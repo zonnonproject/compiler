@@ -1,0 +1,22 @@
+(** 
+ * 4. Language symbols and identifiers. 
+ * 4.5. Character Constants
+ *
+ * Positive test: 
+ *)
+
+
+module Main;
+
+const CRLF = 0DX + 0AX;
+
+var s : string;
+
+begin
+
+s := "Collections List" + CRLF;
+
+writeln(s);
+writeln("---"); halt(1)
+
+end Main.

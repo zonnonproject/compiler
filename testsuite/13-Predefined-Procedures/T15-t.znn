@@ -1,0 +1,14 @@
+(**
+ * 09.Predefined procedures.
+ * The max(T) procedure.
+ *
+ * Positive test: max value for char type.
+ *)
+module Main;
+	var i : integer;
+begin
+	i := max( char{8} );
+
+	if i = 255 
+	then halt(1) else halt(0) end;
+end Main.

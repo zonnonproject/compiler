@@ -1,0 +1,18 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: the array length is constant.
+ * The constant is declared before the array declaration.
+ *)
+module A;
+	const N = 100;
+
+	type T = array N of real;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.

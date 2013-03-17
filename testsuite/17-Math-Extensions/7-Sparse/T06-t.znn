@@ -1,0 +1,13 @@
+module Main;
+
+type t1 = array {sparse} *,* of integer{64};
+type t2 = array {sparse} * of real{16};
+
+var
+	a : t1;
+	b : t2;	
+  
+begin
+	halt(1);
+end Main.
+

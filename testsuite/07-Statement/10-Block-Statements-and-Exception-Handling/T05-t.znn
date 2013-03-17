@@ -1,0 +1,25 @@
+(** 
+ * 7. Statement 
+ * 7.10. Block statement and exception handling.
+ *
+ * Positive test: OutOfRange exception.
+ *)
+module Main;
+var 
+	exc : boolean;
+	v : array 1 of integer;
+begin
+	exc := false;
+
+	do
+		v[5] := 2;
+
+	on OutOfRange do 
+		exc := true;
+	end;
+		
+	if exc 
+	then halt(1) else halt(0) end;
+end Main.
+
+

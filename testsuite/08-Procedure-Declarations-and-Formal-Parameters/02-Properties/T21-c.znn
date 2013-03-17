@@ -1,0 +1,21 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.2 Properties
+ *
+ * Positive test: the Location from result of procedure call.
+ *)
+module Main;
+	import
+		System.Reflection.Assembly as Assembly;
+
+	var
+		dir : string;
+		asm : Assembly;
+		ok : boolean; 
+begin
+	asm := Assembly.GetExecutingAssembly();
+	dir := asm.Location;  
+	dir := Assembly.GetExecutingAssembly().Location;  
+	halt(1);
+end Main.
+

@@ -1,0 +1,27 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: array of objects.
+ *)
+module Main;
+import B.A, B.C;
+
+var 
+	a : array 10 of B.A;
+	c : array 10 of object {B.C};
+begin
+	if B.C(a[0]).x = 5 
+	then halt(1) else halt(0) end;
+end Main.
+
+definition B.C;
+var 
+	x : integer;
+end C.
+
+object {public} B.A implements B.C;
+begin
+	x := 5;
+end A.

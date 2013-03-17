@@ -1,0 +1,21 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call.
+ *
+ * Positive test: designator is self instance.
+ *)
+module Main;
+	procedure p(var j : integer; i : integer);
+	begin  
+		j := i + 1;
+	end p;
+
+	var p1, p2 : integer;
+begin
+	p1 := 1;
+	p2 := 2;
+	self.p(p1, p2);
+
+	if p1 = 3 
+	then halt(1) else halt(0) end;
+end Main.

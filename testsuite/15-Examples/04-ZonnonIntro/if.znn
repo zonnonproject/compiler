@@ -1,0 +1,20 @@
+(* ********* Zonnon online collection ***********
+ * Example on using if clause
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module example522;
+var a,b,m: integer;
+begin
+  write("A: "); readln(a);
+  write("B: "); readln(b);
+  if a > b then
+    m := a
+  else
+    m := b
+  end;
+  writeln("Max(a,b) = ", m);
+end example522.

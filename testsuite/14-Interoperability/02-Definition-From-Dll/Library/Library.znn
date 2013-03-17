@@ -1,0 +1,109 @@
+module Library;
+
+const {public} A = 100;
+
+type {public, ref} Point = object
+var {public} x,y : integer;
+
+procedure {public} print;
+begin
+	write("(",x:3,",", y:3,")");
+end print;
+
+end Point;
+
+type {public, ref} Point3D = object
+var {public} x,y,z : integer;
+
+procedure {public} print;
+begin
+	write("(", x:3,",", y:3,",", z:3,")");
+end print;
+
+end Point3D;
+
+operator {public} "+" (a,b:Point):Point;
+var r:Point;
+begin
+	writeln(" (operator ""+"" (a,b:Point):Point;) "); 
+	r := new Point;
+	r.x := a.x + b.x;
+	r.y := a.y + b.y;
+	return r;
+end "+";
+
+operator {public} "+" (a,b:Point3D):Point3D;
+var r:Point3D;
+begin
+	writeln(" (operator ""+"" (a,b:Point3D):Point3D;) "); 
+	r := new Point3D;
+	r.x := a.x + b.x;
+	r.y := a.y + b.y;
+	r.z := a.z + b.z;
+	return r;
+end "+";
+
+operator {public} "-" (a,b:Point):Point;
+var r:Point;
+begin
+    writeln(" (operator ""-"" (a,b:Point):Point;) "); 
+	r := new Point;
+	r.x := a.x - b.x;
+	r.y := a.y - b.y;
+	return r;
+end "-";
+
+operator {public} "-" (a,b:Point3D):Point3D;
+var r:Point3D;
+begin
+    writeln(" (operator ""-"" (a,b:Point3D):Point3D;) "); 
+	r := new Point3D;
+	r.x := a.x - b.x;
+	r.y := a.y - b.y;
+	r.z := a.z - b.z;
+	return r;
+end "-";
+
+operator {public} ":=" (var a:Point; b:Point);
+begin
+	writeln(" (operator "":="" (var a:Point; b:Point);) "); 
+	a.x := b.x;
+	a.y := b.y;	
+end ":=";
+
+operator {public} ":=" (var a:Point3D; b:Point3D);
+begin
+	writeln(" (operator "":="" (var a:Point3D; b:Point3D);) "); 
+	a.x := b.x;
+	a.y := b.y;	
+	a.z := b.z;	
+end ":=";
+
+operator {public} "=" (a,b:Point):boolean;
+begin
+	writeln(" (operator ""="" (a,b:Point):boolean;) "); 
+	return (a.x = b.x) & (a.y = b.y);
+end "=";
+
+operator {public} "=" (a,b:Point3D):boolean;
+begin
+	writeln(" (operator ""="" (a,b:Point3D):boolean;) "); 
+	return (a.x = b.x) & (a.y = b.y) & (a.z = b.z);
+end "=";
+
+
+operator {public} "#" (a,b:Point):boolean;
+begin
+	writeln(" (operator ""#"" (a,b:Point):boolean;) "); 
+	return (a.x # b.x) or (a.y # b.y);
+end "#";
+
+operator {public} "#" (a,b:Point3D):boolean;
+begin
+	writeln(" (operator ""#"" (a,b:Point3D):boolean;) "); 
+	return (a.x # b.x) or (a.y # b.y) or (a.z # b.z);
+end "#";
+  
+begin
+  writeln("Module Unit is here!"); 
+end Library.

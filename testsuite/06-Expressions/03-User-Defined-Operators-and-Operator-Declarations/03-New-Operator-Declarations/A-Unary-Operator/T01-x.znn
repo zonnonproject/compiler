@@ -1,0 +1,31 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.3. New operator declaration.
+ *
+ * Negative test: wrong parameters numbers in unary operator.
+ *)
+module Main;
+	object Point;
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator "--" (var p : Point) : Point;
+	begin 
+		p.x := p.x - 1;
+		p.y := p.y - 1;
+		return p; 
+	end "--";
+
+	var p : Point;
+begin
+	p.x := 2;
+	p.y := 2;
+
+	p--2;
+
+	halt(0);
+end Main.

@@ -1,0 +1,348 @@
+(* ********* Zonnon online collection ***********
+ * Folding
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Folding;			(* written by rm *)
+
+(* Braucht es, das Oberon.net keine Untertypen kennt. *)
+const	
+	isAND		=    0;
+	isNOT		=    1;
+	isOR		=    2;
+	isVAR		=    3;
+	maxVAR		=   26;
+	maxINPUT	= 1000;
+
+object {public, ref} Tree;
+	var {public}
+		right, left, parent : Tree;
+		type_, val_ : integer;
+		label : char;
+end Tree; 
+	
+(* Hier werden die Belegungen der Variablen gespeichert. *)
+var	BTree : Tree;
+	BSet : array maxVAR of integer;
+
+(* Printet den ausgewerteten Baum aus. *)
+procedure PrintTree(var Node : Tree);
+begin
+	if Node = nil then
+		write("Empty Tree")
+	elsif Node.val_ # -1 then
+		write(Node.val_)
+	elsif Node.type_ = isVAR then
+		write(Node.label)
+	elsif Node.type_ = isNOT then
+		write("NOT ( ");
+		PrintTree(Node.right);
+		write(" )")
+	elsif Node.type_ = isAND then
+		write("( ");
+		PrintTree(Node.left);
+		write(" AND ");
+		PrintTree(Node.right);
+		write(" )")
+	else
+		write("( ");
+		PrintTree(Node.left);
+		write(" OR ");
+		PrintTree(Node.right);
+		write(" )")
+	end
+end PrintTree;
+
+(* Setzt alle Werte wieder aud -1. *)
+procedure ResetTree(Node : Tree);
+begin
+	if Node # nil then
+		ResetTree(Node.left);
+		ResetTree(Node.right);
+		Node.val_ := -1
+	end
+end ResetTree;
+
+(* Wertet den Baum so weit wie mglich aus. *)
+procedure EvalTree(var Node : Tree);
+begin
+	if Node # nil then
+		if Node.type_ = isVAR then
+			Node.val_ := BSet[integer(Node.label) - 65]
+		elsif Node.type_ = isNOT then
+			EvalTree(Node.right);
+			if Node.right.val_ = 0 then
+				Node.val_ := 1
+			elsif Node.right.val_ = 1 then
+				Node.val_ := 0
+			end;
+		else
+			EvalTree(Node.left);
+			EvalTree(Node.right);
+			if Node.type_ = isAND then
+				if (Node.left.val_ = 1) & (Node.right.val_ = 1) then
+					Node.val_ := 1
+				elsif (Node.left.val_ = 0) or (Node.right.val_ = 0) then
+					Node.val_ := 0
+				end 	
+			else
+				if (Node.left.val_ = 1) or (Node.right.val_ = 1) then
+					Node.val_ := 1
+				elsif (Node.left.val_ = 0) & (Node.right.val_ = 0) then
+					Node.val_ := 0
+				end 	
+			end
+		end
+	end
+end EvalTree;
+
+(* Liesst die Belegung ein und speichert sie in Bset. *)
+procedure ReadVarSettings();
+var	tmp : string;
+	str : array maxINPUT of char;
+	ipos, ind, InputEnd : integer;
+	err : boolean;
+begin
+	writeln;
+	writeln("Zwischen jedem Identifyer muss ein Abstand sein.");
+	writeln("z.B. A 1 B 0 D 1");
+	writeln("Wobei 1 = true und 0 = false ist.");
+
+	tmp := "";
+	readln(tmp);
+	copy(tmp, str);
+
+	InputEnd := len(str);
+	err := false;
+
+	for ipos := 0 to maxVAR - 1 do
+		BSet[ipos] := -1
+	end;
+
+	ipos := 0;
+
+	while ~err & (ipos < InputEnd) do
+		ind := integer(str[ipos]) - 65;
+
+		if (ind < 0) or (ind > 25) then
+			err := true
+		else
+			ipos := ipos + 2;
+			if ipos < InputEnd then			
+				(* Braucht es, damit das Programm nicht abstrzt wenn die Eingabe inkorrekt war. *)
+				BSet[ind] := integer(str[ipos]) - 48;
+				if (BSet[ind] < 0) or (BSet[ind] > 1) then
+					err := true
+				end
+			else
+				err := true
+			end;
+			ipos := ipos + 2
+		end
+	end;
+
+	if err then
+		writeln;
+		writeln;
+		writeln("Ihre Eingabe war inkorrekt.");
+		writeln;
+		ReadVarSettings()
+	else
+		ResetTree(BTree);
+		EvalTree(BTree);
+		PrintTree(BTree);
+		writeln;
+		writeln
+	end;
+end ReadVarSettings;
+
+procedure ISAND(str : array of char; ipos : integer) : boolean;
+begin
+	if str[ipos] = char(65) then
+		inc(ipos);
+		if str[ipos] = char(78) then
+			inc(ipos);
+			if str[ipos] = char(68) then
+				return true
+			end
+		end
+	end;
+	return false
+end ISAND;
+
+procedure ISOR(str : array of char; ipos : integer) : boolean;
+begin
+	if str[ipos] = char(79) then
+		inc(ipos);
+		if str[ipos] = char(82) then
+			return true
+		end
+	end;
+	return false
+end ISOR;
+
+procedure ISNOT(str : array of char; ipos : integer) : boolean;
+begin
+	if str[ipos] = char(78) then
+		inc(ipos);
+		if str[ipos] = char(79) then
+			inc(ipos);
+			if str[ipos] = char(84) then
+				inc(ipos);
+				if str[ipos] = char(32) then
+					inc(ipos);
+					if str[ipos] = char(40) then
+						return true
+					end
+				end
+			end
+		end
+	end;
+	return false
+end ISNOT;
+
+(* Liesst den logischen Ausdruck ein und generiert den Baum in BTree. *)
+procedure ReadExpression();
+var	tmp : string;
+	str : array maxINPUT of char;
+	ipos, InputEnd : integer;
+	err : boolean;
+	Node, cur : Tree;
+begin
+	writeln("Der logische Ausdruck muss vollstaendig geklammert sein.");
+	writeln("Zwischen jedem Identifyer muss ein Abstand sein.");
+	writeln("Die Variablennamen drfen nur aus einem Buchstaben bestehen und muessen gross geschrieben sein.");
+	writeln("z.B. ( ( A or B ) AND NOT ( C ) )");
+	writeln("oder NOT ( A ) ");
+
+	tmp := "";
+	readln(tmp);
+	copy(tmp, str);
+
+	InputEnd := len(str);
+	err := false;
+	ipos := 0;
+
+	if InputEnd # 0 then
+		BTree := new Tree();
+		cur := BTree;
+		BTree.val_ := -1;
+		BTree.parent := nil;
+
+		while ~err & (ipos < InputEnd) & (cur # nil) do
+			if str[ipos] = char(40) then
+				writeln("char(40)");
+				Node := new Tree();
+				Node.parent := cur;
+				Node.val_ := -1;
+				cur.left := Node;
+				cur := Node;
+				ipos := ipos + 2
+			elsif str[ipos] = char(41) then
+				writeln("char(41)");
+				cur := cur.parent;
+				ipos := ipos + 2
+			elsif (integer(str[ipos]) > 64) & (integer(str[ipos]) < 91) & (str[ipos + 1] = 0X) & (cur.parent = nil) then
+				writeln("[64..91], 0x, cur.parent=nil");
+				cur.type_ := isVAR;
+				cur.label := str[ipos];
+				cur := cur.parent
+			elsif (integer(str[ipos]) > 64) & (integer(str[ipos]) < 91) & (integer(str[ipos + 1]) = 32) then
+				writeln("[64..91], 32");
+				cur.type_ := isVAR;
+				cur.label := str[ipos];
+				ipos := ipos + 2;
+				cur := cur.parent
+			elsif ISOR(str, ipos) then
+				writeln("ISOR");
+				Node := new Tree();
+				Node.parent := cur;
+				Node.val_ := -1;
+				cur.right := Node;
+				cur.type_ := isOR;
+				cur := Node;	
+				ipos := ipos + 3
+			elsif ISAND(str, ipos) then
+				writeln("ISAND");
+				Node := new Tree();
+				Node.parent := cur;
+				Node.val_ := -1;
+				cur.right := Node;
+				cur.type_ := isAND;
+				cur := Node;
+				ipos := ipos + 4
+			elsif ISNOT(str, ipos) then
+				writeln("ISNOT");
+				Node := new Tree();
+				Node.parent := cur;
+				Node.val_ := -1;
+				cur.right := Node;
+				cur.type_ := isNOT;
+				cur := Node;
+				ipos := ipos + 6
+			else
+				err := true
+			end
+		end
+	end;
+
+	if err then
+		writeln;
+		writeln;
+		writeln("Ihre Eingabe war inkorrekt.");
+		writeln;
+		ReadExpression()
+	else
+		ReadVarSettings()
+	end
+end ReadExpression;
+
+(* Steuert den ganzen Programmablauf. *)
+procedure MainProcedure;
+var	select : integer;
+	tmp : string;	
+	chartmp : array 100 of char;
+	ch : char;
+	nch : integer;
+begin
+	select := 0;
+
+(*	ReadExpression(); *)
+
+	while select # 3 do
+		writeln;
+		writeln("1: Gleichen logischen Ausdruck mit einer anderen Belegung auswerten.");
+		writeln("2: Neuen logischen Ausdruck einlesen.");
+		writeln("3: Programm verlassen.");
+
+		tmp := "";
+		readln(tmp);
+		copy(tmp, chartmp);
+
+		ch := chartmp[0];
+		if ch = 0X then	(* Braucht es, damit das Programm nicht abstrzt wenn die Eingabe inkorrekt war. *)
+			select := 0
+		elsif (48 < integer(ch)) & (integer(ch) < 52) then
+			select := integer(ch)- 48
+		else
+			select := 0
+		end;
+
+		writeln;
+		writeln("select = ", select);
+		writeln;
+
+		if select = 2 then
+			ReadExpression()
+		elsif select = 1 then
+			ReadVarSettings()
+		end
+	end
+end MainProcedure;
+
+begin
+	MainProcedure
+end Folding.

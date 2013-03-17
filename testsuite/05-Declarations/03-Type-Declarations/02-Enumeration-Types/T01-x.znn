@@ -1,0 +1,12 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.2. Enumeration types.
+ *
+ * Positive test: the enumeration A is declared without its elements.
+ *)
+module Main;
+	type C = ();
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,29 @@
+(** 
+ * 11.Program Units.
+ * 11.4. implementation
+ *
+ * Positive test: the variable (i) is declared in definition A.
+ * The variable is initialized by procedure P call 
+ * in main block of default implementation A.
+ *)
+module Main implements A;
+
+begin
+    writeln("i = ", i);
+	if i = 2
+	then halt(1) else halt(0) end;
+end Main.
+
+implementation A;
+	procedure { public } P;
+	begin 
+	    writeln("P was executed");
+		i := 2 
+	end P;
+begin
+	P;
+end A.
+
+definition {public} A;
+	var i : integer;
+end A.

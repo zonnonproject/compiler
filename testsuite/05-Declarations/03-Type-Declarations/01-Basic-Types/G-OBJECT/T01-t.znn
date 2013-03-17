@@ -1,0 +1,45 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * object type
+ *
+ * Positive test: set value does not accept max(set)+1 value.
+ *)
+object {public, ref} A;
+	type {public}
+		ANYarray = array * of object;
+
+	var {public}
+		buffer : ANYarray;
+begin
+	buffer := new ANYarray(10);
+end A.
+
+object {public, ref} B;
+	var {public}
+		x : integer;
+begin
+	x := 5
+end B.
+
+module Main;
+	import A, B;
+
+	var
+		a : A; 
+		b : B;
+begin
+	a := new A;
+	b := new B;
+	b.x := 4;
+
+	a.buffer[0] := b;
+	
+	if a.buffer[0] is B 
+	then b := B(a.buffer[0])
+	end;
+	
+	if b.x = 4
+	then halt(1) else halt(0) end;
+end Main.

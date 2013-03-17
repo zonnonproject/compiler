@@ -1,0 +1,92 @@
+(* ********* Zonnon online collection ***********
+ * Scanner
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+
+module Scanner; (* TB 10.12.00, mg02 *) 
+
+import 
+	System.String,
+	System.IO.File,
+	System.IO.FileStream;
+
+const 
+	namelen =   32;
+	maxlen  = 1000;
+
+type
+	FS = System.IO.FileStream;
+	String = array maxlen of char; 
+
+var { public }
+	fileStream : FS; 
+	Eof, Done : boolean;
+
+procedure ReadChar(fileStream : FS; var ch : char);
+var 
+	x : integer;
+begin
+	x := fileStream.ReadByte();
+	if x = -1 
+	then ch := char(255); Eof := true;
+	else ch := char(x) 
+	end
+end ReadChar;
+
+(* Opens an existing Textfile and sets Reader at its beginning. *)
+procedure { public } Open(fname : System.String); 
+begin
+    fileStream := System.IO.File.OpenRead(fname);
+    Done := false;
+end Open;
+
+(* List of Chars that should not be returned. *)
+procedure forbiddenChar(ch : char) : boolean;	
+var 
+	AscNr : integer;
+begin
+	AscNr := integer(ch);
+	if 		(AscNr < 48)	
+		or ((AscNr >= 58) & (AscNr <  65)) 
+		or ((AscNr >= 91) & (AscNr <= 96))
+		or ((AscNr > 122) & (AscNr < 128)) 
+		or ( AscNr > 133) 
+	then return true
+	else return false
+	end;
+end forbiddenChar;
+
+(* Returns next Word consisting of litterals and numbers. *)
+procedure { public } GetWord (var word : array of char);
+var	
+	i : integer;
+	ch : char;
+	found : boolean;
+begin
+	Done  := false;
+	found := false;
+
+	while ~found do
+		i := 0;
+		ReadChar(fileStream, ch);
+		while ~Eof & (i < len(word, 0)-1) & (~forbiddenChar(ch)) do
+			word[i] := ch;
+			inc(i);
+			ReadChar(fileStream, ch);
+		end;
+
+		if Eof then 
+			found := true; Done := true; (* When reaching end of file, Done is set to false *)
+		elsif i > 0 then 
+			found := true; word[i] := char(0); 
+		end; 
+	end;
+end GetWord;
+
+begin
+	Done := true;
+end Scanner.

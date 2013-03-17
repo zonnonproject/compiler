@@ -1,0 +1,12 @@
+Hallo Roman,
+
+could you please have a look at the attached program?
+
+There are two problems with it:
+
+1) changing line 17 from (myCol.Count-1) to (myCol.Count) gives the compiler error [17,15] [2050] Illegal type Int32 of the to-expression in the for-statement
+
+2) changing line 20 from System.Console.Write to write gives the compiler error:
+[16,10] [2050] Illegal type Object of the argument for 'write/writeln' 
+
+Is this the behaviour correct?

@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3.6 Postulated interface type.
+ * 6.3.5. Value object (RECord).
+ *
+ * Negative test: value object can not have parameters.
+ *)
+object { value } A(i : integer);
+begin
+end A.
+
+module Main; 
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,72 @@
+(* ********* Zonnon online collection ***********
+ * Sorting: Heap Sort (Chapter 2, Example 2.8)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Sorting;
+    const MAX_SIZE = 20;
+
+    type ElementOfArray = integer;
+    type DefaultArray = array MAX_SIZE of ElementOfArray;
+    var MyArray: DefaultArray;
+
+    (***** Implementation *****)
+    
+    procedure sift(var a: DefaultArray; L,R:integer);
+    var i,j:integer; x: ElementOfArray;
+    begin
+       i := L; j:= 2*L; x:= a[L];
+       if (j<R)&(a[j]<a[j+1]) then j := j+1 end;
+       while (j <= R)&(x <a [j]) do
+          a[i] := a[j]; i:=j; j:=2*j;
+          if (j<R) & (a[j] < a[j+1]) then j:= j+1; end;
+       end;
+     a[i] := x;
+   end sift;
+
+    procedure HeapSort(var a: DefaultArray; n: integer);
+    var L,R: integer; x: ElementOfArray;
+
+    begin
+       L := (n div 2); R := n - 1;
+       while L > 0 do L := L-1; sift(a, L, R) end;
+       while R > 0 do x := a[0]; a[0] := a[R]; a[R]:= x;
+          R := R-1; sift(a, L, R);
+       end;
+    end HeapSort;
+
+    (***** Example support *****)
+
+    procedure FillTheArray;
+    var i:integer;
+    begin
+      for i := 0 to MAX_SIZE - 1 do 
+        MyArray[i] := abs( 10 - i ); 
+      end; 
+    end FillTheArray;
+ 
+    procedure PrintTheArray;
+    var i:integer;
+    begin
+       writeln("Array:");
+       for i := 0 to MAX_SIZE - 1 do
+          write( MyArray[i]:2, ', ' ); 
+       end; 
+       writeln;
+    end PrintTheArray;
+    
+    procedure Execute;
+    begin
+       HeapSort(MyArray, MAX_SIZE); 
+    end Execute;
+begin
+ writeln("Example 2.8 (Heap sort)");
+ FillTheArray;
+ PrintTheArray;
+ Execute;
+ PrintTheArray;
+ writeln("Type 'q' to exit");	
+end Sorting.

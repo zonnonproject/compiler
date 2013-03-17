@@ -1,0 +1,32 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: 1-dimensional open array as the procedure P result and parameter.
+ *)
+module Main;
+	(* The open array declaration. *)
+	type Vector = array * of integer;
+
+	(* The procedure parameter value and the procedure result are open arrays. *)
+	procedure copy1(v : Vector) : Vector;
+	var i, j : integer;
+		vector : Vector;
+	begin
+		vector := new Vector( len(v) );
+		for i := 0 to len(vector)-1 do
+			vector[i] := v[i];
+		end;
+		return vector;
+	end copy1;
+
+	var v1 : array 3 of integer;
+	var v2 : Vector;
+begin
+	v1[1] := 1;
+	v2 := copy1(v1);
+
+	if v1[1] = 1 
+	then halt(1) else halt(0) end;
+end Main.

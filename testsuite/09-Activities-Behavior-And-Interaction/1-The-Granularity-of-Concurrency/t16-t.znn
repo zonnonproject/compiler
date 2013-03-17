@@ -1,0 +1,41 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.1. The-Granularity-of-Concurrency
+ *
+ * Positive test: Execution oriented example
+ *)
+module  {protected} Main;
+	import System.Threading;
+	var 	variable, stop : integer;
+
+activity AutoReset(defaultValue : integer );
+begin
+    writeln("activity started");
+	while stop = 0 do
+		await 5;
+		variable := defaultValue;
+		writeln("assigned ", defaultValue)
+	end
+end AutoReset;
+
+begin
+	variable := 10;
+	stop := 0;
+
+	new AutoReset( -1 );
+
+	variable := 7;
+	writeln("assigned 7");
+	await 11;
+
+	stop := 1;
+
+	(* Activity has been activated. Value should be -1. *)
+	await 40;
+	if variable = -1 then (* it is OK *)
+ 		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end;
+end Main.
+

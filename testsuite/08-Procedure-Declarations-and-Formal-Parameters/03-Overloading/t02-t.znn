@@ -1,0 +1,167 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: Overloading
+ *)
+
+module Main;
+import
+      System.Byte    as Card8,      
+      System.UInt16  as Card16,     
+      System.UInt32  as Card32,     
+      System.UInt64  as Card64,     
+      System.Int16   as Int16,      
+      System.Int32   as Int32,      
+      System.Int64   as Int64,    
+      System.Single  as Real32,    
+      System.Double  as Real64,   
+      System.SByte   as Int8;
+
+type {public} Number = object
+var {public} val: Real64;
+end Number;
+
+   (* assignment *)
+
+   operator {public} ":=" (var l : Number; r : Real32);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Card64);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Card32);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Card16);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Card8);
+   begin
+      writeln(" assign");
+      Real64ToNumber(d);      
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Int64);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Int32);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Int16);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : Int8);
+   begin
+      writeln(" assign");
+   end ":=";
+
+   operator {public} ":=" (var l : Number; r : string);
+   begin
+      writeln(" assign");
+   end ":=";
+
+operator {public} "-" (arg1:Number; arg2: Int32): Number;
+begin
+	writeln("int minus");
+	arg1.val := arg1.val - Int64(arg2);
+	return arg1;
+end "-";
+
+operator {public} "-" (arg1:Number; arg2: boolean): Number;
+begin
+	return arg1;
+end "-";
+
+operator {public} "-" (arg1:Number; arg2: Int64): Number;
+begin
+	writeln("double minus");
+	arg1.val := arg1.val - arg2;
+	return arg1;
+end "-";
+
+operator {public} "-" (arg1:Number; arg2: Number): Number;
+begin
+	writeln("number minus");
+	arg1.val := arg1.val - arg2.val;
+	return arg1;
+end "-";
+
+
+operator {public} "+" (arg1:Number; arg2: Int32): Number;
+begin
+	writeln("int plus");
+	arg1.val := arg1.val + Real64(arg2);
+	return arg1;
+end "+";
+
+operator {public} "+" (arg1:Number; arg2: boolean): Number;
+begin
+	return arg1;
+end "+";
+
+operator {public} "+" (arg1:Number; arg2: Real64): Number;
+begin
+	writeln("double plus");
+	arg1.val := arg1.val + arg2;
+	return arg1;
+end "+";
+
+operator {public} "+" (arg1:Number; arg2: Real32): Number;
+begin
+	writeln("double plus");
+	arg1.val := arg1.val + arg2;
+	return arg1;
+end "+";
+
+operator {public} "+" (arg1:Number; arg2: Number): Number;
+begin
+	writeln("number plus");
+	arg1.val := arg1.val + arg2.val;
+	return arg1;
+end "+";
+
+operator {public} "+" (arg2: Int32; arg1:Number): Number;
+begin
+	writeln("f int plus");
+	arg1.val := arg1.val + Real64(arg2);
+	return arg1;
+end "+";
+
+operator {public} "+" (arg2: boolean; arg1:Number): Number;
+begin
+	return arg1;
+end "+";
+
+operator {public} "+" (arg2: Real64; arg1:Number): Number;
+begin
+	writeln("f double plus");
+	arg1.val := arg1.val + arg2;
+	return arg1;
+end "+";
+
+   procedure {private} Real64ToNumber (x : Real64) : Number;
+   var
+      n : Number;
+   begin      
+      return n
+   end Real64ToNumber;
+
+var n, k: Number;
+	d: Real64;
+begin
+	halt(1);
+end Main.

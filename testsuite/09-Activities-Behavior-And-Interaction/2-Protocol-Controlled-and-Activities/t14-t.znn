@@ -1,0 +1,31 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Passing and passing back one integer argument 
+ *)
+
+module {protected} Main;
+
+activity A;
+var 
+	j : integer;
+begin
+	accept j;
+	return object(j + 1)
+end A;
+
+var 
+	a : A;
+	i : integer;
+	o : object;
+begin
+	a := new A;
+	o := a(integer(100));
+	i := integer(o);
+	
+	if i = 101 then
+		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end
+end Main.

@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Negative test: object casting to its non-intrinsic type.
+ *)
+module Main;
+var 
+	i : integer;
+	r : real;
+begin
+	i := 10;
+	r := i { real }; (* Not valid. *)
+	halt(0);
+end Main.

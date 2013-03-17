@@ -1,0 +1,124 @@
+(* ********* Zonnon online collection ***********
+ * LeaderElection
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module LeaderElection;
+
+import System.Random;
+
+const NofP = 100; (* >= 3 *)
+
+object {public, ref} Process;
+var	{public}
+	id : integer;
+	next : Process; (* Reference to the next container. *)
+	recMessage, oldMessage : integer;
+end Process;
+
+var 
+	first : Process; (* One of the processes, to start. *)
+	NofMessages, sim : integer;
+	rg : System.Random;
+
+procedure Init; (* Build ring, send first messages (own id), step 1. *)
+var
+	cur1, cur2 : Process;
+	i : integer;
+	r : real;
+begin
+	NofMessages := 0;
+	cur1 := new Process();
+	r := rg.NextDouble() * max(integer);
+	cur1.id := integer(r);
+	cur1.oldMessage := 0;
+	first := cur1;
+
+	for i := 0 to NofP-2 do
+		cur2 := cur1;
+		cur1 := new Process();
+		r := rg.NextDouble() * max(integer);
+		cur1.id := integer(r);
+		cur1.oldMessage := 0;
+		cur2.next := cur1;
+		cur2.recMessage := cur1.id (* First message. *)
+	end;
+
+	cur1.next := first; (* Close ring. *)
+	cur1.recMessage := first.id (* First message. *)
+end Init;
+
+(* If necessary, the processes send their messages, parallel; step 2. *)
+procedure SendMessages : integer; 
+var
+	cur1, cur2 : Process;
+	fm : integer; (* RecMessage of the first process, protect against overwriting. *)
+begin
+	cur2 := first;
+	cur1 := first.next;
+	fm := first.recMessage;
+
+	repeat
+		if (cur1.recMessage > cur1.id) & (cur1.recMessage # cur1.oldMessage) then (* case c *)
+			cur2.recMessage := cur1.recMessage;
+			inc(NofMessages);
+
+			if cur2.recMessage = cur2.id then (* case b *)
+				return cur2.id
+			end
+		end; (* case a: do nothing *)
+
+		cur1.oldMessage := cur1.recMessage; (* Don't send message twice. *)
+		cur2 := cur1;
+		cur1 := cur1.next;
+	until cur1 = first;
+
+	if (fm > cur1.id ) & (fm # cur1.oldMessage) then (* case c *)
+		cur2.recMessage := fm; (* First.recMessage ist already overwritten. *)
+		inc(NofMessages);
+
+		if cur2.recMessage = cur2.id then (* case b *)
+			return cur2.id
+		end;
+	end; (* case a: do nothing *)	
+
+	cur1.oldMessage := fm; (* Don't send message twice. *)
+	return 0
+end SendMessages;
+
+procedure {public} Simulate;
+var
+	time, i : integer;
+begin
+	repeat (* Restart, if two of the processes have the same id. *)
+		Init();
+		time := 1; (* done -> init *)
+		i := 0;
+
+		while i = 0 do
+			inc(time);
+			i := SendMessages()
+		end;
+	until time >= NofP;	
+
+	(* Create the statistic. *)
+	write("#Processes: "); write(NofP); 
+	write(";  Time: "); write(time); 
+	write(";  Messages: "); write(NofMessages); 
+	write(";  LeaderId: "); writeln(i) 
+end Simulate;
+
+begin
+	rg := new System.Random();
+
+	for sim := 1 to 100 do
+		Simulate()
+	end;
+
+	writeln("done. Press any key");
+	readln
+end LeaderElection.
+

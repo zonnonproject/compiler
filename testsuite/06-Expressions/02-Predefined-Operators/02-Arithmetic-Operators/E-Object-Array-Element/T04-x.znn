@@ -1,0 +1,24 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Negative test: access to private array elements in arithmetic expression.
+ * The object is declared before its using.
+ *)
+object A.B;
+	var { private }
+		x , y : array 2 of integer;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+		r : boolean;
+begin
+	b.x[0] := 5;
+	b.y[1] := 3;
+	r := (b.x[0] + b.y[1] = 8);
+	halt(0);
+end Main.

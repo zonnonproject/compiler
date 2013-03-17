@@ -1,0 +1,21 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * Module visibility
+ *
+ * Negative test: the private method A.B.f is used outside its namespace.
+ * The module is declared before it was used.
+ *)
+module A.B;
+	procedure { private } f : integer;
+	begin 
+		return 3; 
+	end f;
+end B.
+
+module Main;
+	import A.B;
+begin
+    writeln(A.B.f);
+	halt(0);
+end Main.

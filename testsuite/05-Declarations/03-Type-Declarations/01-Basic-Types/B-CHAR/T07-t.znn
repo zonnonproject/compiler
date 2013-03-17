@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * char type
+ *
+ * Positive test: correct char type variable assignment.
+ * Const expression is used for char type width calculation.
+ *)
+module Main;
+	var v : array 2 of char;
+begin
+	v[0] := char(92);
+
+	if integer(v[0]) = 92
+	then halt(1) else halt(0) end
+end Main.
+
+

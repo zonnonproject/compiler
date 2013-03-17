@@ -1,0 +1,21 @@
+I found an interesting bug.  It provides the output:
+
+al@shadowfax:~/Work/code/zonnon/biax/drivers/FreedEinsteinSacks$ mono /home/al/Work/code/zonnon/compiler/zc.exe optimizeIsoFES.znn /ref:/home/al/Work/code/zonnon/bin/Bel.dll /ref:/home/al/Work/code/zonnon/bin/FreedEinsteinSacks.dll /out:/home/al/Work/code/zonnon/bin/isoOptimize /entry:Driver                                                                                        
+Zonnon Compiler, Version 1.1.11.0 of Tuesday, June 16, 2009, 11:38:56 AM                       
+(c) 2003-2009 ETH Zurich                                                                       
+2151: /home/al/Work/code/zonnon/biax/drivers/FreedEinsteinSacks/optimizeIsoFES.znn(527,7): Delegate OptimizerModel arguments do not match requested: (Zonnon.Bel.MF.Arrays+Array _p01,Zonnon.Bel.MF.Matrices+Matrix _p11,System.Int32[] _p21)
+
+Now, let me explain what I think is the cause.  What I have done is to define 
+a procedure type.  It has three arguments.  The first two point to 'value'
+types, the third to a 'ref' type; specifically, an array * of integer.
+This procedure type was defined in the Bel.dll, and is being called from a 
+module outside of Bel.dll.  If I make all the arguments use 'value' types,
+then the code compiles and works.  If any of them is a 'ref' type, though, 
+I get an error message similar to the one above.
+
+I know you won't be fixing this until fall, after Nina is done.  I just
+wanted to let you know so I wouldn't forget to tell you later.  
+
+All the best,
+
+Al

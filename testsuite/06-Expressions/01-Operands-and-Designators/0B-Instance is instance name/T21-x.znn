@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Negative test: access to array element that does not exist.
+ * The object A.B is declared after it is used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	b.x[0] := 1;
+	i := b.x[0];
+	halt(0);
+end Main.
+
+object A.B;
+	var { public } 
+		vi : array 1 of integer;
+
+	var { public, immutable } 
+		vk : array 1 of integer;
+
+	var { private } 
+		vj : array 1 of integer;
+end B.

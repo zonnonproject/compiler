@@ -1,0 +1,13 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators.
+ * C. ~ (negation) operator.
+ *
+ * Positive test: ~ true
+ *)
+module Main;
+begin
+	if ~false 
+	then halt(1) else halt(0) end;
+end Main.

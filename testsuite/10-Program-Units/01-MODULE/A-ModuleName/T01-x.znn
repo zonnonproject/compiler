@@ -1,0 +1,13 @@
+(**
+ * 11.Program Units.
+ * 11.1. module
+ * ModuleName
+ *
+ * Negative test: the module B.C is nested into other module run.
+ *)
+module Main;
+	module B.C;
+	end C;
+begin
+	halt(0);
+end Main.

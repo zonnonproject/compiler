@@ -1,0 +1,50 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.2. Basic operators that can be overloaded.
+ *
+ * Positive test: in operator overloading.
+ *)
+module Main;
+	type {public} Point = object
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	type {public} Rectangle = object
+		var { public } x, y, width, height : integer;
+	begin 
+		x := 0;
+		y := 0;
+		width := 0;
+		height := 0;
+	end Rectangle;
+
+	operator "in" (p : Point; r : Rectangle) : boolean;
+	begin 
+		if p.x < r.x then return false end;
+		if p.y < r.y then return false end;
+
+		if r.x + r.width  <= p.x then return false end;
+		if r.y + r.height <= p.y then return false end;
+
+		return true;
+	end "in";
+
+	var { public } 
+		p : Point;
+		r : Rectangle;
+begin
+	p.x := 2;
+	p.y := 2;
+
+	r.x := 1;
+	r.y := 1;
+
+	r.width  := 2;
+	r.height := 2;
+
+	if p in r then halt(1) else halt(0) end;
+end Main.

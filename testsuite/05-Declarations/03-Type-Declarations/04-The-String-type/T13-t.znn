@@ -1,0 +1,12 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: equvivalence string constants
+ *)
+module Main;
+begin
+	if "AB" = "AB"
+	then halt(1) else halt(0) end;
+end Main.

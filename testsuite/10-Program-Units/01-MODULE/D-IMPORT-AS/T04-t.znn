@@ -1,0 +1,19 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports x as clause
+ *
+ * Positive test: the short name of module A.B is used as designator in procedure call.
+ * The module A.B is declared before it is used.
+ *)
+module Main;
+	import A.B as ab;
+begin
+	if ab.f = 3 
+	then halt(1) else halt(0) end;
+end Main.
+
+module A.B;
+	procedure { public } f : integer;
+	begin return 3 end f;
+end B.

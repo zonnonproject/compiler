@@ -1,0 +1,11 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the variable name is used as procedure name.
+ *)
+module Main;
+	var A : integer;
+begin
+	A();
+	halt(0);
+end Main.

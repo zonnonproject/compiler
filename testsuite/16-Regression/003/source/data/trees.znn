@@ -1,0 +1,739 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates an AVL (Adelson-Velskii-Landis) balanced tree for data storage     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Stored data are to appear as a record in an extension of TreeNode.  I used *)
+(* the AVL tree procedures for Insert and Delete found in the Zonnon on-line  *)
+(* documentation: Alorithms & Data Structures, Chapter 4, Example. 4.5.2.     *)
+(* I added an arbitrary object to its Node definition, as the on-line code    *)
+(* could only insert integers, viz., it could only insert a key - not useful. *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Reference   : N. Wirth, Algorithms and Data Sturctures, Oberon edn., 2004  *)
+(*               http:\\www.oberon.ethz.ch\WirthPubl\AD.pdf, (c) ETH Zurich   *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : TreeNode    - a node for an balanced tree                    *)
+(*   type      : Balance     - enumerated type for how the tree is weighted   *)
+(*             : slantLeft   - the tree is more heavily weighted to the left  *)
+(*             : level       - the tree is equally weighted left to right     *)
+(*             : slantRight  - the tree is more heavily weighted to the right *)
+(*   var       : balance     - stores an instance of the above enumeration    *)
+(*             : data        - where the data (instance of Datum) are stored  *)
+(*             : key         - a key used for locating (sorting) the node     *)
+(*             : left        - a link to the left branch of the tree          *)
+(*             : right       - a link to the right branch of the tree         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : Tree        - an AVL balanced tree data structure            *)
+(*    methods  : Initialize  - prepares the tree for use                      *)
+(*             : Nullify     - sets all dynamic links and memories to nil     *)
+(*             : Load        - reads a tree from file: call Configure first   *)
+(*             : Store       - writes a tree to a binary file                 *)
+(*             : Clone       - returns an empty tree                          *)
+(*             : Copy        - returns a deep copy of the tree                *)
+(*             : Configure   - specifies the data type for tree insertion     *)
+(*             : Contains    - returns the data type of the data in the tree  *)
+(*             : Entries     - returns the number of nodes in the tree        *)
+(*             : Height      - number of branches (or levels) in the tree     *)
+(*             : Delete      - removes datum (at specified key) from the tree *)
+(*             : Insert      - places a new node into the tree                *)
+(*    # additional procedures for managing a tree via a rider                 *)
+(*             : Find        - searchs for a specified key in the tree        *)
+(*             : Home        - moves the rider to its home node               *)
+(*             : Left        - advances the rider to the left branch          *)
+(*             : Right       - advances the rider to the right branch         *)
+(*             : Previous    - moves rider back one node to the parent branch *)
+(*             : GetData     - gets the datum at the rider's current position *)
+(*             : GetKey      - gets the key at the rider's current position   *)
+(*             : Update      - replaces that datum at that node in the tree   *)
+(*                             with the matching key                          *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+
+object {public, ref} BelData.TreeNode;
+   import
+      BelData.Datum,
+      BelData.Keys;
+   type {public}
+      Balance = (slantLeft, level, slantRight);
+   var {public}
+      balance : Balance;
+      data : object{BelData.Datum};
+      key  : BelData.Keys.Key;
+      left, right : TreeNode;
+begin
+   balance := Balance.level;
+   data := nil;
+   key.Initialize;
+   left  := nil;
+   right := nil
+end TreeNode.
+
+
+object {public, ref} BelData.Tree implements BelData.Structure;
+
+   import
+      System.Int32  as Int32,
+      System.Object as Obj,
+      BelCore.Log      as L,
+      BelData.Keys     as K,
+      BelData.TreeNode as N;
+
+   var {private}
+      dataClone   : object{BelData.Datum};
+      dataType    : Type;
+      entries     : integer;
+      rider, root : N;
+
+   procedure {public} Initialize
+      implements BelData.Object.Initialize;
+   begin
+      dataClone := nil;
+      entries := 0;
+      rider := nil;
+      root  := nil
+   end Initialize;
+
+      procedure {private} NullifyNodes (n : N);
+      begin
+         if n # nil then
+            n.data.Nullify;
+            NullifyNodes(n.left);
+            NullifyNodes(n.right)
+         end
+      end NullifyNodes;
+
+      procedure {private} RemoveLinks (n : N; atLevel, delLevel : integer);
+      var
+         nextLevel : integer;
+      begin
+         if n # nil then
+            if atLevel < delLevel then
+               nextLevel := atLevel + 1;
+               RemoveLinks(n.left, nextLevel, delLevel);
+               RemoveLinks(n.right, nextLevel, delLevel)
+            else
+               n.left := nil;
+               n.right := nil
+            end
+         end
+      end RemoveLinks;
+
+   procedure {public} Nullify
+      implements BelData.Object.Nullify;
+   var
+      endLevel, i, startLevel : integer;
+   begin {locked}
+      NullifyNodes(root);
+      startLevel := 1;
+      endLevel := Height() + 1;
+      for i := endLevel to startLevel by -1 do
+         RemoveLinks(root, startLevel, i)
+      end;
+      dataClone := nil;
+      entries := 0;
+      rider := nil;
+      root := nil
+   end Nullify;
+
+   procedure {public} Load (br : BinaryReader)
+      implements BelData.Object.Load;
+   var
+      d : object{BelData.Datum};
+      i, j : integer;
+      k : K.Key;
+      o : object{BelData.Object};
+      success : boolean;
+   begin {locked}
+      entries := 0;
+      j := br.ReadInt32();
+      for i := 1 to j do
+         o := dataClone.Clone();
+         d := BelData.Datum(o);
+         d.Load(br);
+         k.Load(br);
+         Insert(d, k, success)
+      end
+   end Load;
+
+      procedure {private} StoreNode (bw : BinaryWriter;
+         n : N; at, storeAt : integer; var stored : integer);
+      var
+         nextLevel : integer;
+      begin
+         (* allows for tree reconstruction with minimal nodal rotations *)
+         if n # nil then
+            if at < storeAt then
+               nextLevel := at + 1;
+               StoreNode(bw, n.left,  nextLevel, storeAt, stored);
+               StoreNode(bw, n.right, nextLevel, storeAt, stored)
+            else
+               n.data.Store(bw);
+               n.key.Store(bw);
+               inc(stored)
+            end
+         end
+      end StoreNode;
+
+   procedure {public} Store (bw : BinaryWriter)
+      implements BelData.Object.Store;
+   var
+      j : Int32;
+      nodesStored, startLevel, storeLevel : integer;
+   begin
+      j := entries;
+      bw.Write(j);
+      nodesStored := 0;
+      startLevel := 1;
+      storeLevel := 0;
+      repeat
+         inc(storeLevel);
+         StoreNode(bw, root, startLevel, storeLevel, nodesStored)
+      until nodesStored = entries;
+      bw.Flush
+   end Store;
+
+   procedure {public} Clone () : object{BelData.Datum}
+      implements BelData.Datum.Clone;
+   var
+      d : object{BelData.Datum};
+      t : Tree;
+   begin
+      t := new Tree;
+      d := BelData.Datum(t);
+      return d
+   end Clone;
+
+      procedure {private} CopyNode (t : Tree; n : N; at, copyAt : integer);
+      var
+         nextLevel : integer;
+         success : boolean;
+      begin
+         if n # nil then
+            if at < copyAt then
+               nextLevel := at + 1;
+               CopyNode(t, n.left, nextLevel, copyAt);
+               CopyNode(t, n.right, nextLevel, copyAt)
+            else
+               t.Insert(n.data, n.key, success)
+            end
+         end
+      end CopyNode;
+
+   procedure {public} Copy () : object{BelData.Datum}
+      implements BelData.Datum.Copy;
+   var
+      copyLevel, startLevel : integer;
+      d : object{BelData.Datum};
+      t : Tree;
+   begin {locked}
+      t := new Tree;
+      copyLevel := 0;
+      startLevel := 1;
+      repeat
+         inc(copyLevel);
+         CopyNode(t, root, startLevel, copyLevel);
+      until entries = t.entries;
+      d := BelData.Datum(t);
+      return d
+   end Copy;
+
+   procedure {public} Configure (clone : object{BelData.Datum})
+      implements BelData.Structure.Configure;
+   var
+      o : object{BelData.Object};
+      obj : Obj;
+   begin {locked}
+      if clone # nil then
+         Nullify;
+         o := clone.Clone();
+         dataClone := BelData.Datum(o);
+         obj := clone;
+         dataType := obj.GetType()
+      else
+         L.WarningMessage(500,415, "BelData.Tree.Configure")
+      end
+   end Configure;
+
+   procedure {public} Contains () : Type
+      implements BelData.Structure.Contains;
+   begin
+      return dataType
+   end Contains;
+
+   procedure {public} Entries () : integer;
+   begin
+      return entries
+   end Entries;
+
+   procedure {public} Height () : integer;
+   var
+      h, n : integer;
+   begin
+      if entries = 0 then
+         h := 0
+      else
+         n := 1;
+         h := 1;
+         while entries > (2*n - 1) do
+            n := 2 * n;
+            inc(h)
+         end
+      end;
+      return h
+   end Height;
+
+      (* local procedures for node rotation common to insertion and deletion *)
+
+      procedure {private} SingleLL (var node : N);
+      var
+         n : N;
+      begin
+         (* node balances are set in the Grow and Shrink routines *)
+         (* because they are different for insertion and deletion *)
+         n := node.left;
+         node.left := n.right;
+         n.right := node;
+         node := n
+      end SingleLL;
+
+      procedure {private} SingleRR (var node : N);
+      var
+         n : N;
+      begin
+         (* node balances are set in the Grow and Shrink routines *)
+         (* because they are different for insertion and deletion *)
+         n := node.right;
+         node.right := n.left;
+         n.left := node;
+         node := n
+      end SingleRR;
+
+      procedure {private} DoubleLR (var node : N);
+      var
+         n1, n2 : N;
+      begin
+         n1 := node.left;
+         n2 := n1.right;
+         n1.right := n2.left;
+         n2.left := n1;
+         node.left := n2.right;
+         n2.right := node;
+         if n2.balance = N.Balance.slantLeft then
+            node.balance := N.Balance.slantRight
+         else
+            node.balance := N.Balance.level
+         end;
+         if n2.balance = N.Balance.slantRight then
+            n1.balance := N.Balance.slantLeft
+         else
+            n1.balance := N.Balance.level
+         end;
+         n2.balance := N.Balance.level;
+         node := n2
+      end DoubleLR;
+
+      procedure {private} DoubleRL (var node : N);
+      var
+         n1, n2 : N;
+      begin
+         n1 := node.right;
+         n2 := n1.left;
+         n1.left := n2.right;
+         n2.right := n1;
+         node.right := n2.left;
+         n2.left := node;
+         if n2.balance = N.Balance.slantRight then
+            node.balance := N.Balance.slantLeft
+         else
+            node.balance := N.Balance.level
+         end;
+         if n2.balance = N.Balance.slantLeft then
+            n1.balance := N.Balance.slantRight
+         else
+            n1.balance := N.Balance.level
+         end;
+         n2.balance := N.Balance.level;
+         node := n2
+      end DoubleRL;
+
+      (* local procedures for deletion *)
+
+      procedure {private} ShrinkLeft
+         (var node : N; var htChanged: boolean);
+      begin
+         case node.balance of
+         | N.Balance.slantLeft :
+            node.balance := N.Balance.level
+         | N.Balance.level :
+            node.balance := N.Balance.slantRight;
+            htChanged := false
+         | N.Balance.slantRight :
+            if node.right.balance = N.Balance.slantLeft then
+               DoubleRL(node)
+            else
+               SingleRR(node);
+               if node.balance = N.Balance.level then
+                  node.left.balance := N.Balance.slantRight;
+                  node.balance := N.Balance.slantLeft;
+                  htChanged := false
+               else
+                  node.balance := N.Balance.level;
+                  node.left.balance := N.Balance.level
+               end
+            end;
+            if root = node.left then
+               root := node
+            end
+         end
+      end ShrinkLeft;
+
+      procedure {private} ShrinkRight
+         (var node : N; var htChanged : boolean);
+      begin
+         case node.balance of
+         | N.Balance.slantRight :
+            node.balance := N.Balance.level
+         | N.Balance.level :
+            node.balance := N.Balance.slantLeft;
+            htChanged := false
+         | N.Balance.slantLeft :
+            if node.left.balance = N.Balance.slantRight then
+               DoubleLR(node)
+            else
+               SingleLL(node);
+               if node.balance = N.Balance.level then
+                  node.right.balance := N.Balance.slantLeft;
+                  node.balance := N.Balance.slantRight;
+                  htChanged := false
+               else
+                  node.balance := N.Balance.level;
+                  node.right.balance := N.Balance.level
+               end
+            end;
+            if root = node.right then
+               root := node
+            end
+         end
+      end ShrinkRight;
+
+      procedure {private} Extract
+         (var delNode, swapNode : N; var htChanged : boolean);
+      begin
+         if swapNode.right # nil then
+            Extract(delNode, swapNode.right, htChanged);
+            if htChanged then
+               ShrinkRight(swapNode, htChanged)
+            end
+         else
+            (* move info from swap node to nodal location to be deleted *)
+            delNode.key.Initialize;
+            delNode.key := swapNode.key;
+            delNode.data := swapNode.data;
+            (* link back in all nodes below the swap node *)
+            swapNode := swapNode.left;
+            htChanged := true
+         end
+      end Extract;
+
+      procedure {private} Remove
+         (k : K.Key; var delete, node : N; var htChanged, success : boolean);
+      begin
+         if node = nil then  (* key not found *)
+            success := false
+         else  (* search for the key *)
+            if k < node.key then
+               Remove(k, delete, node.left, htChanged, success);
+               if htChanged then
+                  ShrinkLeft(node, htChanged)
+               end
+            elsif k > node.key then
+               Remove(k, delete, node.right, htChanged, success);
+               if htChanged then
+                  ShrinkRight(node, htChanged)
+               end
+            else (* the key has been found - delete the entry *)
+               delete := node;
+               if delete.right = nil then
+                  node := delete.left;
+                  htChanged := true
+               elsif delete.left = nil then
+                  node := delete.right;
+                  htChanged := true
+               else  (* neither decendant is NIL - rotate on the heavier side *)
+                  Extract(delete, delete.left, htChanged);
+                  if htChanged then
+                     ShrinkLeft(node, htChanged)
+                  end
+               end;
+               success := true
+            end
+         end
+      end Remove;
+
+   procedure {public} Delete (key : K.Key; var success : boolean);
+   var
+      delete : N;
+      heightChanged : boolean;
+   begin {locked}
+      if entries > 1 then
+         delete := nil;
+         heightChanged := false;
+         success := false;
+         Remove(key, delete, root, heightChanged, success)
+      else
+         if key = root.key then
+            delete := root;
+            root := nil;
+            rider := nil;
+            success := true
+         else
+            success := false
+         end
+      end;
+      if success then
+         delete.data.Nullify;
+         delete := nil;
+         dec(entries)
+      end;
+      Home
+   end Delete;
+
+      (* local procedures for insertion *)
+
+      procedure {private} GrowLeft (var node : N; var htChanged : boolean);
+      begin
+         case node.balance of
+         | N.Balance.slantRight :
+            node.balance := N.Balance.level;
+            htChanged := false
+         | N.Balance.level :
+            node.balance := N.Balance.slantLeft
+         | N.Balance.slantLeft :
+            if node.left.balance = N.Balance.slantLeft then
+               SingleLL(node);
+               node.balance := N.Balance.level;
+               node.right.balance := N.Balance.level
+            else
+               DoubleLR(node)
+            end;
+            htChanged := false;
+            if root = node.right then
+               root := node
+            end
+         end
+      end GrowLeft;
+
+      procedure {private} GrowRight (var node : N; var htChanged : boolean);
+      begin
+         case node.balance of
+         | N.Balance.slantLeft :
+            node.balance := N.Balance.level;
+            htChanged := false
+         | N.Balance.level :
+            node.balance := N.Balance.slantRight
+         | N.Balance.slantRight :
+            if node.right.balance = N.Balance.slantRight then
+               SingleRR(node);
+               node.balance := N.Balance.level;
+               node.left.balance := N.Balance.level
+            else
+               DoubleRL(node)
+            end;
+            htChanged := false;
+            if root = node.left then
+               root := node
+            end
+         end
+      end GrowRight;
+
+      procedure {private} Place
+         (newNode : N; var node : N; var htChanged, success : boolean);
+      begin
+         if node = nil then
+            node := newNode;
+            htChanged := true;
+            success := true
+         elsif newNode.key < node.key then
+            Place(newNode, node.left, htChanged, success);
+            if htChanged then
+               GrowLeft(node, htChanged)
+            end
+         elsif newNode.key > node.key then
+            Place(newNode, node.right, htChanged, success);
+            if htChanged then
+               GrowRight(node, htChanged)
+            end
+         else  (* an entry already exits with this key *)
+            success := false
+         end
+      end Place;
+
+   procedure {public} Insert
+      (datum : object{BelData.Datum}; key : K.Key; var success : boolean);
+   var
+      heightChanged : boolean;
+      n : N;
+      o : object{BelData.Object};
+      obj : Obj;
+      s : string;
+      t : Type;
+   begin {locked}
+      if datum # nil then
+         if entries <= 0 then
+            Configure(datum)
+         end;
+         obj := datum;
+         t := obj.GetType();
+         if dataType.Equals(t) then
+            n := new N;
+            o := datum.Copy();
+            n.data := BelData.Datum(o);
+            n.key := key;
+            if root = nil then
+               root := n;
+               rider := n;
+               success := true
+            else
+               heightChanged := false;
+               success := false;
+               Place(n, root, heightChanged, success);
+               if ~success then
+                  L.WarningMessage(511,415, "BelData.Tree.Insert")
+               end
+            end
+         else
+            success := false;
+            L.WarningMessage(501,415, "BelData.Tree.Insert")
+         end
+      else
+         success := false;
+         L.WarningMessage(500,415, "BelData.Tree.Insert")
+      end;
+      if success then
+         inc(entries)
+      end;
+      Home
+   end Insert;
+
+   (* the following procedures allow the user to explore a tree *)
+
+      procedure {private} Locate (n : N; k : K.Key; var found : boolean);
+      begin
+         if n = nil then
+            Home;
+            found := false
+         elsif k < n.key then
+            Locate(n.left, k, found)
+         elsif k > n.key then
+            Locate(n.right, k, found)
+         else (* found the key *)
+            rider := n;
+            found := true
+         end
+      end Locate;
+
+   procedure {public} Find (key : K.Key; var found : boolean);
+   begin {locked}
+      Locate(root, key, found)
+   end Find;
+
+   procedure {public} Home;
+   begin {locked}
+      rider := root
+   end Home;
+
+   procedure {public} Left (var moved : boolean);
+   begin {locked}
+      if (rider # nil) & (rider.left # nil) then
+         rider := rider.left;
+         moved := true
+      else
+         moved := false
+      end
+   end Left;
+
+   procedure {public} Right (var moved : boolean);
+   begin {locked}
+      if (rider # nil) & (rider.right # nil) then
+         rider := rider.right;
+         moved := true
+      else
+         moved := false
+      end
+   end Right;
+
+      procedure {private} Parent (branch, leaf : N; k : K.Key);
+      begin
+         if k < leaf.key then
+            Parent(leaf, leaf.left, k)
+         elsif k > leaf.key then
+            Parent(leaf, leaf.right, k)
+         else (* found the key - the parent node is the branch *)
+            rider := branch
+         end
+      end Parent;
+
+   procedure {public} Previous;
+   begin {locked}
+      if root # nil then
+         Parent(root, root, rider.key)
+      end
+   end Previous;
+
+   procedure {public} GetData () : object{BelData.Datum};
+   begin
+      return rider.data
+   end GetData;
+
+   procedure {public} GetKey () : K.Key;
+   begin
+      return rider.key
+   end GetKey;
+
+   procedure {public} Update
+      (datum : object{BelData.Datum}; key : K.Key; var success : boolean);
+   var
+      o : object{BelData.Object};
+   begin {locked}
+      if (rider # nil) & (datum # nil) then
+         Find(key, success);
+         if success then
+            rider.data.Nullify;
+            o := datum.Copy();
+            rider.data := BelData.Datum(o);
+         else
+            Insert(datum, key, success)
+         end
+      elsif datum # nil then
+         Insert(datum, key, success)
+      else
+         success := false;
+         L.WarningMessage(500,415, "BelData.Tree.Update")
+      end;
+      Home
+   end Update;
+
+begin
+   Initialize
+end Tree.

@@ -1,0 +1,51 @@
+(* ********* Zonnon online collection ***********
+ * Cycle buffer example (using protected objects)
+ *
+ * This example is a part of Concurrency examples
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*
+  Buffer implements a bounded circular buffer. The methods Put and Get are 
+  protected against concurrent access; they also check that a buffer slot, 
+  resp. data, is available, otherwise the activity is suspended until the 
+  until the slot or data become available. 
+*)
+
+module Main;
+
+const bufLen = 128;
+
+type {public, ref, protected} Buffer = object
+	var inp, out: integer;
+        buf : array bufLen of integer;
+
+	procedure {public} Put (j : integer);
+	(* Since object is protected method is also protected *)
+	begin 
+		(* Entering await release protection *)
+		await (* Await until full. *) 
+			  (inp + 1) mod bufLen # out;
+		(* For prtotected object to exit await
+		   there are two conditions to be met:
+			- await condition
+			- object is free
+		*)
+		buf[inp] := j;
+		inp := (inp + 1) mod bufLen;
+	end Put;
+
+	procedure {public} Get(var j : integer);
+	begin 
+		await (* Await until not empty. *) 
+			  inp # out;
+		j := buf[out];
+		out := (out + 1) mod bufLen;
+	end Get;
+begin
+	inp := 0;
+	out := 0;
+end Buffer;
+
+end Main.

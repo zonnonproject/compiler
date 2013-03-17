@@ -1,0 +1,26 @@
+(** 
+ * 7. Statement 
+ * 7.10. Block statement and exception handling.
+ *
+ * Positive test: Overflow exception for maximun integer.
+ *)
+module Main;
+	var exc1, exc2 : boolean;
+		a : integer;
+begin
+	exc1 := false;
+	exc2 := false;
+	a := 1;
+
+	do
+		a := max(integer) + a;
+
+	on Overflow do 
+		exc1 := true;
+	on exception do 
+		exc2 := true;
+	end;
+		
+	if exc1 
+	then halt(1) else halt(0) end;
+end Main.

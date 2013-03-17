@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * integer type
+ *
+ * Positive test: wrong integer type width.
+ * Warning from compiler.
+ *)
+module Main;
+	var i1 : integer {  24 };
+	var i2 : integer { 128 };
+begin
+	halt(1);
+end Main.

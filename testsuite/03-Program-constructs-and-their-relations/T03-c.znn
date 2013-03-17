@@ -1,0 +1,15 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: module contains object.
+ *)
+module A;
+	type B = object
+	end B;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

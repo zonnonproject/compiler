@@ -1,0 +1,263 @@
+module {public} Main;
+
+import
+   System.IO.BinaryReader     as BinaryReader,
+   System.IO.BinaryWriter     as BinaryWriter,
+   System.IO.Path             as Path,
+   System.IO.StreamReader     as StreamReader,
+   System.IO.StreamWriter     as StreamWriter,
+   System.Reflection.Assembly as Assembly,
+   BelCore.Log                as L,
+   BelCore.Numbers            as N,
+   BelCore.Arrays             as A,
+   BelCore.DataFiles          as DF;
+
+var {private}
+   asm : Assembly;
+   dir, file, loc, path : string;
+
+   procedure {private} Assign (var a : A.Array);
+   var
+      n : N.Number;
+      s : string;
+   begin
+      s := "";
+      a.Initialize(3);
+      writeln("Enter the elements of a 3-dimensional array.");
+      write("   a[1] = ");
+      readln(s);
+      n.Parse(s);
+      a[1] := n;
+      write("   a[2] = ");
+      readln(s);
+      n.Parse(s);
+      a[2] := n;
+      write("   a[3] = ");
+      readln(s);
+      n.Parse(s);
+      a[3] := n
+   end Assign;
+
+   procedure {private} Print (a : A.Array);
+   var
+      n : N.Number;
+      s : string;
+   begin
+      s := "{ ";
+      n := a[1];
+      s := s + n.ToString(8);
+      s := s + "  ";
+      n := a[2];
+      s := s + n.ToString(8);
+      s := s + "  ";
+      n := a[3];
+      s := s + n.ToString(8);
+      s := s + "}^T";
+      writeln(s)
+   end Print;
+
+   procedure {public} StringIO;
+   var
+      a : A.Array;
+   begin
+      Assign(a);
+      writeln("The array entered in was:");
+      Print(a);
+      writeln()
+   end StringIO;
+
+   procedure {public} Store;
+   var
+      a, b : A.Array;
+      bw : BinaryWriter;
+      f : string;
+   begin
+      f := "testArrays";
+      bw := DF.OpenWriter(f);
+      (* use the Store procedure to write some data *)
+      writeln("Enter two arrays to store to a binary file.");
+      Assign(a);
+      a.Store(bw);
+      Assign(b);
+      b.Store(bw);
+      DF.CloseWriter(bw);
+      writeln("The first array written to file was:");
+      Print(a);
+      writeln("and the second array written to file was:");
+      Print(b);
+      writeln()
+   end Store;
+
+   procedure {public} Load;
+   var
+      a, b : A.Array;
+      br : BinaryReader;
+      f : string;
+   begin
+      f := "testArrays";
+      br := DF.OpenReader(f);
+      (* read in the data *)
+      a.Load(br);
+      b.Load(br);
+      DF.CloseReader(br);
+      writeln("The first array read from file was:");
+      Print(a);
+      writeln("and the second array read from file was:");
+      Print(b);
+      writeln()
+   end Load;
+
+   procedure {public} Boolean;
+   var
+      s : string;
+      x, y : A.Array;
+   begin
+      writeln("Test the boolean function of equality.");
+      writeln();
+      writeln("Enter an array for the left-hand side:");
+      Assign(x);
+      writeln("Enter an array for the right-hand side.");
+      Assign(y);
+      writeln();
+      Print(x);
+      writeln("   =");
+      Print(y);
+      s :=  "   is ";
+      if x.Equals(y) then
+         s := s + "true  using the function Equals"
+      else
+         s := s + "false using the function Equals"
+      end;
+      writeln(s);
+      writeln("and");
+      Print(x);
+      writeln("   =");
+      Print(y);
+      s :=  "   is ";
+      if x = y then
+         s := s + "true  using the operator  ="
+      else
+         s := s + "false using the operator  ="
+      end;
+      writeln(s)
+   end Boolean;
+
+   procedure {public} Arithmetic;
+   var
+      x, y, z : A.Array;
+      n : N.Number;
+      s : string;
+   begin
+      s := "";
+      writeln("Test the arithmetic operators.");
+      writeln;
+      writeln("Enter an array for the left-hand side:");
+      Assign(x);
+      writeln("Enter an array for the right-hand side.");
+      Assign(y);
+      writeln("   The negative of the array last entered is:");
+      z := -y;
+      Print(z);
+      writeln();
+      writeln("   Addition:");
+      Print(x);
+      writeln("   +");
+      Print(y);
+      writeln("   =");
+      z := x + y;
+      Print(z);
+      writeln();
+      writeln("   Subtraction:");
+      Print(x);
+      writeln("   -");
+      Print(y);
+      writeln("   =");
+      z := x - y;
+      Print(z);
+      writeln("Enter a number for scalar multiplication and division:");
+      readln(s);
+      n.Parse(s);
+      writeln();
+      writeln("   Multiplication:");
+      s := n.Typeset();
+      s := s + " *";
+      writeln(s);
+      Print(x);
+      writeln("   =");
+      z := n * x;
+      Print(z);
+      writeln();
+      writeln("   Division:");
+      Print(x);
+      s := "   / " + n.Typeset();
+      writeln(s);
+      writeln("   =");
+      z := x / n;
+      Print(z)
+   end Arithmetic;
+
+   procedure {public} Functions;
+   var
+      a, b, c : A.Array;
+      n : N.Number;
+      s : string;
+   begin
+      writeln("To test the various array functions, enter an array:");
+      Assign(a);
+      c := a.Copy(A.deepCopy);
+      c.Normalize(n);
+      writeln("The normalized representation of this array is:");
+      Print(c);
+      s := "with a magnitude of " + n.Typeset();
+      writeln(s);
+      writeln();
+      c := a.Copy(A.deepCopy);
+      writeln("When sorted, this array becomes:");
+      c.Sort;
+      Print(c);
+      writeln("Its various norms are:");
+      n := A.OneNorm(a);
+      s := "   the L1 norm        = " + n.Typeset();
+      writeln(s);
+      n := A.TwoNorm(a);
+      s := "   the L2 norm        = " + n.Typeset();
+      writeln(s);
+      n := A.InfinityNorm(a);
+      s := "   the LInfinity norm = " + n.Typeset();
+      writeln(s);
+      writeln("Finally, enter a second array:");
+      Assign(b);
+      writeln();
+      Print(a);
+      writeln("   dot");
+      Print(b);
+      n := a.Dot(b);
+      s := "   = " + n.Typeset();
+      writeln(s)
+   end Functions;
+
+begin
+   StringIO;
+   writeln;
+   Store;
+   writeln("Data have been stored in the file");
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   file := Path.Combine(dir, "testArrays.dat");
+   writeln(file + ".");
+   writeln;
+   writeln("When read back in to check its integrity, one finds:");
+   Load;
+   writeln;
+   Boolean;
+   writeln;
+   Arithmetic;
+   writeln;
+   Functions;
+   writeln;
+   writeln("Press 'Enter' to quit.");
+   readln;
+   L.Close
+end Main.

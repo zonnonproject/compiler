@@ -1,0 +1,14 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Positive text: casting of external type to its base type
+ *)
+
+module Main;
+import System.IO as IO;
+var f : IO.Stream;
+begin
+  f := IO.File.Open("test.txt", IO.FileMode.Create);
+  halt(1);
+end Main.

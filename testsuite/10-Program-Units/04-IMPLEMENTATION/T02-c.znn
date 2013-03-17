@@ -1,0 +1,16 @@
+(** 
+ * 11.Program Units.
+ * 11.4. implementation
+ *
+ * Positive test: the definition A is declared before its default implementation A.
+ *)
+definition A;
+end A.
+
+implementation A;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.

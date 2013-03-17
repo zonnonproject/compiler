@@ -1,0 +1,12 @@
+(** 
+ *	4. Language symbols and identifiers. 
+ *	4.4. Numeric Constants
+ *
+ *	Positive test: real numbers comparison.
+ *)
+module Main;
+	var r : real;
+begin
+	if 1.5 = 1.5
+	then halt(1) else halt(0) end;
+end Main.

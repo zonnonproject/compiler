@@ -1,0 +1,17 @@
+(* ********* Zonnon online collection ***********
+ * Using system time from Zonnon
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Main;
+import System;
+
+var
+ dt: System.DateTime;
+begin
+ dt := System.DateTime.Now;
+ writeln(dt.Ticks);
+end Main.

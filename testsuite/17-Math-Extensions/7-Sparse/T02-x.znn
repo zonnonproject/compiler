@@ -1,0 +1,9 @@
+module Main;
+
+var
+	a: array {sparse} * of double;
+  
+begin
+	halt(0);
+end Main.
+

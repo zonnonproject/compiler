@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. Variable declarations.
+ *
+ * Positive test: 2-dimensional arrays assignment.
+ * Short declaration of 2-dimensional array: array 8, 8 of boolean.
+ *)
+module Main;
+	var x : array 8, 8 of integer;
+begin
+	x[1,1] := 1;
+	
+	if x[1,1] = 1
+	then halt(1) else halt(0) end;
+end Main.
+

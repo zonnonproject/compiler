@@ -1,0 +1,188 @@
+(* ********* Zonnon online collection ***********
+ * Sorting: Natural merge  (Chapter 2, Example 2.14)
+ * Note:
+ *    Two additional modules have been attaced 
+ *    just with idea not to use them externally
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module FileSystem;
+(*
+	This module emulates file system
+	using array in memory
+*)
+
+   const MaxLength = 4096;
+   object {value, public} Sequence;
+      var {public}
+          pos, length: integer;
+          eof: boolean;
+          a: array MaxLength of integer; (* word? *)
+   end Sequence;
+
+   procedure {public} Open(var f:Sequence);
+   begin
+      f.length := 0;
+      f.pos := 0;
+      f.eof := false;
+   end Open;
+
+   procedure {public} WriteInt(var f:Sequence; w:integer);
+   begin
+      if f.pos < MaxLength then
+         f.a[f.pos] := w; f.pos := f.pos+1; f.length := f.pos;
+      else
+         halt(0);
+      end;
+   end WriteInteger;
+
+   procedure {public} Reset(var f:Sequence);
+   begin
+      f.pos := 0; f.eof := false;
+   end Reset;
+
+   procedure {public} ReadInt(var f:Sequence; var w:integer);
+   begin
+      if f.pos = f.length then f.eof := true; w:=-1;
+      else w:= f.a[f.pos]; f.pos := f.pos + 1;
+      end;
+   end ReadInteger;
+
+   procedure {public} Close(var f:Sequence);
+   begin
+      (* nothing to do *)
+   end Close;
+end FileSystem.
+
+
+
+module Sequences;
+(*
+	This module emulates sequences
+*)
+
+   import FileSystem;
+   object {value, public} Sequence;
+      var {public} first: integer;
+          eor, eof: boolean;
+          f: FileSystem.Sequence;
+   end Sequence;
+
+   procedure {public} OpenSeq(var s: Sequence);
+   begin FileSystem.Open(s.f);
+   end OpenSeq;
+
+   procedure {public} OpenRandomSeq(var s:Sequence; length, seed: integer);
+   var i: integer;
+   begin
+      FileSystem.Open(s.f);
+      for i:=0 to length-1 do
+         FileSystem.WriteInt(s.f, seed); seed := (31 * seed) mod 997 + 5;
+      end;
+   end OpenRandomSeq;
+
+   procedure {public} StartRead(var s:Sequence);
+   begin
+      FileSystem.Reset(s.f); 
+      FileSystem.ReadInt(s.f, s.first); 
+      s.eof := s.f.eof;
+   end StartRead;
+
+   procedure {public} StartWrite(var s:Sequence);
+   begin
+      FileSystem.Reset(s.f);
+      s.f.length := 0;
+   end StartWrite;
+
+   procedure {public} Copy(var x, y:Sequence);
+   begin
+      y.first := x.first;
+      if ~x.eof then
+        FileSystem.WriteInt(y.f,y.first); 
+        FileSystem.ReadInt(x.f, x.first);
+      end;
+      x.eof := x.f.eof;
+      x.eor := x.eof or (x.first < y.first);
+   end Copy;
+
+   procedure {public} CopyRun(var x,y:Sequence); 
+   begin
+     repeat Copy(x,y);
+     until x.eor;
+   end CopyRun;
+
+   procedure {public} CloseSeq(var s: Sequence);
+   begin
+      FileSystem.Close(s.f);
+   end CloseSeq;
+
+   procedure {public} ListSeq(var s:Sequence);
+   var i,L: integer;
+   begin
+      write("> ");
+      FileSystem.Reset(s.f); i:=0; L:=s.f.length;
+      while i<L do
+         write(s.f.a[i]:6); i := i + 1;
+         if i mod 10 = 0 then writeln; end;
+      end;
+      writeln;
+   end ListSeq;
+
+end Sequences.
+
+
+
+
+(**************************************************)
+(**************************************************)
+
+
+module NaturalMerge;
+import Sequences;
+
+var L: integer;
+    a,b,c: Sequences.Sequence;
+    ch:char;
+
+
+begin
+  writeln("Example 2.14: Natural merge");	
+
+  Sequences.OpenSeq(a);
+  Sequences.OpenSeq(b);
+  Sequences.OpenRandomSeq(c,17,531);
+  Sequences.ListSeq(c);
+  repeat 
+     Sequences.StartWrite(a); Sequences.StartWrite(b); Sequences.StartRead(c);
+
+     repeat
+        Sequences.CopyRun(c,a);
+        if ~c.eof then Sequences.CopyRun(c,b); end;
+     until c.eof;
+
+     Sequences.StartRead(a); Sequences.StartRead(b); Sequences.StartWrite(c);
+     L := 0;
+     repeat
+        loop
+           if a.first < b.first then
+              Sequences.Copy(a, c);
+              if a.eor then Sequences.CopyRun(b,c); exit; end;
+           else Sequences.Copy(b, c); 
+              if b.eor then Sequences.CopyRun(a,c); exit; end;
+           end;
+        end;
+        L := L+1;
+     until a.eof or b.eof;
+     while ~a.eof do Sequences.CopyRun(a,c); 
+        L := L+1; end;
+     while ~b.eof do Sequences.CopyRun(b,c); 
+        L := L+1; end;
+  until L = 1;  
+
+  Sequences.ListSeq(c); Sequences.CloseSeq(a); Sequences.CloseSeq(b); Sequences.CloseSeq(c);
+  writeln("Type 'q' to exit");	
+end NaturalMerge.
+

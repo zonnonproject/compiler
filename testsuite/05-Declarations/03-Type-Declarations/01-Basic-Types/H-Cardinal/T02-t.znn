@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * cardinal type
+ *
+ * Positive test: wrong cardinal type width.
+ * Warning from compiler.
+ *)
+module Main;
+	var i1 : cardinal{  24 };
+	var i2 : cardinal{ 128 };
+begin
+	halt(1);
+end Main.

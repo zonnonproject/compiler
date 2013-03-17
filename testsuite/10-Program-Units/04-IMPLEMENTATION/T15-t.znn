@@ -1,0 +1,33 @@
+(** 
+ * 11.Program Units.
+ * 11.4. implementation
+ *
+ * Positive test: the variable (i) is declared in definition A.
+ * The variable is initialized in default implementation A.
+ *)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.i = 5
+	then halt(1) else halt(0) end;
+end Main.
+
+object B implements A;
+	var { public }
+		j : integer;
+begin
+	j := i;
+end B.
+
+implementation A;
+begin
+	i := 5;
+end A.
+
+definition A;
+	var i : integer;
+end A.
+
+

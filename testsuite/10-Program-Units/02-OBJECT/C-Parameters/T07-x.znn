@@ -1,0 +1,21 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Negative test: the wrong count of object parameters.
+ * It is more then 1.
+ *)
+object {public, ref} A.B(i : integer);
+begin
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b := new A.B(1, 2);
+
+	halt(0) 
+end Main.

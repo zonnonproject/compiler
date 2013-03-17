@@ -1,0 +1,51 @@
+Hi Roman,
+
+It has been awhile.  I hope all is going well.  I noticed that, from the zonnon web page, you have been busy with Studio 08.  I have been busy trying to meet a publication deadline.  Instead of reporting bugs, I've been constructing workarounds to get results.  I do have some to report to you, and I will try to be more diligent about doing so in the future.
+
+I have attached what I believe is a compiler error in the handling of passed procedure types.  There is no way I could reduce this to a simple file, so I've appended a couple of directories: Core, Data and Math.  I have attached the dll's for these as well (assuming they can get through your firewall).  These directories belong to the next release of BEL, when I'm finished with them.  Core and Data are quite stable, it is Math that I'm working on.
+
+The bug entails just two files that you may need to look at:
+math/newtonRaphson.znn and test/testMarquardt.znn.  You can see the results from my attempt to compile this test module below:
+
+adfreed@lan15-107:~/work/zonnon/test/math>
+mono /home/abc/adfreed/work/zonnon/compiler/zc.exe
+testMarquardt.znn /ref:/home/abc/adfreed/work/zonnon/bin/Core.dll /ref:/home/abc/adfreed/work/zonnon/bin/Math.dll /entry:Main Zonnon Compiler, Version 1.0.89.0 of Tuesday, June 03, 2008, 2:37:14 PM
+(c) 2003-2007 ETH Zurich
+2147: /home/abc/adfreed/work/zonnon/test/math/testMarquardt.znn(116,7):
+Delegate Exp arguments do not match requested: (System.Int32 _p01,Number@ _p11,Array@ _p21)
+2147: /home/abc/adfreed/work/zonnon/test/math/testMarquardt.znn(122,17):
+Delegate Exp arguments do not match requested: (System.Int32 _p01,Number@ _p11,Array@ _p21)
+2147: /home/abc/adfreed/work/zonnon/test/math/testMarquardt.znn(122,17):
+Delegate Exp arguments do not match requested: (System.Int32 _p01,Number@ _p11,Array@ _p21)
+2069: /home/abc/adfreed/work/zonnon/test/math/testMarquardt.znn(122,10):
+Types 'variable' and 'not expression' are not assignment compatible
+2147: /home/abc/adfreed/work/zonnon/test/math/testMarquardt.znn(125,16):
+Delegate Exp arguments do not match requested: (System.Int32 _p01,Number@ _p11,Array@ _p21)
+
+Four of the five errors say the procedure Exp, defined in testMarquardt.znn, does not have the correct interface.  Exp is suppose to have the type defined in newtonRaphson.znn as Datum; it is:
+
+   type {public}
+      (* arguments : data indexer, control, responses *)
+      Datum = procedure (integer; var N.Number; var A.Array);
+
+whereas, Exp in testMarquardt.znn looks like:
+
+   procedure {public} Exp (n : integer; var x : N.Number; var y :
+A.Array);
+   ...
+
+which has the correct structure.  There are four other procedure types defined in newtonRaphson.znn, and none of these draw a compiler error.
+The only thing that stands out which is different about Datum is that it contains two var variables; the other defined types contain just one var, or none.
+
+I am assuming that the fifth error:
+
+2069: /home/abc/adfreed/work/zonnon/test/math/testMarquardt.znn(122,10):
+Types 'variable' and 'not expression' are not assignment compatible
+
+is an indirect consequence of the above error, which may or may not be a correct assumption.
+
+Since this is a show stopper for me - I cannot do an easy workaround - I'll try to get a couple of other bugs to you soon.
+
+Thursday is thanksgiving here.  It is our country's biggest family holiday of the year.  I know Switzerland doesn't have this holiday; nevertheless, happy thanksgiving:-)
+
+Al

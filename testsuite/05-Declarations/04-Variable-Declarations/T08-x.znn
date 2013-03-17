@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ *
+ * Negative test: the imported name B is object B name.
+ * The object is declared before it is used.
+ *)
+object B;
+end B.
+
+module A;
+	import B;
+
+	var X : B.C;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

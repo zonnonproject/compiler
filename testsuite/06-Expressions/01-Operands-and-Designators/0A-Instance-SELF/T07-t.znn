@@ -1,0 +1,34 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * A. Instance = self
+ *
+ * Positive test: access to public array element.
+ *)
+object A;
+	var { public } 
+		vi : array 1 of integer;
+
+	var { public, immutable } 
+		vk : array 1 of integer;
+
+	var { private } 
+		vj : array 1 of integer;
+
+	var { public }
+		i : integer;
+begin
+	self.vi[0] := 1;
+	self.vi[0] := self.vi[0] + 1;
+	i := vi[0];
+end A.
+
+module Main;
+	import A;
+
+	var a : A;
+begin	
+	if a.i = 2 
+	then halt(1) else halt(0) end;
+end Main.
+

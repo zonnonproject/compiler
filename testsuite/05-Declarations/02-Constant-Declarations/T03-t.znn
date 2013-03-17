@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.2. Constant Declarations.
+ *
+ * Positive test on constant expression.
+ * The predefined procedures succ, pred, min and abs were used in constant expressions.
+ *)
+module Main;
+	const N = 10;
+	const L = 10;
+	const M = 20;
+	const X = succ(N) + pred(M) + min( set{8} ) + abs(-N * M);
+begin
+	if X = 230 
+	then halt(1) else halt(0) end;
+end Main.

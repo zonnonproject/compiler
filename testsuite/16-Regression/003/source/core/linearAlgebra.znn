@@ -1,0 +1,284 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The modules in CORE form a foundation for computation modeling in Zonnon.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* This module provides various solvers for linear systems of equations.      *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object     : Lu           - Crout's LU decomposition of a square matrix    *)
+(*    Methods : Initialize   - initializes all elements of the object         *)
+(*            : Factorize    - performs LU factorization on supplied matrix   *)
+(*            : Dimension    - returns the dimension of initialized matrix    *)
+(*            : Rank         - returns the rank of the initialized matrix     *)
+(*            : Determinant  - returns the determinant of initialized matrix  *)
+(*            : Inverse      - returns the inverse of the initialized matrix  *)
+(*            : Solve        - solves the linear equation M.x = b for x given *)
+(*                             vector b, even if rank differs from dimension  *)
+(* Procedure  : RefineInverse - perform one iteration of Hotelling's method   *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Reference  : Stewart, G. W., Introduction to Matrix Computations, Academic *)
+(*              Press, London, chapter 3, 1973.                               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCore.LinearAlgebra;
+
+   import
+      BelCore.Arrays   as A,
+      BelCore.Log      as L,
+      BelCore.Math     as Fn,
+      BelCore.Matrices as M,
+      BelCore.Numbers  as N;
+
+   var {private}
+      zero, one, two : N.Number;
+
+   type {private}
+      IntArray = array * of integer;
+
+   type {public, value} Lu = object
+
+      var {private}
+         lu : M.Matrix;
+         dim, interchanges, rank : integer;
+         pivots : IntArray;
+
+      procedure {public} Initialize;
+      begin
+         dim := 0;
+         interchanges := 0;
+         lu.Nullify;
+         pivots := nil;
+         rank := 0
+      end Initialize;
+
+      (* Crout reduction with partial pivoting. Matrix  a  is not destroyed. *)
+      procedure {public} Factorize (a : M.Matrix);
+      var
+         absCell, diag, left, maxCell, right, sum, val : N.Number;
+         i, j, k, l : integer;
+      begin
+         if a.Rows() = a.Columns() then
+            dim := a.Rows();
+            interchanges := 0;
+            if dim = 1 then
+               lu.Initialize(1,1);
+               lu[1,1] := a[1,1];
+               pivots := nil;
+               if lu[1,1] = zero then
+                  rank := 0
+               else
+                  rank := 1
+               end
+            else
+               rank := dim;
+               lu := a.Copy(A.deepCopy);
+               pivots := new IntArray(dim+1);
+               for k := 1 to dim do
+                  (* determine the elements of L *)
+                  for i := k to dim do
+                     sum := zero;
+                     for l := 1 to k-1 do
+                        left  := lu[i,l];
+                        right := lu[l,k];
+                        sum   := sum + left*right
+                     end;
+                     val := lu[i,k];
+                     lu[i,k] := val - sum
+                  end;
+                  (* perform pivoting *)
+                  pivots[k] := k;
+                  maxCell := Fn.Abs(lu[k,k]);
+                  for i := k+1 to dim do
+                     absCell := Fn.Abs(lu[i,k]);
+                     if absCell > maxCell then
+                        maxCell := absCell;
+                        pivots[k] := i
+                     end
+                  end;
+                  if pivots[k] # k then
+                     lu.SwapRows(pivots[k], k);
+                     inc(interchanges)
+                  end;
+                  diag := lu[k,k];
+                  if zero < Fn.Abs(diag) then
+                     (* determine the elements of U, where U[i,i] = 1 *)
+                     for j := k+1 to dim do
+                        sum := zero;
+                        for l := 1 to k-1 do
+                           left  := lu[k,l];
+                           right := lu[l,j];
+                           sum := sum+ left*right
+                        end;
+                        val := lu[k,j];
+                        val := val - sum;
+                        lu[k,j] := val/diag
+                     end
+                  else
+                     L.WarningMessage(323,-1,
+                        "BelCore.LinearAlgebra.Lu.Factorize");
+                     rank := k - 1;
+                     k := dim
+                  end
+               end
+            end
+         else
+            L.WarningMessage(320,-1, "BelCore.LinearAlgebra.Lu.Factorize")
+         end
+      end Factorize;
+
+      (* returns the dimension of matrix  M *)
+      procedure {public} Dimension () : integer;
+      begin
+         return dim
+      end Dimension;
+
+      (* returns the rank of matrix  M, which can be less than its dimension *)
+      procedure {public} Rank () : integer;
+      begin
+         return rank
+      end Rank;
+
+      (* returns the determinant of matrix  M *)
+      procedure {public} Determinant () : N.Number;
+      var
+         det : N.Number;
+         i : integer;
+      begin {locked}
+         if rank = dim then
+            det := one;
+            for i := 1 to dim do
+               det := det*lu[i,i]
+            end;
+            (* correct for the sign caused by pivoting *)
+            if odd(interchanges) then
+               det := -det
+            end
+         else
+            (* matrix is singular *)
+            det := zero
+         end;
+         return det
+      end Determinant;
+
+      (* returns the inverse of a square matrix M *)
+      procedure {public} Inverse () : M.Matrix;
+      var
+         i, j : integer;
+         inv : M.Matrix;
+         soln, unit : A.Array;
+      begin {locked}
+         inv.Initialize(dim,dim);
+         if rank = dim then
+            if dim = 1 then
+               inv[1,1] := one/lu[1,1]
+            else
+               soln.Initialize(dim);
+               unit.Initialize(dim);
+               for j := 1 to dim do
+                  unit[j] := one;
+                  soln := Solve(unit);
+                  unit[j] := zero;
+                  for i := 1 to dim do
+                     inv[i,j] := soln[i]
+                  end
+               end
+            end
+         else
+            L.WarningMessage(323,420, "BelCore.LinearAlgebra.Lu.Inverse");
+            for i := 1 to dim do
+               for j := 1 to dim do
+                  inv[i,j] := N.PositiveInfinity
+               end
+            end
+         end;
+         return inv
+      end Inverse;
+
+      (* solves  A.x = b  for  x  given  b, vector  b  is not destroyed *)
+      procedure {public} Solve (b : A.Array) : A.Array;
+      var
+         i, j : integer;
+         sum : N.Number;
+         v, x, y : A.Array;
+      begin {locked}
+         if rank = dim then
+            x.Initialize(dim);
+            if dim = 1 then
+               x[1] := b[1]/lu[1,1]
+            else
+               v := b.Copy(A.deepCopy);
+               if v.Length() = dim then
+                  y.Initialize(dim);
+                  (* pivot the working vector *)
+                  for i := 1 to dim-1 do
+                     if pivots[i] # i then
+                        v.Swap(pivots[i], i)
+                     end
+                  end;
+                  (* forward substitution: solve L.y=b for y *)
+                  y[1]  := v[1]/lu[1,1];
+                  for i := 2 to dim do
+                     sum := zero;
+                     for j := 1 to i-1 do
+                        sum   := sum + lu[i,j]*y[j]
+                     end;
+                     y[i] := (v[i] - sum)/lu[i,i]
+                  end;
+                  (* backward substitution: solve U.x=y for x; note U[i,i]=1 *)
+                  x[dim] := y[dim];
+                  for i := dim-1 to 1 by -1 do
+                     sum := zero;
+                     for j := i+1 to dim do
+                        sum := sum + lu[i,j]*x[j]
+                     end;
+                     x[i] := y[i] - sum
+                  end
+               else
+                  L.WarningMessage(211,422, "BelCore.LinearAlgebra.Lu.Solve");
+                  for i := 1 to dim do
+                     x[i] := N.NaN
+                  end
+               end
+            end
+         else
+            L.WarningMessage(321,415, "BelCore.LinearAlgebra.Lu.Solve")
+         end;
+         return x
+      end Solve;
+
+   begin
+      Initialize
+   end Lu;
+
+   (* Hotelling's method to improve the accuracy of a matrix inverse *)
+   procedure {public} RefineInverse (m : M.Matrix; var mInv : M.Matrix);
+   begin
+      mInv := two*mInv - mInv.Dot(m.Dot(mInv))
+   end RefineInverse;
+
+begin
+   zero := 0.0E+0;
+   one  := 1.0E+0;
+   two  := 2.0E+0
+end LinearAlgebra.

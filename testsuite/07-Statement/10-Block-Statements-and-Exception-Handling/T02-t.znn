@@ -1,0 +1,26 @@
+(** 
+ * 7. Statement 
+ * 7.10. Block statement and exception handling.
+ *
+ * Positive test: common exception handler using.
+ * The quotient with 0 is handled by common exception handler.
+ *)
+module Main;
+	var exc : boolean;
+		a : real;
+		b : integer;
+begin
+	exc := false;
+	a := 1.0;
+	b := 0;
+
+	do
+		a := a / b;
+
+	on exception do	
+		exc := true;
+	end;
+		
+	if exc 
+	then halt(1) else halt(0) end;
+end Main.

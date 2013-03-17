@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * A-boolean
+ *
+ * Negative test: boolean type conversed to integer type by the predefined procedure val.
+ * But boolean type and integer type are from different families.
+ *)
+module Main;
+var 
+	b : boolean;
+	i : integer;
+begin
+	i := integer(b);
+	halt(0);
+end Main.

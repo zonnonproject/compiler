@@ -1,0 +1,153 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Complex example
+ *)
+module {protected} Main;
+
+protocol {public} SMTP = (
+	SMTP_SERVER_READY, 		SERVICE_NOT_AVAILABLE, 		HELO, 
+	OK, 				MAIL_FROM, 			RCPT_TO, 
+	RCPT_REJECTED,			DATA, 				START_MAIL_INPUT, 
+	END,				QUIT, 				BYE,  LINE,
+	mail_from = MAIL_FROM string ?OK,
+	rcpt_to = RCPT_TO string ( ?OK | ?RCPT_REJECTED ),
+	msg_body = DATA ?START_MAIL_INPUT { LINE string ?OK } END ?OK,
+	session = HELO string ?OK  {mail_from rcpt_to {rcpt_to} msg_body},
+	se_end = QUIT ?BYE,
+	dialog = ?SMTP_SERVER_READY [session] se_end | ?SERVICE_NOT_AVAILABLE
+);
+
+type {public, ref, protected} MailServer = object
+
+(* == SMTP Activity - session to client ============== *)
+ activity SendMail implements SMTP;
+ var request : SMTP; any_request : object;
+	 mto, mtextline : string;
+ begin
+    writeln("server is activated");
+	return SMTP.SMTP_SERVER_READY;
+	writeln("server said HELO and waiting for request");
+	accept request; 
+	if request = SMTP.HELO then (* If not HELO then request is QUIT *)
+		accept unused; 
+		return SMTP.OK; (* Confirm that client is accepted *)
+		(* Sending a message *)
+		loop
+			accept request;
+			if request = SMTP.QUIT then exit end;
+			(* Protocol guarantees that request = SMTP.MAIL_FROM *)
+			accept unused; (* Sender e-mail *)
+			return SMTP.OK; (* Confirm that sender is accepted *)
+
+			(*** New mail - clearing recipients list ***)
+			accept request;
+			while request = SMTP.RCPT_TO do
+				accept mto; (* One more recipient *)
+				(* if  checking the recipient is  true then *)
+				return SMTP.OK; (* Recipient accepted *)
+					(* Adding mto to the rcpt list *)
+				(*else
+					return SMTP.RCPT_REJECTED (* Recipient rejected *)
+				end; *)
+				writeln("server approved ", mto);
+				accept request
+			end; (* Request can be SMTP.DATA or SMTP.QUIT *)
+			
+			if request = SMTP.QUIT then exit end;
+			(* Protocol guarantees that request = SMTP.DATA *)
+			return SMTP.START_MAIL_INPUT; 
+			accept request;
+			while request = SMTP.LINE do
+					accept mtextline; (* One more text line  *)
+					return SMTP.OK; writeln("server accepted ", mtextline);
+					accept request;					
+			end; (* while *) (* any_request is SMTP.END *)
+			writeln("END was accepted. Reply with OK ");
+			(* Accept the message to delivery *)
+			return SMTP.OK
+			(* Putting the message to the queue *)
+		end (* loop *)
+	end;
+	return SMTP.BYE
+ end SendMail;
+
+end MailServer;
+
+type {public, ref} MailClient = object
+var {public}
+	server: MailServer;
+
+procedure {public} Configure(server: MailServer);
+begin
+	self.server := server;
+end Configure;
+
+procedure {public} SendMail;
+var smtp: activity { SMTP }; 
+	answer: SMTP; 
+	i: integer;
+begin
+    writeln("client requests server");
+	smtp := new server.SendMail; (* new dialog with the server *)
+	writeln("client is waiting for greeting");
+	answer := smtp(); 
+	writeln("client received greeting");
+	if  answer = SMTP.SMTP_SERVER_READY  then
+		answer := smtp( SMTP.HELO, "www.roman.nnov.ru" );
+		if answer = SMTP.OK then
+			for (* each mail in outbox *) i := 1 to 1 do
+				answer := smtp( SMTP.MAIL_FROM, "roman.mitin@inf.ethz.ch" );
+				if answer = SMTP.OK then
+					answer := smtp( SMTP.RCPT_TO, "zueff@inf.ethz.ch" );
+					writeln("client recieved confiramtion of email");
+					if answer = SMTP.OK then
+						writeln("client sending data");
+						answer := smtp( SMTP.DATA );
+						writeln("client transfers text");
+						if answer = SMTP.START_MAIL_INPUT then
+							answer := smtp( SMTP.LINE, "Hi!" );
+							answer := smtp( SMTP.LINE, "It works!" );
+							writeln("client is sending END");
+							answer := smtp( SMTP.END );
+							if answer = SMTP.OK then
+								writeln("client is sending QUIT");
+								answer := smtp( SMTP.QUIT );
+								if answer = SMTP.BYE then
+									(* Session closed *)
+								end
+							else (* Smth. has happened *)
+							end		
+						else (* No invitaion to input data *)
+						end
+					else (* Recipient has been rejected *)
+					end
+				else (* Sender has been rejected *)
+				end
+			end (* for *)
+		else (* Host has been rejected *)
+		end
+	else (* Cant connect case *)
+	end
+end SendMail;
+
+procedure {public} Synchronize;
+begin
+	SendMail; 
+	(* Other syncronisation tasks such as GetMail *)
+end Synchronize;
+
+begin (* object MailClient *)
+	
+end MailClient;
+
+var 
+	server: MailServer;
+	client: MailClient;
+begin
+	server := new MailServer;
+	client := new MailClient;
+	client.Configure( server );
+	client.Synchronize();
+	halt(1);
+end Main.

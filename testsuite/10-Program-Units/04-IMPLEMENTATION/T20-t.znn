@@ -1,0 +1,38 @@
+(** 
+ * 11.Program Units.
+ * 11.4. implementation
+ *
+ * Positive test: the variable (i) is declared in definition A.
+ * The variable is initialized by procedure P call in main block of object B;
+ *)
+definition A;
+	import B;
+
+	procedure P(b : B) : B;
+end A.
+
+implementation A;
+	import B;
+ 
+	procedure { public } P(b : B) : B;
+	begin
+		return b;
+	end P;
+end A.
+
+object { public, value } B;
+begin
+end B.
+
+definition C;
+end C.
+
+module Main;
+	import A;
+	
+	var k : integer;
+begin
+	k := 1;
+	if k = 1
+	then halt(1) else halt(0) end;
+end Main.

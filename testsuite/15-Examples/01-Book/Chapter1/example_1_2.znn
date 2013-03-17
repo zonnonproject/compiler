@@ -1,0 +1,50 @@
+(* ********* Zonnon online collection ***********
+ * KMP (Chapter 1, Example 1.2)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module KMP;
+
+const Mmax = 100;
+
+var i,j,k,k0,M,N: integer;
+  ch: char;
+  p: string;
+  s: string;
+  d: array Mmax of integer;
+
+begin
+  writeln("Example 1.2: KMP");	
+
+  write("String: ");
+  readln(s);
+  N := len(s);
+  loop
+    write("Pattern (empty string to quit): ");
+    readln(p);
+    M := len(p);
+    if p = "" then exit; end;
+
+    j := 0; k := -1; d[0] := -1;
+    while j < M-1 do
+       while (k>=0) & (p[j] # p[k]) do k := d[k] end;
+       j := j+1; k := k+1;
+       if p[j] =p[k] then d[j] := d[k] else d[j] := k; end;
+    end;
+    i:=0; j:=0; k:=0;
+    while (j < M) & (i < N) do
+       while k <= i do write(s[k]); k := k+1; end;
+       while (j>=0) & (s[i] #p[j]) do j:= d[j]; end;
+       i := i+1; j:= j+1;
+    end;
+    if j=M then writeln; writeln("  Founded!"); 
+    else writeln; writeln("  Not founded.");
+    end;
+  end;
+  writeln("Type 'q' to exit");
+end KMP.
+
+
+     

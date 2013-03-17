@@ -1,0 +1,13 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the procedure declaration and type declaration have the same name.
+ *)
+module Main;
+	type A = (one, two);
+
+	procedure A();
+	begin end A;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,32 @@
+(** 
+ * 11.Program Units.
+ * 11.3. definition
+ *
+ * Positive test: the public variable (i) is declared in definition A.
+ * The variable is used in the object A that implements the definition A.
+ * The object modifies the variable in its procedure P.
+ *
+ * The definition is declared before its using.	
+ *)
+definition {public} A;
+	var {public}
+		i : integer;
+end A.
+
+object {public, value } B implements A;
+	procedure P;
+	begin 
+		i := 2 
+	end P;
+begin
+	P;
+end B.
+
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.i = 2
+	then halt(1) else halt(0) end;
+end Main.

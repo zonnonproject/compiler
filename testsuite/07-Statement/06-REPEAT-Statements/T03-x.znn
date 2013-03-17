@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.6. REPEAT statement.
+ *
+ * Negative test: not logical expression in until clause.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 4;
+	j := 4;
+
+	repeat 
+		i := i - 1;
+		j := j - 1;
+	until i - i;
+
+	halt(0);
+end Main.

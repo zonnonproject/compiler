@@ -1,0 +1,22 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * char type
+ *
+ * Negative test: wrong char type variable assignment.
+ * Const expression is used for char type width calculation.
+ *)
+module Main;
+	const N = 2;
+	var c8  : char { 3 + 5  };
+	var c16 : char { N + 14 };
+begin
+	c8  := 'A' {8};
+	c16 := 'B';
+
+	c8 := c16; (* Wrong assignment: left type width {8} < right type width {16} *)
+
+	if c16 = 'A' 
+	then halt(1) else halt(0) end;
+end Main.

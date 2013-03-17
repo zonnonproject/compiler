@@ -1,0 +1,17 @@
+(* ********* Zonnon online collection ***********
+ * Case structure, Input symbol.
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module example523;
+var a: char;
+begin
+  write("Enter symbol: "); readln(a);
+  case a of
+  "0".."9": writeln('Digit')
+  else writeln('Smth. else')
+  end
+end example523.

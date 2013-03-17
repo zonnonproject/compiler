@@ -1,0 +1,25 @@
+module Main;
+
+type {public}
+
+      Array32 = array * of real;
+      Array64 = array * of real;
+
+   type {public, ref} Array = object (length : integer) implements []
+
+      var {private}
+         n : integer;
+         v : array * of real;
+   procedure {public} get(i:integer):real implements [].Get;
+   begin
+     return v[i];
+   end get;
+   
+   begin
+      self.n := length;
+      self.v := new Array64(length);
+   end Array;
+
+begin
+  halt(1);
+end Main.

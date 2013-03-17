@@ -1,0 +1,30 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: object\'s variable is used as function parameter.
+ *)
+module Main;
+
+type String = array 64 of char;
+
+procedure F(i : integer) : integer;
+begin
+	return i + 1;
+end F;
+
+type { value } A = object
+	var { public }
+		i : integer;
+end A;
+
+var a : array 2 of A;
+	k, i : integer;
+
+begin
+	i := 4;
+	a[0].i := i;
+	k := F(a[0].i);
+
+	if k = 5
+	then halt(1) else halt(0) end;	
+end Main.

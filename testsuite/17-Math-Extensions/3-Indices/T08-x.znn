@@ -1,0 +1,15 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Negative test: range indexing : array is not math
+ *)
+
+module Main;
+
+var
+	a : array 5 of integer;
+begin	
+	a[1..3] := [9, 10, 11];
+	halt(0);
+end Main.

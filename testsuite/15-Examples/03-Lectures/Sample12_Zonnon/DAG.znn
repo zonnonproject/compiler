@@ -1,0 +1,412 @@
+(* ********* Zonnon online collection ***********
+ * DAG
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module DAG;
+
+const	
+	isDIR   =   0;
+	isFILE  =   1;
+	maxPATH = 100;
+
+type Name = string;
+
+(* Used to model the INodeTable which will be a simple linear list. *)
+object {public, ref} INode ;
+	var {public}
+		refCount : integer;
+		ID : integer;
+		next : INode;
+end INode;
+	
+(* Abstract type used to derive from it the FSofile and dir types. *)
+object {public, ref} FSObject;
+	var {public}
+		next : FSObject;
+		name : Name;
+		otype : integer;
+		inode : INode;
+		down : FSObject;
+end FSObject;
+	
+var	iNodeTable : INode;
+	lastID : integer;
+	root : FSObject;
+ 
+(* Some auxiliary proc. To read one name from a path. *)
+procedure ReadOneName(path : array of char; var pos : integer; var name : Name);
+var	i : integer;
+	buf : string;
+	tmp : array maxPATH of char;
+begin
+	i := 0;
+
+	while (path[pos] # char(92)) & (path[pos] # 0X) do
+		tmp[i] := path[pos];
+		inc(i); inc(pos)
+	end;
+
+	tmp[i] := char(0);
+(*
+			write("1.ReadOneName: tmp(char)="); writeln(tmp);
+			write("1.ReadOneName: tmp(int)=");
+			for i := 0 to maxPATH-1 do
+				write( integer(tmp[i]) ); write(", ");
+			end;
+			writeln();
+*)
+	copy(tmp, buf);
+	name := buf;
+(*
+			write("1.ReadOneName: name="); writeln(name);
+
+			writeln();
+			writeln("-----");
+			writeln();
+
+	copy(name, tmp);
+			write("2.ReadOneName: name="); writeln(name);
+			write("2.ReadOneName: tmp(char)="); writeln(tmp);
+			write("2.ReadOneName: tmp(int)=");
+			for i := 0 to maxPATH-1 do
+				write( integer(tmp[i]) ); write(", ");
+			end;
+			writeln();
+*)
+end ReadOneName;
+  
+(* Used to find the directory which will be changed. *)
+procedure Search(path : array of char; var node : FSObject);
+var	
+	i : integer; 
+	buf : Name;
+	temp : FSObject;
+begin
+	i := 0;
+
+	copy(path, buf);
+	write("Search path: "); writeln(buf);
+
+	if path[i] # char(92) then 
+		writeln("Invalid path.");
+		node := nil;
+		return 
+	elsif path[i+1] = 0X then
+		temp := root
+	else
+		temp := root.down;
+
+		loop
+			inc(i);
+			ReadOneName(path, i, buf);
+						write("ReadOneName: buf = "); writeln(buf);
+			while (temp # nil) & (temp.name # buf) do 
+				temp := temp.next
+			end;
+
+			if (temp = nil) or (temp.otype = isFILE) then
+						if temp = nil then	
+							writeln("ReadOneName: temp = nil") 
+						elsif temp.otype = isFILE then	
+							writeln("ReadOneName: temp.otype = isFILE") 
+						end;
+				writeln("Invalid path");
+				node := nil;
+				return
+			elsif path[i] # 0X then
+				temp := temp.down
+			else
+				exit
+			end
+		end; (* loop *)
+	end; (* if *)
+	node := temp;
+	node.otype := isDIR
+end Search;
+
+(* Is used when a FSofile is to be deleted. *)
+procedure DeleteINode(inode : INode);
+var 
+	temp : INode;
+begin
+	if inode.refCount > 1 then 
+		inode.refCount := inode.refCount - 1;
+	elsif inode = iNodeTable then
+		iNodeTable := iNodeTable.next;
+	else
+		temp := iNodeTable;
+		while temp.next # inode do
+			temp := temp.next
+		end;
+		temp.next := temp.next.next
+	end
+end DeleteINode;
+
+(* This procedure does actually the deletion from the DAG. *)
+procedure InternalDel(var node : FSObject);
+var 
+	temp : FSObject;
+begin
+	if node.otype = isFILE then
+		DeleteINode(node.inode)
+	else
+		temp := node.down;
+
+		while temp # nil do
+			InternalDel(temp)
+		end
+	end;
+	node := node.next
+end InternalDel;
+
+(* Takes as input a path to a directory and the name of the FSofile/dir that will be deleted. *)
+procedure Delete(path : array of char; name : Name);
+var	
+	dir, temp, prev : FSObject;
+	isUpdateDown : boolean;
+begin
+	dir  := new FSObject();
+	temp := new FSObject();
+	prev := new FSObject();
+
+	dir.otype := isDIR;
+	Search(path, dir);
+
+	if dir # nil then
+		prev := dir;
+		temp := dir.down;
+		isUpdateDown := true;
+
+		while (temp # nil) & (temp.name # name) do 
+			prev := temp; 
+			temp := temp.next;
+			isUpdateDown := false
+		end;
+
+		if temp = nil then
+			writeln("Invalid search path.") 
+		else 
+			InternalDel(temp);
+			if isUpdateDown then
+				prev.down := temp;
+				prev.otype := isDIR
+			else
+				prev.next := temp
+			end
+		end
+	end
+end Delete;
+
+(* Used when a new FSofile is added to the DAG. *)
+procedure AddINode(var inode : INode);
+var 
+	tmp : INode;
+begin
+	tmp := new INode();
+	tmp.ID := lastID;
+	inc(lastID);
+	tmp.refCount := 1;
+	tmp.next := iNodeTable;
+	inode := tmp;
+	iNodeTable := inode
+end AddINode;
+
+(* Used when a hardlink is added to the DAG. *)
+procedure AddINodeRef(inode : INode);
+begin
+	inode.refCount := inode.refCount + 1
+end AddINodeRef;
+
+(* Initialising the DAG and the inodeTable *)
+procedure InitDAG;
+var	
+	tmp : array 2 of char;
+begin
+	iNodeTable := nil;
+	lastID := 0;
+	root := new FSObject();
+	root.otype := isDIR;
+	tmp[0] := char(92); 
+	tmp[1] := 0X;
+
+	copy(tmp, root.name);
+	root.next := nil;
+	root.down := nil
+end InitDAG;
+
+(** 
+	Adds a new FSofile given by path to directory and name of the FSofile
+	in inode returns the inode that was created 
+*)
+procedure AddFSofile(path : array of char; name : Name; var inode : INode);	
+var 
+	buf : string;
+	dir, FSofile : FSObject; 
+begin
+		copy(path, buf);
+		writeln();
+		write("AddFSofile.path = "); writeln(buf);
+		write("AddFSofile.name = "); writeln(name);
+
+	dir := new FSObject();
+	dir.otype := isDIR;
+
+	FSofile := new FSObject();
+	FSofile.otype := isFILE;
+
+	Search(path, dir);
+
+	if dir # nil then
+		FSofile := new FSObject();
+		FSofile.otype := isFILE;
+		FSofile.name := name;
+
+		AddINode(FSofile.inode);
+		inode := FSofile.inode;
+		FSofile.next := dir.down;
+		dir.down := FSofile
+	end
+end AddFSofile;
+
+(* 
+	Adds a new dir given by path to its parent dir and the name of the dir. 
+*)
+procedure AddDir(path : array of char; name : Name);
+var 
+	dir, newDir : FSObject;
+begin
+	dir := new FSObject();
+	dir.otype := isDIR;
+
+	newDir := new FSObject();
+	newDir.otype := isDIR;
+
+	Search(path, dir);
+
+	if dir # nil then
+		newDir := new FSObject();
+		newDir.otype := isDIR;
+		newDir.name := name;
+		newDir.down := nil;
+		newDir.next := dir.down;
+		dir.down := newDir
+	end
+end AddDir;
+
+(* 
+	Adds a hardlink given by a path to its parent dir, 
+	the name of the FSofile and the inode to which it refers to. 
+*)
+procedure AddLink(path : array of char; name : Name; inode : INode); 
+var	
+	dir, FSofile : FSObject; 
+begin
+	dir := new FSObject();
+	dir.otype := isDIR;
+
+	FSofile := new FSObject();
+	FSofile.otype := isFILE;
+
+	Search(path, dir);
+
+	if dir # nil then
+		FSofile := new FSObject();
+		FSofile.otype := isFILE;
+		FSofile.name := name;
+		FSofile.inode := inode;
+		AddINodeRef(FSofile.inode);
+		FSofile.next := dir.down;
+		dir.down := FSofile
+	end	
+end AddLink;
+
+(* Displays the directory structure in a hierarchical way. *)
+procedure PrintFS(node : FSObject; indent : integer); (* displays the FSofile system *)
+var	
+	i : integer;
+	temp : FSObject;
+begin
+
+	for i := 1 to indent do;
+		write(" ") 
+	end; 
+
+	write(node.name);
+
+	if node.otype = isFILE then
+		write(" ");
+		write(node.inode.ID);
+		write(": ");
+		writeln(node.inode.refCount)
+	else 
+		writeln();
+		indent := indent + 5;
+		temp := node.down;
+		while temp # nil do
+			PrintFS(temp, indent);
+			temp := temp.next
+		end
+	end
+end PrintFS;
+
+(* The test procedure. *)
+procedure Test();
+var	
+	buf : string;
+	inode, multiple : INode;
+	path : array 31 of char;
+	fname : Name;
+begin
+	inode := new INode();
+	multiple := new INode();
+	InitDAG();
+
+	path[0] := char(92);
+	path[1] := 0X;
+		copy(path, buf);
+		writeln("Path = ", buf);
+
+	fname := "Laci";
+	AddDir(path, fname);
+
+	fname := "Gabi";
+	AddDir(path, fname);
+
+	copy(" Gabi", path);
+	path[0] := char(92);
+	fname := "lajos.cpp";
+	AddFSofile(path, fname, inode);
+
+(*
+	fname := "Gabika";
+	AddDir(path, fname);
+	copy(" Gabi Gabika", path);
+	path[0] := char(92);
+	path[5] := char(92);
+	fname := "test.txt";
+	AddFSofile(path, fname, multiple);
+
+	copy(" Laci", path);
+	path[0] := char(92);
+	fname := "stest.txt";
+	AddLink(path, fname, multiple);
+
+	path[0] := char(92);
+	path[1] := 0X;
+	fname := "Gabi";
+	PrintFS(root, 0);
+	Delete(path, fname);
+*)
+	PrintFS(root, 0);
+end Test;
+
+begin
+	Test();
+	
+	writeln("Done. Press the Enter key");
+	readln
+end DAG.

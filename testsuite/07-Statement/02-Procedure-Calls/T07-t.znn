@@ -1,0 +1,26 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call. 
+ *
+ * Positive test: designator is array element.
+ *)
+object A.B;
+	procedure {public} p(var j : integer; i : integer);
+	begin  
+		j := i + 1;
+	end p;
+end B.
+
+module Main;
+	import A.B as B;
+	
+	var p1, p2 : integer;
+		b : array 2 of B;
+begin
+	p1 := 1;
+	p2 := 2;
+	b[1].p(p1, p2);
+
+	if p1 = 3 
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,134 @@
+(*************************************************************************
+Solving a system of linear equations Ax = b. 
+
+Solving a SLE (system of linear equations) Ax = b using biconjugate gradient method,
+where A is a real square matrix;
+The preconditioner is the diagonal part of A.
+
+Method description: http://en.wikipedia.org/wiki/Biconjugate_gradient_method
+                    Belov S.A., Zolotykh N.Y. "Numerical methods of linear algebra" (in russian)
+
+Author: Nina Gonova                     
+Last change: 13.04.2009
+**************************************************************************)
+
+module BiConjugateGradMethod;
+
+type {public} TypeOfArray = real;
+type {public, ref} Vector = array {math} * of TypeOfArray;
+type {public, ref} Matrix = array {math} *, * of TypeOfArray;
+
+const eps = 0.01;
+
+procedure {public} Solution(A: Matrix; b, x0: Vector) : Vector;
+var
+	x : Vector; (*x is the solution*)
+	MInv : Vector; (*MInv = M^(-1), where M is preconditioner*)
+	r, rw : Vector; (*biorthogonal residuals*)
+	p, pw : Vector; (*biconjugate directions*)
+	q, z, zw : Vector; (*auxiliary variable*)
+	mu, nu, alpha, beta: TypeOfArray; (*auxiliary variable*)
+	i, n : integer; (*n = number of lines of A = number of columns of A*)
+
+begin
+	n := len(A);
+
+	x := new Vector(n);
+	q := new Vector(n);
+	r := new Vector(n);
+	rw := new Vector(n);
+	p := new Vector(n);
+	pw := new Vector(n);
+	MInv := new Vector(n);
+	z := new Vector(n); 
+	zw := new Vector(n);
+	for i := 0 to n - 1 do
+		MInv[i] := 1 / A[i, i];
+	end;
+	
+	(*initialization*)
+	x := x0;
+	r := b - A * x;
+	rw := r;
+	p := MInv .* r;
+	pw := rw .* MInv;
+	z := p;
+	zw := pw;
+	mu := rw +* z; 
+	
+	loop
+		if abs(r) < eps then exit; end;
+		
+		q := A * p;
+		alpha := mu / (pw +* q);
+		r := r - alpha * q;
+		rw := rw - alpha * pw * A;
+		x := x + alpha * p;	
+		z := MInv .* r;
+		zw := rw .* MInv;
+		nu := rw +* z;
+		beta := nu / mu;
+		p := z + beta * p;
+		pw := zw + beta * pw;
+		mu := nu;
+		
+	end;
+
+	return x;
+
+end Solution;
+
+begin
+
+end BiConjugateGradMethod.
+
+module Main;
+
+import 
+	BiConjugateGradMethod;
+
+var
+	A : BiConjugateGradMethod.Matrix; 
+	i, j: integer;
+	n: integer;
+	x, x0, b, r: BiConjugateGradMethod.Vector;
+	q : real;
+
+begin
+	n := 4;
+
+	A := new BiConjugateGradMethod.Matrix(n, n);
+	b := new BiConjugateGradMethod.Vector(n);
+	x0 := new BiConjugateGradMethod.Vector(n);
+	
+	q := 3.4;
+	for i := 0 to n - 1 do
+		for j := 0 to n - 1 do
+			A[i, j] := q * q + i + j - q * i + 2.3 / q * j;
+		end;
+	end;
+	
+	q := 2.18;
+	for i := 0 to n - 1 do
+		b[i] := (q + 2*i - 4) / q;
+	end;
+
+	for i := 0 to n - 1 do
+		x0[i] := 0.;
+	end;
+	
+	x := BiConjugateGradMethod.Solution(A, b, x0);
+	
+	if x # nil 
+	then	
+		r := b - A * x;
+		if (abs(r) < 0.01) 
+		then halt(1);
+		else halt(0);
+		end;
+	else
+		halt(0);
+	end;
+	
+end Main.
+

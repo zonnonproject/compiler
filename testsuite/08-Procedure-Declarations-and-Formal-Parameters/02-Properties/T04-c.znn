@@ -1,0 +1,32 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.2 Properties
+ *
+ * Negative test: the set property is used as get property
+ *)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.age.year = 2000
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, value} B implements A;
+	import C;
+
+	var {public}
+		a : C;
+end B.
+
+definition {public} A;
+	import C;
+
+	var age : C;
+end A.
+
+object {public, value} C;
+	var {public}
+		year, month, day : integer;
+end C.

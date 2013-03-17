@@ -1,0 +1,400 @@
+module {public} Main;
+
+import
+   System.IO.BinaryReader     as BinaryReader,
+   System.IO.BinaryWriter     as BinaryWriter,
+   System.IO.Path             as Path,
+   System.IO.StreamReader     as StreamReader,
+   System.IO.StreamWriter     as StreamWriter,
+   System.Reflection.Assembly as Assembly,
+   BelCore.Log       as L,
+   BelCore.Math      as M,
+   BelCore.Numbers   as N,
+   BelCcm.Scalars    as S,
+   BelCcm.Units      as U,
+   BelCore.DataFiles as DF,
+   BelCore.TextFiles as TF;
+
+var {private}
+   asm : Assembly;
+   dir, file, loc, path : string;
+
+procedure {public} StringIO;
+var
+	i : integer;
+	s : string;
+	x : S.Scalar;
+begin
+   s := "";
+	writeln("Enter two scalars, e.g., 1.23456789E6 kg.m/s^2");
+	writeln("   Special real parts are: NaN, Infinity and -Infinity.");
+	writeln("   The program will then parse each and print its parsing.");
+	writeln;
+	for i := 1 to 2 do
+		readln(s);
+		x.Parse(s);
+		s := "[ " + x.Typeset() + "]";
+		writeln(s);
+		writeln
+	end;
+end StringIO;
+
+procedure {public} Store;
+var
+   bw : BinaryWriter;
+   f, s : string;
+   i : integer;
+   sw : StreamWriter;
+   x : S.Scalar;
+begin
+   s := "";
+   f := "testScalars";
+   bw := DF.OpenWriter(f);
+   sw := TF.OpenWriter(f);
+   (* use the Store procedure to write some data *)
+   writeln("Enter four scalars to store to file.");
+   for i := 1 to 4 do
+      readln(s);
+      sw.WriteLine(s);
+      x.Parse(s);
+      x.Store(bw);
+      s := "   the ";
+      if i = 1 then
+         s := s + "first "
+      elsif i = 2 then
+         s := s + "second"
+      elsif i = 3 then
+         s := s + "third "
+      else
+         s := s + "fourth"
+      end;
+      s := s + " scalar stored to file was: " + x.Typeset();
+      writeln(s)
+   end;
+   DF.CloseWriter(bw);
+   TF.CloseWriter(sw)
+end Store;
+
+procedure Load;
+var
+   br : BinaryReader;
+   f, s : string;
+   i : integer;
+   sr : StreamReader;
+   x : S.Scalar;
+begin
+   s := "";
+   f := "testScalars";
+   br := DF.OpenReader(f);
+   sr := TF.OpenReader(f);
+   (* read in the data *)
+   for i := 1 to 4 do
+      x.Load(br);
+      s := "   the ";
+      if i = 1 then
+         s := s + "first "
+      elsif i = 2 then
+         s := s + "second"
+      elsif i = 3 then
+         s := s + "third "
+      else
+         s := s + "fourth"
+      end;
+      s := s + " scalar read from the binary file was: " + x.Typeset();
+      writeln(s);
+      s := sr.ReadLine();
+      x.Parse(s);
+      s := "   the ";
+      if i = 1 then
+         s := s + "first "
+      elsif i = 2 then
+         s := s + "second"
+      elsif i = 3 then
+         s := s + "third "
+      else
+         s := s + "fourth"
+      end;
+      s := s + " scalar read from the  text  file was: " + x.Typeset();
+      writeln(s)
+   end;
+   DF.CloseReader(br);
+   TF.CloseReader(sr)
+end Load;
+
+procedure {public} GetSet;
+var
+	r : N.Number;
+	s : string;
+	u : U.Si;
+	x : S.Scalar;
+begin
+   s := "";
+	writeln("Test the Get and Set methods.");
+	writeln;
+	(* assign parameters to a scalar *)
+	writeln("Enter a number (without units).");
+	readln(s);
+	r.Parse(s);
+	x.Set(r);
+	writeln("Enter a set of SI units.");
+	readln(s);
+	u.Parse(s);
+	x.SetUnits(u);
+	(* retrieve the parameters held by the scalar *)
+	r := x.Get();
+	s := "The number held by the scalar is:    " + r.Typeset();
+	writeln(s);
+	u := x.GetUnits();
+	s := "The SI units held by the scalar are: " + u.Typeset();
+	writeln(s);
+	s := "Or, as an entity, the scalar is:     " + x.Typeset();
+	writeln(s)
+end GetSet;
+
+procedure {public} Boolean;
+var
+	s : string;
+	x, y : S.Scalar;
+begin
+   s := "";
+	writeln("Test the boolean functions.");
+	writeln;
+	writeln("Enter the scalar for the left-hand side.");
+	readln(s);
+	x.Parse(s);
+	writeln("Enter the scalar for the right-hand side.");
+	readln(s);
+	y.Parse(s);
+	s := x.Typeset() + "= ";
+	s := s + y.Typeset() + "is ";
+	if x.Equals(y) then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := x.Typeset() + "< ";
+	s := s + y.Typeset() + "is ";
+	if x.LessThan(y) then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := x.Typeset() + "> ";
+	s := s + y.Typeset() + "is ";
+	if x.GreaterThan(y) then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s)
+end Boolean;
+
+procedure {public} Arithmetic;
+var
+	r : N.Number;
+	s : string;
+	x, y, z : S.Scalar;
+begin
+   s := "";
+	writeln("Test the arithmetic methods.");
+	writeln;
+	writeln("Verify the absolute value function: enter a scalar.");
+	readln(s);
+	x.Parse(s);
+	y := x.Magnitude();
+	s := "| " + x.Typeset() + "| = ";
+	s := s + y.Typeset();
+	writeln(s);
+	writeln("Enter a scalar for the left-hand side.");
+	readln(s);
+	x.Parse(s);
+	writeln("Enter a scalar for the right-hand side.");
+	readln(s);
+	y.Parse(s);
+	s := "-( " + x.Typeset() + ") = ";
+	z := x.Negative();
+	s := s + z.Typeset();
+	writeln(s);
+	s := "1/( " + x.Typeset() + ") = ";
+	z := x.Reciprocal();
+	s := s + z.Typeset();
+	writeln(s);
+	s := x.Typeset() + "+ " + y.Typeset();
+	z := x.Add(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := x.Typeset() + "- " + y.Typeset();
+	z := x.Subtract(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := x.Typeset() + "* " + y.Typeset();
+	z := x.Multiply(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := x.Typeset() + "/ " + y.Typeset();
+	z := x.Divide(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	writeln("Enter a number (without units).");
+	readln(s);
+	r.Parse(s);
+	writeln("Enter a dimensionless scalar.");
+	readln(s);
+	x.Parse(s);
+	s := x.Typeset() + "* " + r.Typeset();
+	z := x.Scale(r);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := x.Typeset() + "** " + r.Typeset();
+	z := x.Power(r);
+	s := s + "= " + z.Typeset();
+	writeln(s)
+end Arithmetic;
+
+procedure {public} Operators;
+var
+	l, r, z : S.Scalar;
+	y : N.Number;
+	s : string;
+begin
+   s := "";
+   writeln("We are now testing the overloaded operators.");
+   writeln;
+	writeln("Test the unary operator.");
+	writeln;
+	writeln("Enter a scalar.");
+	readln(s);
+	r.Parse(s);
+	s := "-( " + r.Typeset() + ") = ";
+	l := -r;
+	s := s + l.Typeset();
+	writeln(s);
+	writeln;
+	writeln("Enter a scalar for the left-hand side.");
+	readln(s);
+	l.Parse(s);
+	writeln("Enter a scalar for the right-hand side.");
+	readln(s);
+	r.Parse(s);
+	writeln("Test the boolean operators.");
+	s := l.Typeset() + "= ";
+	s := s + r.Typeset() + " is ";
+	if l = r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := l.Typeset() + "# ";
+	s := s + r.Typeset() + " is ";
+	if l # r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := l.Typeset() + "< ";
+	s := s + r.Typeset() + " is ";
+	if l < r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := l.Typeset() + "<= ";
+	s := s + r.Typeset() + "is ";
+	if l <= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := l.Typeset() + "> ";
+	s := s + r.Typeset() + " is ";
+	if l > r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := l.Typeset() + ">= ";
+	s := s + r.Typeset() + "is ";
+	if l >= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	writeln("Test the binary arithemtic operators.");
+   writeln;
+	s := l.Typeset() + "+ " + r.Typeset();
+	z := l + r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := l.Typeset() + " - " + r.Typeset();
+	z := l - r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := l.Typeset() + "* " + r.Typeset();
+	z := l * r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := l.Typeset() + "/ " + r.Typeset();
+	z := l / r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	writeln("Enter a real number for mixed operations.");
+	readln(s);
+	s := y.Typeset() + "* " + r.Typeset();
+	z := y * r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := l.Typeset() + "/ " + y.Typeset();
+	z := l / y;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := y.Typeset() + "/ " + r.Typeset();
+	z := y / r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+   writeln;
+	writeln("Enter a dimensionless scalar:");
+	readln(s);
+	l.Parse(s);
+	s := l.Typeset() + "** " + y.Typeset();
+	z := l ** y;
+	s := s + "= " + z.Typeset();
+	writeln(s)
+end Operators;
+
+begin
+	StringIO;
+	writeln;
+	Store;
+   writeln("Data have been stored in the files");
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   file := Path.Combine(dir, "testScalars.dat");
+   writeln(file + " and");
+   file := Path.Combine(dir, "testScalars.txt");
+   writeln(file + ".");
+   writeln;
+	writeln("When read back in to check their integrity, one finds:");
+	Load;
+	writeln;
+	GetSet;
+	writeln;
+	Boolean;
+	writeln;
+	Arithmetic;
+	writeln;
+	Operators;
+	writeln;
+	writeln("Press 'Enter' to quit.");
+	readln;
+   L.Close
+end Main.

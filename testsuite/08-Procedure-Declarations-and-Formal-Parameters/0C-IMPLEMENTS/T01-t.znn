@@ -1,0 +1,19 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: the procedure B implements procedure B
+ * from the definition A.
+ *)
+definition {public} A;
+	procedure B(i : integer) : integer;
+end A.
+
+module Main implements A;
+	procedure {public} B(i : integer) : integer implements A.B;
+	begin
+		return i+1;
+	end B;
+begin
+	if B(4) = 5
+	then halt(1) else halt(0) end;
+end Main.

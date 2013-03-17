@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: the element B of qualified type name B.C is not object name.
+ *)
+module A;
+	import B.C;
+
+	type T = array 1 of B.C;
+end A.
+
+object B;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

@@ -1,0 +1,25 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Positive test: the object parameter is used 
+ * in the object block for object B constuction.
+ *)
+object {public, ref} A.B(i : integer);
+	var { public } 
+		j : integer;
+begin
+	j := i + 1;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b := new A.B(1);
+
+	if b.j = 2
+	then halt(1) else halt(0) end;
+end Main.

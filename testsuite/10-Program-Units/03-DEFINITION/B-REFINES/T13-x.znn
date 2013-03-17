@@ -1,0 +1,21 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Negative test: circle in definition refines.
+ *)
+definition {public} A refines B;
+end A.
+
+definition {public} B refines A;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+
+
+
+

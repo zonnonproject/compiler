@@ -1,0 +1,13 @@
+module Main;
+
+type t1 = array {sparse} * of double;
+
+var
+	a : t1;	
+  
+begin
+
+	halt(1);
+
+end Main.
+

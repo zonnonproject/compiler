@@ -1,0 +1,27 @@
+module Main;
+
+type {public} float = real;
+
+type {public} complex = record 
+	x, y: float;
+end complex;
+
+operator {public} ':='(var a: complex; b: float);
+begin
+	a.x := b;
+	a.y := 0.0;
+end ':=';
+
+var
+	a : complex;
+	r : float;
+begin
+	r := 2.3;
+	a := r;
+	
+	if a.x = r then
+		halt(1)
+	else
+		halt(0)
+	end
+end Main.

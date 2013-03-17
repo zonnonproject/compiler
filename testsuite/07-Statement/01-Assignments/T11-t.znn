@@ -1,0 +1,23 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Positive text: procedure assignment to procedure type variable.
+ *)
+module Main;
+	type PT = procedure (integer) : integer;
+
+	procedure p(i : integer) : integer;
+	begin 
+		return 3 
+	end p;
+
+	var	pv : PT;
+		i : integer;
+begin
+	pv := p;
+	i := pv(4);
+
+	if i = 3
+	then halt(1) else halt(0) end;
+end Main.

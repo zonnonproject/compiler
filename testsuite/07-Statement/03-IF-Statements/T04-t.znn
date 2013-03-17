@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.3. if statement.
+ *
+ * Positive test: the else absent, no conditions are true.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 3;
+	j := 2;
+
+	if    i = 1 then j := 3;
+	elsif i = 2	then j := 4;
+	end;
+
+	if j = 2 
+	then halt(1) else halt(0) end;
+end Main.

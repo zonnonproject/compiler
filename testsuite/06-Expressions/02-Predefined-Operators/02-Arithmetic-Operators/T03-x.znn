@@ -1,0 +1,13 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Negative test: devision to integer zero constant must not be compiled.
+ *)
+module Main;
+	var i : real;
+begin
+	i := 1 / 0;
+	halt(0);
+end Main.

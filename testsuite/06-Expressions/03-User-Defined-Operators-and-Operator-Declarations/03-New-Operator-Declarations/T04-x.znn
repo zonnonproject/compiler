@@ -1,0 +1,31 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.3. New operator declaration.
+ *
+ * Negative test: operators can not be declared in any object.
+ *)
+object Point;
+	var { public } x, y : integer;
+begin 
+	x := 0;
+	y := 0;
+end Point.
+
+object geometry;
+	import Point;
+
+	operator { public } "+" (p1, p2 : Point) : Point;
+		var pr : Point;
+	begin 
+		pr.x := p1.x + p2.x;
+		pr.y := p1.y + p2.y;
+
+		return pr; 
+	end "+";
+end geometry.
+
+module Main;
+begin
+	halt(0);
+end Main.

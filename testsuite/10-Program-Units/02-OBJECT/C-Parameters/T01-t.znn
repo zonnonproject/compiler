@@ -1,0 +1,25 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Positive test: the object B parameter is modified in object main block.
+ *)
+object {public, ref} A.B(i : integer);
+var { public }
+	j : integer;
+begin
+	i := i + 1;
+	j := i;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b := new A.B(4);
+
+	if b.j = 5 
+	then halt(1) else halt(0) end;
+end Main.

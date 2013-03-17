@@ -1,0 +1,1493 @@
+2 Bahnhof Tiefenbrunnen
+2 Wildbachstrasse
+3 Fröhlichstrasse
+4 Höschgasse
+5 Feldeggstrasse
+6 Kreuzstrasse
+7 Opernhaus
+9 Bellevue
+11 Bürkliplatz
+12 Börsenstrasse
+14 Paradeplatz
+15 Sihlstrasse
+18 Stauffacher
+19 Bezirksgebäude
+20 Kalkbreite
+22 Lochergut
+23 Zypressenstrasse
+24 Albisriederplatz
+26 Letzigrund
+27 Freihofstrasse
+28 Kappeli
+30 Grimselstrasse
+31 Lindenplatz
+32 Bachmattstrasse
+32 Farbhof
+1 Bachmattstrasse
+2 Lindenplatz (Altstetten
+3 Grimselstrasse
+5 Kappeli
+6 Freihofstrasse
+7 Letzigrund
+8 Albisriederplatz
+9 Zypressenstrasse
+10 Lochergut
+12 Kalkbreite
+13 Bezirksgebäude
+16 Stauffacher
+17 Sihlstrasse
+20 Paradeplatz
+21 Börsenstrasse
+22 Bürkliplatz
+24 Bellevue
+26 Opernhaus
+26 Kreuzstrasse
+28 Feldeggstrasse
+29 Höschgasse
+30 Fröhlichstrasse
+31 Wildbachstrasse
+31 Bahnhof Tiefenbrunnen
+-1
+3 Klusplatz
+2 Hölderlinstrasse
+3 Römerhof
+4 Hottingerplatz
+6 Kunsthaus
+7 Neumarkt
+9 Central
+11 Bahnhofplatz/Hauptbahnhof
+12 Löwenplatz
+14 Kaserne
+17 Stauffacher
+18 Bezirksgebäude
+19 Kalkbreite
+20 Lochergut
+22 Zypressenstrasse
+23 Albisriederplatz
+24 Krematorium Sihlfeld
+25 Hubertus
+27 Siemens
+28 Fellenbergstrasse
+29 Albisrieden
+2 Fellenbergstrasse
+3 Siemens
+5 Hubertus
+6 Krematorium Sihlfeld
+7 Albisriederplatz
+8 Zypressenstrasse
+9 Lochergut
+11 Kalkbreite
+12 Bezirksgebäude
+14 Stauffacher
+16 Kaserne
+18 Löwenplatz
+19 Bahnhofplatz/Hauptbahnhof
+21 Central
+23 Neumarkt
+24 Kunsthaus
+26 Hottingerplatz
+27 Römerhof
+28 Hölderlinstrasse
+29 Klusplatz
+-1
+4 Bahnhof Tiefenbrunnen
+2 Wildbachstrasse
+3 Fröhlichstrasse
+4 Höschgasse
+5 Feldeggstrasse
+6 Kreuzstrasse
+7 Opernhaus
+9 Bellevue
+10 Helmhaus
+11 Rathaus
+12 Rudolf-Brun-Brücke
+14 Central
+16 Bahnhofquai/Hauptbahnhof
+18 Sihlquai
+19 Museum für Gestaltung
+21 Limmatplatz
+22 Quellenstrasse
+23 Dammweg
+24 Escher-Wyss-Platz
+26 Förrlibuckstrasse
+27 Fischerweg
+28 Bernoulli-Häuser
+29 Hardturm
+30 Hardhof
+31 Tüffenwies
+33 Grünaustrasse
+34 Bändliweg
+34 Werdhölzli
+2 Bändliweg
+3 Grünaustrasse
+4 Tüffenwies
+5 Hardhof
+6 Hardturm
+7 Bernoulli-Häuser
+8 Fischerweg
+9 Förrlibuckstrasse
+11 Escher-Wyss-Platz
+12 Dammweg
+13 Quellenstrasse
+14 Limmatplatz
+15 Museum für Gestaltung
+17 Sihlquai
+19 Bahnhofquai/Hauptbahnhof
+21 Central
+22 Rudolf-Brun-Brücke
+23 Rathaus
+24 Helmhaus
+26 Bellevue
+28 Opernhaus
+29 Kreuzstrasse
+30 Feldeggstrasse
+31 Höschgasse
+32 Fröhlichstrasse
+33 Wildbachstrasse
+34 Bahnhof Tiefenbrunnen
+-1
+5 Zoo
+3 Susenbergstrasse
+4 Zürichbergstrasse
+5 Toblerplatz
+7 Kirche Fluntern
+9 Voltastrasse
+10 Platte
+12 Kantonsschule
+14 Kunsthaus
+17 Bellevue
+18 Bürkliplatz
+20 Rentenanstalt
+21 Bahnhof Enge
+3 Rentenanstalt
+4 Bürkliplatz
+6 Bellevue
+8 Kunsthaus
+9 Kantonsschule
+11 Platte
+13 Voltastrasse
+15 Kirche Fluntern
+16 Toblerplatz
+17 Zürichbergstrasse
+18 Susenbergstrasse
+19 Zoo
+-1
+6 Zoo
+2 Susenbergstrasse
+4 Zürichbergstrasse
+5 Toblerplatz
+6 Kirche Fluntern
+8 Voltastrasse
+10 Platte
+12 ETH/Universitätsspital
+13 Haldenegg
+15 Central
+17 Bahnhofplatz/Hauptbahnhof
+18 Bahnhofstrasse/Hauptbahnhof
+20 Rennweg
+22 Paradeplatz
+23 Stockerstrasse
+24 Tunnelstrasse
+26 Bahnhof Enge
+2 Tunnelstrasse
+4 Stockerstrasse
+5 Paradeplatz
+6 Rennweg
+8 Bahnhofstrasse/Hauptbahnhof
+11 Central
+12 Haldenegg
+15 ETH/Universitätsspital
+17 Platte
+18 Voltastrasse
+20 Kirche Fluntern
+21 Toblerplatz
+22 Zürichbergstrasse
+23 Susenbergstrasse
+25 Zoo
+-1
+7 Bahnhof Stettbach
+2 Mattenhof
+3 Probstei
+4 Glattwiesen
+5 Roswiesen
+6 Schwamendingerplatz
+8 Schörlistrasse
+9 Waldgarten
+10 Tierspital
+12 Milchbuck
+13 Guggachstrasse
+14 Schaffhauserplatz
+16 Röslistrasse
+17 Ottikerstrasse
+18 Sonneggstrasse
+19 Haldenegg
+21 Central
+23 Bahnhofstrasse/Hauptbahnhof
+25 Rennweg
+27 Paradeplatz
+28 Stockerstrasse
+29 Tunnelstrasse
+31 Bahnhof Enge
+32 Museum Rietberg
+33 Brunaustrasse
+34 Billoweg
+35 Bahnhof Wollishofen
+36 Post Wollishofen
+38 Morgental
+39 Butzenstrasse
+40 Wollishofen
+2 Butzenstrasse
+3 Morgental
+4 Post Wollishofen
+5 Bahnhof Wollishofen
+6 Billoweg
+7 Brunaustrasse
+9 Museum Rietberg
+10 Bahnhof Enge
+11 Tunnelstrasse
+12 Stockerstrasse
+14 Paradeplatz
+15 Rennweg
+17 Bahnhofstrasse/Hauptbahnhof
+19 Central
+21 Haldenegg
+22 Sonneggstrasse
+23 Ottikerstrasse
+24 Röslistrasse
+26 Schaffhauserplatz
+26 Guggachstrasse
+28 Milchbuck
+30 Tierspital
+31 Waldgarten
+32 Schörlistrasse
+34 Schwamendingerplatz
+35 Roswiesen
+36 Glattwiesen
+37 Probstei
+38 Mattenhof
+39 Bahnhof Stettbach
+-1
+8 Klusplatz
+2 Hölderlinstrasse
+3 Römerhof
+4 Hottingerplatz
+6 Kunsthaus
+8 Bellevue
+10 Bürkliplatz
+11 Börsenstrasse
+13 Paradeplatz
+14 Stockerstrasse
+16 Bahnhof Selnau
+18 Stauffacher
+19 Helvetiaplatz
+20 Hohlstrasse
+22 Güterbahnhof
+23 Hardplatz
+2 Güterbahnhof
+4 Hohlstrasse
+5 Helvetiaplatz
+6 Stauffacher
+8 Bahnhof Selnau
+9 Stockerstrasse
+11 Paradeplatz
+12 Börsenstrasse
+13 Bürkliplatz
+15 Bellevue
+17 Kunsthaus
+19 Hottingerplatz
+20 Römerhof
+21 Hölderlinstrasse
+22 Klusplatz
+-1
+9 Hirzenbach
+2 Altried
+3 Luchswiesen
+4 Luegisland
+5 Heerenwiesen
+6 Schwamendingerplatz
+8 Schörlistrasse
+9 Waldgarten
+10 Tierspital
+12 Milchbuck
+13 Irchel
+14 Langmauerstrasse
+15 Letzistrasse
+16 Kinkelstrasse
+17 Seilbahn Rigiblick
+18 Winkelriedstrasse
+19 Haldenbach
+20 ETH/Universitätsspital
+22 Kantonsschule
+24 Kunsthaus
+26 Bellevue
+28 Bürkliplatz
+29 Börsenstrasse
+31 Paradeplatz
+32 Sihlstrasse
+35 Stauffacher
+37 Bahnhof Wiedikon
+38 Schmiede Wiedikon
+40 Goldbrunnenplatz
+41 Talwiesenstrasse
+41 Heuried
+44 Schaufelbergerstrasse
+45 Triemli
+2 Schaufelbergerstrasse
+3 Heuried
+4 Talwiesenstrasse
+5 Goldbrunnenplatz
+7 Schmiede Wiedikon
+9 Bahnhof Wiedikon
+11 Stauffacher
+13 Sihlstrasse
+16 Paradeplatz
+17 Börsenstrasse
+19 Bürkliplatz
+21 Bellevue
+23 Kunsthaus
+24 Kantonsschule
+26 ETH/Universitätsspital
+27 Haldenbach
+28 Winkelriedstrasse
+29 Seilbahn Rigiblick
+30 Kinkelstrasse
+31 Letzistrasse
+32 Langmauerstrasse
+33 Irchel
+35 Milchbuck
+37 Tierspital
+38 Waldgarten
+39 Schörlistrasse
+40 Schwamendingerplatz
+42 Heerenwiesen
+43 Luegisland
+44 Luchswiesen
+45 Altried
+46 Hirzenbach
+-1
+10 Seebach
+2 Höhenring
+3 Felsenrainstrasse
+4 Bahnhof Oerlikon Nord
+5 Sternen Oerlikon
+7 Salersteig
+7 Berninaplatz
+9 Hirschwiesenstrasse
+10 Milchbuck
+12 Irchel
+13 Langmauerstrasse
+14 Letzistrasse
+15 Kinkelstrasse
+16 Seilbahn Rigiblick
+17 Winkelriedstrasse
+18 Haldenbach
+20 ETH/Universitätsspital
+22 Haldenegg
+23 Central
+25 Bahnhofplatz/Hauptbahnhof
+4 Central
+5 Haldenegg
+7 ETH/Universitätsspital
+8 Haldenbach
+9 Winkelriedstrasse
+10 Seilbahn Rigiblick
+11 Kinkelstrasse
+12 Letzistrasse
+13 Langmauerstrasse
+14 Irchel
+16 Milchbuck
+17 Hirschwiesenstrasse
+18 Berninaplatz
+19 Salersteig
+21 Sternen Oerlikon
+22 Bahnhof Oerlikon
+23 Bahnhof Oerlikon Nord
+25 Felsenrainstrasse
+26 Höhenring
+27 Seebach
+-1
+11 Messe / Hallenstadion
+2 Sternen Oerlikon
+4 Bahnhof Oerlikon
+5 Regensbergbrücke
+6 Bad Allenmoos
+7 Radiostudio
+9 Bucheggplatz
+10 Laubiweg
+11 Schaffhauserplatz
+13 Kronenstrasse
+14 Beckenhof
+15 Stampfenbachplatz
+17 Bahnhofquai/Hauptbahnhof
+20 Bahnhofstrasse/Hauptbahnhof
+21 Rennweg
+23 Paradeplatz
+24 Börsenstrasse
+26 Bürkliplatz
+28 Bellevue
+29 Bahnhof Stadelhofen
+31 Kreuzplatz
+32 Signaustrasse
+33 Hegibachplatz
+34 Hedwigsteig
+36 Wetlistrasse
+37 Burgwies
+38 Balgrist
+39 Friedhof Enzenbühl
+40 Rehalp
+1 Friedhof Enzenbühl
+3 Balgrist
+4 Burgwies
+5 Wetlistrasse
+6 Hedwigsteig
+7 Hegibachplatz
+8 Signaustrasse
+9 Kreuzplatz
+11 Bahnhof Stadelhofen
+13 Bellevue
+15 Bürkliplatz
+16 Börsenstrasse
+17 Paradeplatz
+19 Rennweg
+21 Bahnhofstrasse/Hauptbahnhof
+23 Bahnhofquai/Hauptbahnhof
+24 Stampfenbachplatz
+26 Beckenhof
+28 Kronenstrasse
+29 Schaffhauserplatz
+30 Laubiweg
+32 Bucheggplatz
+33 Radiostudio
+34 Bad Allenmoos
+35 Regensbergbrücke
+37 Bahnhof Oerlikon
+39 Sternen Oerlikon
+40 Messe / Hallenstadion
+-1
+13 Frankental
+2 Winzerstrasse
+3 Wartau
+4 Zwielplatz
+5 Meierhofplatz
+7 Schwert
+8 Alte Trotte
+9 Eschergutweg
+10 Waidfussweg
+11 Wipkingerplatz
+13 Escher-Wyss-Platz
+14 Dammweg
+15 Quellenstrasse
+16 Limmatplatz
+17 Museum für Gestaltung
+18 Sihlquai
+21 Bahnhofquai/Hauptbahnhof
+23 Bahnhofstrasse/Hauptbahnhof
+24 Rennweg
+26 Paradeplatz
+28 Stockerstrasse
+29 Tunnelstrasse
+30 Bahnhof Enge/Bederstrasse
+32 Waffenplatzstrasse
+33 Utobrücke
+34 Saalsporthalle
+35 Laubegg
+36 Uetlihof
+37 Strassenverkehrsamt
+38 Albisgütli
+2 Strassenverkehrsamt
+4 Uetlihof
+4 Laubegg
+6 Saalsporthalle
+7 Utobrücke
+8 Waffenplatzstrasse
+10 Bahnhof Enge/Bederstrasse
+11 Tunnelstrasse
+12 Stockerstrasse
+14 Paradeplatz
+15 Rennweg
+17 Bahnhofstrasse/Hauptbahnhof
+20 Bahnhofquai/Hauptbahnhof
+21 Sihlquai
+23 Museum für Gestaltung
+24 Limmatplatz
+25 Quellenstrasse
+26 Dammweg
+27 Escher-Wyss-Platz
+29 Wipkingerplatz
+30 Waidfussweg
+31 Eschergutweg
+32 Alte Trotte
+33 Schwert
+34 Meierhofplatz
+36 Zwielplatz
+37 Wartau
+38 Winzerstrasse
+39 Frankental
+-1
+14 Seebach
+2 Höhenring
+3 Felsenrainstrasse
+4 Bahnhof Oerlikon Nord
+5 Sternen Oerlikon
+7 Salersteig
+7 Berninaplatz
+9 Hirschwiesenstrasse
+11 Milchbuck
+12 Guggachstrasse
+13 Schaffhauserplatz
+15 Kronenstrasse
+16 Beckenhof
+17 Stampfenbachplatz
+20 Bahnhofquai/Hauptbahnhof
+21 Bahnhofplatz/Hauptbahnhof
+22 Löwenplatz
+24 Kaserne
+27 Stauffacher
+29 Bahnhof Wiedikon
+31 Schmiede Wiedikon
+32 Goldbrunnenplatz
+33 Talwiesenstrasse
+34 Heuried
+35 Schaufelbergerstrasse
+36 Triemli
+2 Schaufelbergerstrasse
+3 Heuried
+4 Talwiesenstrasse
+5 Goldbrunnenplatz
+7 Schmiede Wiedikon
+8 Bahnhof Wiedikon
+11 Stauffacher
+13 Kaserne
+15 Löwenplatz
+16 Bahnhofplatz/Hauptbahnhof
+18 Bahnhofquai/Hauptbahnhof
+20 Stampfenbachplatz
+21 Beckenhof
+23 Kronenstrasse
+24 Schaffhauserplatz
+25 Guggachstrasse
+27 Milchbuck
+28 Hirschwiesenstrasse
+30 Berninaplatz
+30 Salersteig
+32 Sternen Oerlikon
+34 Bahnhof Oerlikon Nord
+35 Felsenrainstrasse
+36 Höhenring
+37 Seebach
+-1
+15 Bucheggplatz
+2 Laubiweg
+3 Schaffhauserplatz
+4 Röslistrasse
+5 Ottikerstrasse
+6 Sonneggstrasse
+7 Haldenegg
+9 Central
+10 Rudolf-Brun-Brücke
+11 Rathaus
+12 Helmhaus
+14 Bellevue
+16 Bahnhof Stadelhofen
+18 Kreuzplatz
+19 Englischviertelstrasse
+20 Römerhof
+21 Hölderlinstrasse
+22 Klusplatz
+2 Hölderlinstrasse
+3 Römerhof
+4 Englischviertelstrasse
+5 Kreuzplatz
+7 Bahnhof Stadelhofen
+9 Bellevue
+10 Helmhaus
+11 Rathaus
+12 Rudolf-Brun-Brücke
+14 Central
+15 Haldenegg
+16 Sonneggstrasse
+17 Ottikerstrasse
+18 Röslistrasse
+20 Schaffhauserplatz
+21 Laubiweg
+23 Bucheggplatz
+-1
+29 Seebach
+2 Höhenring
+2 Bahnhaldenstrasse
+3 Felsberg
+5 Buhnstrasse
+5 Friedhof Schwandenholz
+6 Staudenbühl
+7 Hürstholz
+8 Glaubtenstrasse
+1 Hürstholz
+3 Staudenbühl
+4 Friedhof Schwandenholz
+5 Buhnstrasse
+6 Felsberg
+6 Bahnhaldenstrasse
+8 Höhenring
+10 Seebach
+-1
+31 Hegibachplatz
+2 Signaustrasse
+2 Kreuzplatz
+3 Sprecherstrasse
+5 Kunsthaus
+7 Neumarkt
+8 Central
+10 Bahnhofplatz/Hauptbahnhof
+11 Löwenplatz
+13 Kaserne
+14 Kanonengasse
+15 Militär-/Langstrasse
+17 Hohlstrasse
+18 Güterbahnhof
+19 Hardplatz
+21 Herdernstrasse
+22 SBB-Werkstätte
+23 Letzibeck
+23 Luggwegstrasse
+25 Bahnhof Altstetten
+26 Seidelhof
+28 Farbhof
+29 Micafil
+30 Mülligen, Schlieren
+32 Gasometerbrücke
+33 Wagonsfabrik, Schlieren
+34 Schlieren Bahnhof
+2 Zentrum Schlieren
+3 Wagonsfabrik, Schlieren
+4 Gasometerbrücke
+5 Mülligen, Schlieren
+6 Micafil
+8 Farbhof
+9 Seidelhof
+10 Bahnhof Altstetten
+11 Luggwegstrasse
+12 Letzibeck
+13 SBB-Werkstätte
+15 Herdernstrasse
+16 Hardplatz
+17 Güterbahnhof
+19 Hohlstrasse
+20 Militär-/Langstrasse
+21 Kanonengasse
+22 Kaserne
+24 Löwenplatz
+26 Bahnhofplatz/Hauptbahnhof
+28 Central
+29 Neumarkt
+31 Kunsthaus
+32 Sprecherstrasse
+34 Kreuzplatz
+34 Signaustrasse
+36 Hegibachplatz
+-1
+32 Holzerhurd
+2 Hungerbergstrasse
+3 Zehntenhausplatz
+4 Einfangstrasse
+5 Glaubtenstrasse
+7 Neu-Affoltern
+8 Birchdörfli
+9 Radiostudio
+12 Bucheggplatz
+14 Lägernstrasse
+15 Rotbuchstrasse
+16 Nordstrasse
+18 Limmatplatz
+20 Röntgenstrasse
+21 Militär-/Langstrasse
+22 Helvetiaplatz
+23 Kernstrasse
+25 Kalkbreite
+26 Zwinglihaus
+28 Goldbrunnenplatz
+29 Höfliweg
+30 Friesenberg SZU
+32 Friesenbergstrasse
+33 Im Hagacker
+34 Hegianwandweg
+35 Strassenverkehrsamt
+1 Hegianwandweg
+2 Im Hagacker
+3 Friesenbergstrasse
+4 Friesenberg SZU
+5 Höfliweg
+7 Goldbrunnenplatz
+8 Zwinglihaus
+10 Kalkbreite
+11 Kernstrasse
+12 Helvetiaplatz
+14 Militär-/Langstrasse
+15 Röntgenstrasse
+17 Limmatplatz
+19 Nordstrasse
+20 Rotbuchstrasse
+21 Lägernstrasse
+23 Bucheggplatz
+25 Radiostudio
+26 Birchdörfli
+28 Neu-Affoltern
+29 Glaubtenstrasse
+31 Einfangstrasse
+32 Zehntenhausplatz
+33 Hungerbergstrasse
+34 Holzerhurd
+-1
+33 Tiefenbrunnen
+2 Wildbachstrasse
+2 Fröhlichstrasse
+3 Höschgasse
+4 Botanischer Garten
+5 Hegibachplatz
+7 Freiestrasse
+8 Klusplatz
+9 Hölderlinsteig
+10 Klosbach
+11 Hofstrasse
+13 Kirche Fluntern
+14 Hinterbergstrasse
+15 Spyriplatz
+16 Vogelsangstrasse
+17 Seilbahn Rigiblick
+18 Scheuchzerstrasse
+20 Schaffhauserplatz
+20 Rotbuchstrasse
+21 Nürenbergstrasse
+22 Bahnhof Wipkingen
+25 Rosengartenstrasse
+26 Escher-Wyss-Platz
+26 Pfingstweidstrasse
+27 Bahnhof Hardbrücke
+28 Hardplatz
+31 Albisriederplatz
+32 Friedhof Sihlfeld
+34 Bertastrasse
+35 Zwinglihaus
+36 Schmiede Wiedikon
+38 Manesseplatz
+40 Utobrücke
+41 Waffenplatzstrasse
+42 Hügelstrasse
+43 Brunau-/Mutschellenstrasse
+44 Thujastrasse
+45 Jugendherberge
+45 Besenrainstrasse
+45 Morgental
+3 Jugendherberge
+4 Thujastrasse
+6 Brunau-/Mutschellenstrasse
+8 Hügelstrasse
+10 Waffenplatzstrasse
+11 Utobrücke
+12 Manesseplatz
+15 Schmiede Wiedikon
+15 Zwinglihaus
+16 Bertastrasse
+17 Friedhof Sihlfeld
+17 Krematorium Sihlfeld
+19 Albisriederplatz
+22 Hardplatz
+23 Bahnhof Hardbrücke
+24 Pfingstweidstrasse
+24 Escher-Wyss-Platz
+25 Rosengartenstrasse
+28 Bahnhof Wipkingen
+29 Nürenbergstrasse
+30 Rotbuchstrasse
+30 Schaffhauserplatz
+32 Scheuchzerstrasse
+33 Seilbahn Rigiblick
+34 Vogelsangstrasse
+35 Spyriplatz
+36 Hinterbergstrasse
+37 Kirche Fluntern
+39 Hofstrasse
+40 Klosbach
+41 Hölderlinsteig
+42 Klusplatz
+43 Freiestrasse
+45 Hegibachplatz
+46 Botanischer Garten
+47 Höschgasse
+48 Fröhlichstrasse
+48 Wildbachstrasse
+50 Tiefenbrunnen
+-1
+34 Kienastwies
+2 Zweiackerstrasse
+3 Loorenstrasse
+4 Berghaldenstrasse
+5 Carl-Spitteler-Strasse
+5 Waserstrasse
+6 Drusbergstrasse
+7 Schlyfi
+8 Kapfstrasse
+9 Klusplatz
+2 Kapfstrasse
+2 Schlyfi
+4 Drusbergstrasse
+5 Waserstrasse
+5 Carl-Spitteler-Strasse
+6 Berghaldenstrasse
+7 Loorenstrasse
+8 Zweiackerstrasse
+9 Kienastenwies
+-1
+35 Lindenplatz
+5 Farbhof
+6 Neeserweg
+7 Feusisbergli
+8 Am Suteracher
+10 Loogarten
+11 Dunkelhölzli
+11 Salzweg
+12 Rautihalde
+12 Schulhaus Buchlern
+13 Friedhof Eichbühl
+1 Schulhaus Buchlern
+2 Rautihalde
+2 Salzweg
+3 Dunkelhölzli
+4 Loogarten
+5 Am Suteracher
+6 Feusisbergli
+7 Neeserweg
+8 Farbhof
+11 Lindenplatz
+-1
+37 Waidhof
+2 Schwandenholz
+4 Unter-Affoltern
+4 Bärenbohlstrasse
+8 Bahnhof Affoltern
+10 Zehntenhausplatz
+11 Schauenberg
+12 Lerchenrain
+13 Lerchenhalde
+14 ETH Hönggerberg
+2 Lerchenhalde
+2 Lerchenrain
+3 Schauenberg
+5 Zehntenhausplatz
+10 Bahnhof Affoltern
+11 Bärenbohlstrasse
+12 Unter-Affoltern
+14 Schwandenholz
+15 Waidhof
+-1
+38 Schützenhaus Höngg
+2 Friedhof Hönggerberg
+3 Michelstrasse
+4 Wieslergasse
+5 Kappenbühlweg
+6 Meierhofplatz
+8 Schwert
+9 Am Börtli
+10 Appenzellerstrasse
+11 Waidbadstrasse
+11 Krankenheim Käferberg
+12 Waidspital
+1 Krankenheim Käferberg
+2 Waidbadstrasse
+2 Appenzellerstrasse
+3 Am Börtli
+4 Schwert
+6 Meierhofplatz
+7 Kappenbühlweg
+7 Wieslergasse
+8 Michelstrasse
+9 Friedhof Hönggerberg
+10 Schützenhaus Höngg
+-1
+39 Irchel
+2 Strickhof
+3 Langensteinenstrasse
+4 Schäppiweg
+5 Germaniastrasse
+6 Rigiblick
+7 Spyristeig
+8 Krönleinstrasse
+9 Heubeeriweg
+10 Flobotstrasse
+11 Zoo
+11 Klosterweg
+13 Im Klösterli
+1 Klosterweg
+2 Zoo
+3 Flobotstrasse
+4 Heubeeriweg
+4 Krönleinstrasse
+5 Spyristeig
+6 Rigiblick
+7 Germaniastrasse
+9 Schäppiweg
+10 Langensteinenstrasse
+22 Letzistrasse
+25 Irchel
+-1
+40 Rebhüsli
+2 Althoos
+4 Maienweg
+5 Krematorium Nordheim
+6 Nordheimstrasse
+7 Berufswahlschule
+9 Bucheggplatz
+3 Nordheimstrasse
+4 Krematorium Nordheim
+5 Maienweg
+6 Althoos
+8 Wannenholz
+8 Rebhüsli
+-1
+45 Bahnhof Oerlikon
+2 Sternen Oerlikon
+3 Messe / Hallenstadion
+4 Hagenholzstrasse
+5 Riedbach
+6 Kehrichtverbrennung
+6 Zivilschutzzentrum
+7 Auwiesen
+8 Auzelg
+2 Auwiesen
+3 Zivilschutzzentrum
+3 Kehrichtverbrennung
+4 Riedbach
+4 Hagenholzstrasse
+6 Messe / Hallenstadion
+7 Sternen Oerlikon
+8 Bahnhof Oerlikon
+-1
+46 Rütihof
+1 Geeringstrasse
+3 Heizenholz
+3 Giblenstrasse
+4 Segantinistrasse
+5 Singlistrasse
+6 Wieslergasse
+7 Meierhofplatz
+8 Schwert
+9 Kempfhofsteig
+10 Rebbergsteig
+12 Lehenstrasse
+13 Rosengartenstrasse
+14 Bahnhof Wipkingen
+15 Lettenstrasse
+16 Okenstrasse
+19 Stampfenbachplatz
+21 Central
+22 Bahnhofquai/Hauptbahnhof
+2 Stampfenbachplatz
+4 Nordstrasse
+5 Lettenstrasse
+6 Bahnhof Wipkingen
+8 Rosengartenstrasse
+9 Lehenstrasse
+10 Rebbergsteig
+11 Kempfhofsteig
+12 Schwert
+13 Meierhofplatz
+15 Wieslergasse
+16 Singlistrasse
+16 Segantinistrasse
+17 Segantinistrasse Nord
+18 Giblenstrasse
+18 Heizenholz
+20 Geeringstrasse
+20 Rütihof
+-1
+54 Bahnhof Altstetten Nord
+3 Aargauerstrasse
+4 Sportweg
+6 Duttweilerbrücke
+7 Technopark
+8 Bahnhof Hardbrücke
+10 Escher-Wyss-Platz
+3 Bahnhof Hardbrücke
+4 Technopark
+6 Duttweilerbrücke
+7 Sportweg
+8 Aargauerstrasse
+10 Bahnhof Altstetten Nord
+-1
+62 Schwamendingerplatz
+2 Friedrichstrasse
+3 Frohburg
+4 Waldgarten
+5 Friedackerstrasse
+5 Dorflinde
+7 Sternen Oerlikon
+9 Bahnhof Oerlikon
+10 Regensbergbrücke
+12 Oberwiesenstrasse
+13 Neu-Affoltern
+14 Glaubtenstrasse
+16 Einfangstrasse
+17 Zehntenhausplatz
+18 Bahnhof Affoltern
+19 Fronwald
+19 Unter-Affoltern
+2 Fronwald
+3 Bahnhof Affoltern
+4 Zehntenhausplatz
+5 Einfangstrasse
+7 Glaubtenstrasse
+8 Neu-Affoltern
+9 Oberwiesenstrasse
+10 Regensbergbrücke
+11 Bahnhof Oerlikon
+14 Sternen Oerlikon
+15 Dorflinde
+16 Friedackerstrasse
+17 Waldgarten
+18 Frohburg
+19 Friedrichstrasse
+19 Schwamendingerplatz
+-1
+63 Bahnhof Oerlikon
+2 Sternen Oerlikon
+3 Messe / Hallenstadion
+3 Hallenbad Oerlikon
+4 Riedgraben
+5 Saatlenstrasse
+6 Dreispitz (Schwamendingen)
+7 Aubrücke
+8 Herzogenmühlestrasse
+9 Schwamendingerplatz
+2 Tulpenstrasse
+2 Herbstweg
+3 Saatlenstrasse
+4 Riedgraben
+4 Hallenbad Oerlikon
+5 Messe / Hallenstadion
+7 Sternen Oerlikon
+7 Bahnhof Oerlikon
+-1
+64 Maillartstrasse
+2 Neunbrunnen
+2 Bollingerweg
+4 Max-Bill-Platz
+5 Bahnhof Oerlikon Nord
+2 Max-Bill-Platz
+3 Bollingerweg
+4 Neunbrunnen
+5 Maillartstrasse
+-1
+66 Sihlstrasse
+4 Brandschenkestrasse
+5 Parkring
+6 Waffenplatzstrasse
+8 Hügelstrasse
+9 Brunau-/Mutschellenstrasse
+10 Thujastrasse
+10 Jugendherberge
+12 Morgental
+13 Kalchbühlstrasse
+14 Widmerstrasse
+16 Neubühl
+2 Widmerstrasse
+3 Kalchbühlstrasse
+4 Morgental
+6 Jugendherberge
+6 Thujastrasse
+7 Brunau-/Mutschellenstrasse
+8 Hügelstrasse
+10 Waffenplatzstrasse
+11 Parkring
+13 Brandschenkestrasse
+15 Sihlstrasse
+-1
+67 Dunkelhölzli
+1 Salzweg
+2 Rautihalde
+2 Schulhaus Buchlern
+4 Rautistrasse
+4 Untermoosstrasse
+6 Albisriederdörfli
+7 Fellenbergstrasse
+8 Sackzelg
+9 Langgrütstrasse
+10 Im Gut
+10 Gutstrasse
+12 Goldbrunnenplatz
+15 Schmiede Wiedikon
+2 Goldbrunnenplatz
+3 Gutstrasse
+4 Im Gut
+5 Langgrütstrasse
+6 Sackzelg
+7 Fellenbergstrasse
+8 Albisriederdörfli
+9 Untermoosstrasse
+11 Rautistrasse
+12 Schulhaus Buchlern
+12 Rautihalde
+13 Salzweg
+13 Dunkelhölzli
+-1
+69 Milchbuck
+3 Bucheggplatz
+4 Weihersteig
+6 Waidspital
+6 Krankenheim Käferberg
+7 Waidbadstrasse
+8 Im Wingert
+9 Hönggerberg
+11 ETH Hönggerberg
+2 Hönggerberg
+2 Im Wingert
+3 Waidbadstrasse
+4 Krankenheim Käferberg
+5 Waidspital
+6 Weihersteig
+7 Bucheggplatz
+10 Milchbuck
+-1
+70 Morgental
+2 Butzenstrasse
+3 Verenastrasse
+4 Manegg
+5 Frymannstrasse
+6 Bahnhof Leimbach
+7 Marbachweg
+8 Im Hüsli
+9 Sihlweidstrasse
+9 Mittelleimbach
+2 Sihlweidstrasse
+2 Im Hüsli
+3 Marbachweg
+4 Bahnhof Leimbach
+5 Frymannstrasse
+6 Manegg
+7 Verenastrasse
+8 Butzenstrasse
+10 Morgental
+-1
+71 Escher-Wyss-Platz
+3 Wipkingerplatz
+4 Breitensteinstrasse
+5 Hardturm-Steg
+5 Grossmannstrasse
+6 Fabrik am Wasser
+8 Tobeleggweg
+9 Weinberg Höngg
+11 Tüffenwies
+2 Weinberg Höngg
+4 Tobeleggweg
+5 Fabrik am Wasser
+6 Grossmannstrasse
+7 Hardturm-Steg
+8 Breitensteinstrasse
+9 Wipkingerplatz
+11 Escher-Wyss-Platz
+-1
+72 Milchbuck
+3 Bucheggplatz
+6 Rosengartenstrasse
+7 Escher-Wyss-Platz
+8 Pfingstweidstrasse
+9 Bahnhof Hardbrücke
+10 Hardplatz
+12 Albisriederplatz
+13 Krematorium Sihlfeld
+14 Hubertus
+15 Sackzelg
+16 Schulhaus Altweg
+17 In der Ey
+18 Triemli
+1 In der Ey
+2 Schulhaus Altweg
+3 Sackzelg
+4 Hubertus
+6 Krematorium Sihlfeld
+7 Albisriederplatz
+10 Hardplatz
+11 Bahnhof Hardbrücke
+11 Pfingstweidstrasse
+13 Escher-Wyss-Platz
+14 Rosengartenstrasse
+17 Bucheggplatz
+20 Milchbuck
+-1
+73 Zielweg
+2 Friedhof Uetliberg
+4 Friesenberghalde
+6 Friesenbergstrasse
+7 Schweighof SZU
+2 Friesenbergstrasse
+4 Friesenberghalde
+6 Friedhof Uetliberg
+7 Zielweg
+-1
+75 Schönauring
+2 Buhnstrasse
+2 Hertensteinstrasse
+4 Höhenring
+5 Seebach
+7 Ausserdorfstrasse
+8 Birch-/Glattalstrasse
+9 Leimgrübelstrasse
+9 Käshaldenstrasse
+2 Leimgrübelstrasse
+3 Birch-/Glattalstrasse
+3 Ausserdorfstrasse
+5 Seebach
+6 Höhenring
+7 Hertensteinstrasse
+8 Buhnstrasse
+9 Schönauring
+-1
+76 Stauffacher/Zweierstrasse
+2 Bahnhof Wiedikon
+3 Seebahnstrasse
+5 Schmiede Wiedikon
+7 Manesseplatz
+8 Binz SZU
+9 Räffelstrasse
+10 Binz
+10 Binz Center
+2 Räffelstrasse
+3 Binz SZU
+4 Manesseplatz
+6 Schmiede Wiedikon
+8 Bahnhof Wiedikon
+9 Stauffacher/Zweierstrasse
+-1
+77 Hegibachplatz
+2 Botanischer Garten
+3 Altenhofstrasse
+5 Wonnebergstrasse
+5 Flühgasse
+6 EPI-Klinik
+6 Im Walder
+2 Bleulerstrasse
+2 EPI-Klinik
+3 Flühgasse
+3 Wonnebergstrasse
+5 Altenhofstrasse
+6 Botanischer Garten
+8 Hegibachplatz
+-1
+78 Farbhof
+1 Neeserweg
+3 Feusisbergli
+4 Am Suteracher
+5 Loogarten
+6 Dunkelhölzli
+7 Salzweg
+8 Rautihalde
+8 Schulhaus Buchlern Oefeli
+9 Friedhof Eichbühl
+9 Schulhaus Buchlern Oefeli
+9 Schulhaus Buchlern
+10 Rautistrasse
+12 Lindenplatz
+13 Bristenstrasse
+14 Bahnhof Altstetten
+17 Grünaustrasse
+18 Bändliweg
+2 Grünaustrasse
+5 Bahnhof Altstetten
+6 Bristenstrasse
+7 Lindenplatz
+8 Rautistrasse
+9 Schulhaus Buchlern
+9 Schulhaus Buchlern Oefeli
+11 Friedhof Eichbühl
+10 Schulhaus Buchlern Oefeli
+10 Rautihalde
+11 Salzweg
+11 Dunkelhölzli
+13 Loogarten
+14 Am Suteracher
+15 Feusisbergli
+17 Neeserweg
+18 Farbhof
+-1
+79 Auzelg
+2 Auwiesen
+3 Zivilschutzzentrum
+4 Aubrücke
+6 Herzogenmühlestrasse
+7 Schwamendingerplatz
+8 Friedrichstrasse
+8 Bocklerstrasse
+5 Schwamendingerplatz
+6 Herzogenmühlestrasse
+7 Aubrücke
+9 Zivilschutzzentrum
+10 Auwiesen
+11 Auzelg
+-1
+80 Bahnhof Oerlikon Nord
+1 Max-Bill-Platz
+2 Birchstrasse
+3 Chaletweg
+4 Mötteliweg
+5 Glaubtenstrasse
+7 Schumacherweg
+8 Lerchenhalde
+10 ETH Hönggerberg
+11 Hönggerberg
+12 Meierhofplatz
+13 Zwielplatz
+14 Wartau
+16 Winzerstrasse
+16 Hohenklingensteig
+17 Winzerhalde
+18 Tüffenwies
+21 Bahnhof Altstetten
+22 Bristenstrasse
+23 Lindenplatz (Altstetten
+25 Rautistrasse
+26 Untermoosstrasse
+27 Albisriederdörfli
+27 Albisrieden
+28 Goldackerweg
+29 In der Ey
+31 Triemli
+33 Triemlispital
+2 Triemli
+3 In der Ey
+4 Goldackerweg
+5 Albisrieden
+6 Albisriederdörfli
+7 Untermoosstrasse
+8 Rautistrasse
+10 Lindenplatz (Altstetten
+11 Bristenstrasse
+12 Bahnhof Altstetten
+14 Tüffenwies
+15 Winzerhalde
+16 Hohenklingensteig
+17 Winzerstrasse
+18 Wartau
+19 Zwielplatz
+20 Meierhofplatz
+22 Hönggerberg
+23 ETH Hönggerberg
+24 Lerchenhalde
+25 Schumacherweg
+27 Glaubtenstrasse
+28 Mötteliweg
+29 Chaletweg
+30 Birchstrasse
+31 Max-Bill-Platz
+32 Bahnhof Oerlikon Nord
+-1
+89 Heizenholz
+2 Geeringstrasse
+3 Riedhofstrasse (Höngg
+5 Frankental
+6 Winzerstrasse
+7 Hohenklingensteig
+8 Winzerhalde
+8 Tüffenwies
+12 Bahnhof Altstetten
+13 Bristenstrasse
+14 Baslerstrasse
+15 Letzipark
+17 Kappeli
+17 Flurstrasse
+18 Albisrank
+20 Hubertus
+21 Im Gut
+22 Schaufelbergerstrasse
+24 Schweighof SZU
+25 Friesenbergstrasse
+26 Im Hagacker
+27 Hegianwandweg
+29 Strassenverkehrsamt
+30 Uetlihof
+30 Laubegg
+31 Brunaupark
+2 Laubegg
+3 Uetlihof
+5 Strassenverkehrsamt
+6 Hegianwandweg
+7 Im Hagacker
+8 Friesenbergstrasse
+9 Schweighof SZU
+10 Schaufelbergerstrasse
+12 Im Gut
+13 Hubertus
+15 Albisrank
+16 Flurstrasse
+17 Kappeli
+18 Letzipark
+20 Baslerstrasse
+21 Bristenstrasse
+23 Bahnhof Altstetten
+25 Tüffenwies
+26 Winzerhalde
+27 Hohenklingensteig
+28 Winzerstrasse
+30 Frankental
+32 Riedhofstrasse (Höngg
+34 Geeringstrasse
+36 Heizenholz
+-1
+91 Zollikerberg Station
+2 Spital Neumünster
+3 Spital Zollikerberg
+4 Trichtenhausermühle
+5 Trichtenhausenfussweg
+6 Wiesliacher
+7 Segeten
+8 Paulus-Akademie
+9 Carl-Spitteler-Strasse
+10 Witikon Zentrum
+12 Buchholz
+2 Witikon Zentrum
+3 Carl-Spitteler-Strasse
+4 Paulus-Akademie
+5 Segeten
+6 Wiesliacher
+7 Trichtenhausenfussweg
+8 Trichtenhausermühle
+9 Spital Zollikerberg
+10 Spital Neumünster
+13 Zollikerberg Station
+-1
+94 Bahnhof Oerlikon
+2 Sternen Oerlikon
+3 Messe / Hallenstadion
+3 Hallenbad Oerlikon
+4 Riedgraben
+5 Saatlenstrasse
+6 Dreispitz (Schwamendingen
+7 Aubrücke
+8 Schürgistrasse
+9 Luchswiesen
+11 Altried
+11 Zentrum Glatt
+3 Altried
+4 Luchswiesen
+5 Schürgistrasse
+6 Aubrücke
+7 Dreispitz (Schwamendingen
+8 Saatlenstrasse
+8 Riedgraben
+9 Hallenbad Oerlikon
+10 Messe / Hallenstadion
+11 Sternen Oerlikon
+12 Bahnhof Oerlikon
+-1
+95 Bahnhof Altstetten
+1 Bristenstrasse
+2 Baslerstrasse
+4 Letzipark
+5 Kappeli
+6 Flurstrasse
+7 Albisrank
+8 Siemens
+9 Freilagerstrasse
+2 Flurstrasse
+3 Kappeli
+4 Letzipark
+6 Luggwegstrasse
+7 Bahnhof Altstetten
+-1

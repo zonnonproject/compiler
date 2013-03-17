@@ -1,0 +1,11 @@
+(**
+ * 09.Predefined procedures.
+ * The ODD procedure.
+ *
+ * Positive test: ODD for two integer numbers.
+ *)
+module Main;
+begin
+	if odd(5) & ~odd(4)
+	then halt(1) else halt(0) end;
+end Main.

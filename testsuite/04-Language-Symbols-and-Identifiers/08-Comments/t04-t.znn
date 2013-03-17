@@ -1,0 +1,33 @@
+module Main;
+
+      procedure {public} Initialize
+         (model            : integer;      (* mathematical model to be fit *)
+          gradientOfModel  : integer;   (* gradient of model wrt parameters  *)
+          experimentalData : integer;        (* array of observed responses *)
+          controlVariables : integer;        (* array of pseudo-control variables *)
+          times            : integer);       (* array of primary control variable *)
+
+begin
+end Initialize;
+
+      procedure {public} Optimize (tolerance : integer;
+          var parameters : integer;
+          var fullSteps, reducedSteps, failedSteps : integer;
+          var loglikelihoods : integer; var predictions : integer);
+begin
+end Optimize;
+
+      procedure {public} Optimize2 
+         (tolerance          : integer (* tolerance needed for convergence   *);
+          var parameters     : integer;  (* the model constants to be obtained *)
+          var fullSteps      : integer;  (* full Newton-Raphson steps taken    *)
+          var reducedSteps   : integer;  (* Marquardt reduced steps taken      *)
+          var failedSteps    : integer;  (* number of steps requiring restart  *)
+          var loglikelihoods : integer;      (* array of loglikelihoods to optimum *)
+          var predictions    : integer);     (* array of best model fit to data    *)
+begin
+end Optimize2;
+
+begin
+  halt(1)
+end Main.

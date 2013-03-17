@@ -1,0 +1,12 @@
+(**
+ * 09.Predefined procedures.
+ * The len procedure.
+ *
+ * Positive test: 1-dimensional static array length
+ *)
+module Main;
+	var a : array 5 of char;
+begin
+	if len(a) = 5
+	then halt(1) else halt(0) end;
+end Main.

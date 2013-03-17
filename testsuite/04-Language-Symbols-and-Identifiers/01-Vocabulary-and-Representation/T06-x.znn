@@ -1,0 +1,10 @@
+(** 
+  * Russian symbol A in the module A name.
+  *)
+module ?;
+end ?.
+
+module Main;
+begin
+	halt(0);
+end Main.

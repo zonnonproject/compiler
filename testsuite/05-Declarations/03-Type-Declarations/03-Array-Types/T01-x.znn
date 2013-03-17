@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: not declared type name for array element.
+ *)
+module A;
+	type T = array 1 of B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

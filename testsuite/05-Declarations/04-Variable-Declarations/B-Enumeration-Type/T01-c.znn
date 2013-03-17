@@ -1,0 +1,23 @@
+(**
+ * 5. Declarations.
+ * 6.4. Variable declarations.
+ * Enumeration type of variable
+ *
+ * Positive test: variable X has enumeration type B.C.D.
+ * The enumeration type B.C.D is used before it is declared.
+ *)
+object A;
+	import B.C as C;
+
+	var	X : C.D;
+end A.
+
+module B.C;
+	type { public }
+		D = ( one, two, three );
+end C.
+
+module Main;
+begin
+	halt(1);
+end Main.

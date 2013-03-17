@@ -1,0 +1,78 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Establishes object interfaces for types used in zonnon data structures     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Definition  : Object      - interface for a persistent object              *)
+(*   methods   : Initialize  - abstract: create dynamic memory & zero fields  *)
+(*             : Nullify     - abstract: set all dynamic memory links to nil  *)
+(*             : Load        - abstract: read a instance from a binary file   *)
+(*             : Store       - abstract: write itself to a binary file        *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Definition  : Datum       - interface for a data container                 *)
+(*   methods   : Clone       - abstract: return a clone of itself             *)
+(*             : Copy        - abstract: return a deep copy of itself         *)
+(*                           - shallow copies can be gotten through ':='      *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Definition  : Structure   - interface for a repository of data containers  *)
+(*   methods   : Configure   - abstract: supply instance of data to be held   *)
+(*             : Contains    - abstract: data type of the data held within    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The programmer needs to know a priori the data type held within a data     *)
+(* structure that has been stored to file before it can be read back in.      *)
+(* To read data in from a binary file, program the following steps:           *)
+(*    i)   create a new instance of the data structure                        *)
+(*            <name of new data structure> := new Data.<data structure>;      *)
+(*    ii)  specify what type of data are to be read in from file by calling   *)
+(*            <name of new data structure>.Configure(<clone of stored data>); *)
+(*    iii) read data in from the file                                         *)
+(*            <name of new data structure>.Load(<reader to the binary file>); *)
+(* A data structure can only hold one type of data which can be determined by *)
+(*    <name of System.Type> := <name of data structure>.Contains();           *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+
+definition {public, ref} BelData.Object;
+   import
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter;
+   procedure {public} Initialize;
+   procedure {public} Nullify;
+   procedure {public} Load  (br : BinaryReader);
+   procedure {public} Store (bw : BinaryWriter);
+end Object.
+
+
+definition {public, ref} BelData.Datum refines BelData.Object;
+   procedure {public} Clone () : object{Object};
+   procedure {public} Copy  () : object{Object};
+end Datum.
+
+
+definition {public, ref} BelData.Structure refines BelData.Datum;
+   import
+      System.Type as Type;
+   procedure {public} Configure (clone : object{Datum});
+   procedure {public} Contains  () : Type;
+end Structure.

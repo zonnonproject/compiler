@@ -1,0 +1,30 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Positive test: 
+ *)
+module Main;
+	import B.A, B.C, B.D;
+
+	procedure P(a : object{B.A} );
+	begin end P;
+
+	var 
+		i : integer;
+		d : B.D;
+begin
+	P(d);
+	halt(1);
+end Main.
+
+object {public} B.D implements B.A, B.C; 
+end D.
+
+definition {public} B.A refines B.C;
+end A.
+
+definition {public} B.C;
+end C.
+

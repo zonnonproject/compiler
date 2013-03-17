@@ -1,0 +1,21 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Negative test: wrong kind of case expression.
+ *)
+module Main;
+	type E = ( one, two );
+
+	var e : E;
+		j : integer;
+begin
+	j := 2;
+
+	case j = 2 of
+		  E.one : j := 3;
+		| E.two : j := 4;
+	end;
+
+	halt(0);
+end Main.

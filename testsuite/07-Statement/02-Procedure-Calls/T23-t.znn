@@ -1,0 +1,8 @@
+module Main;
+import System.Math as Math;
+var a: real;
+
+begin
+	a:=Math.Sin(2.3);
+	halt(1);
+end Main.

@@ -1,0 +1,16 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.4. Set Operators.
+ *
+ * Positive test: set equivalence.
+ *)
+module Main;
+	var s1, s2 : set;
+begin
+	s1 := { 1, 2 };
+	s2 := { 1, 2 };
+
+	if s1 = s2
+	then halt(1) else halt(0) end;
+end Main.

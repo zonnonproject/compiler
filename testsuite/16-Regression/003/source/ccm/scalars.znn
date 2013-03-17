@@ -1,0 +1,3624 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Ccm was written to model in-plane biaxial experiments run in my laboratory *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Defines a physical scalar field, i.e., a real number with SI units         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : Scalar      - a real number with units attached to it        *)
+(*    methods  : Initialize  - assigns a dimensionless zero                   *)
+(*             : Nullify     - null out the scalar                            *)
+(*             : Clone       - returns an initialized scalar                  *)
+(*             : Copy        - returns an equivalent-valued scalar field      *)
+(*             : Load        - reads a scalar from a binary file              *)
+(*             : Store       - writes a scalar to a binary file               *)
+(*             : Parse       - converts a string into a scalar                *)
+(*             : Typeset     - converts the scalar into a string              *)
+(*             : Get         - returns the real part of a scalar field        *)
+(*             : Set         - assigns the real part to a scalar field        *)
+(*             : GetUnits    - returns the units part of a scalar field       *)
+(*             : SetUnits    - assigns the units part of a scalar field       *)
+(*             : IsFinite    - boolean test to see if it is finite valued     *)
+(*             : IsInfinite  - boolean test to see if it is +/- infinity      *)
+(*             : IsPositiveInfinity - boolean test to see if it is infinity   *)
+(*             : IsNegativeInfinity - boolean test to see if it is -infinity  *)
+(*             : IsNaN       - boolean test to see if it is not-a-number      *)
+(*             : IsDimensionless - boolean check for dimensionality           *)
+(*             : Equals             - boolean test for = between two scalars  *)
+(*             : NotEqual           - boolean test for # between two scalars  *)
+(*    (# a 'false' is returned for inequalities where units are not equal #)  *)
+(*             : LessThan           - boolean test for < between two scalars  *)
+(*             : LessThanOrEqual    - boolean test for <= between two scalars *)
+(*             : GreaterThan        - boolean test for > between two scalars  *)
+(*             : GreaterThanOrEqual - boolean test for >= between two scalars *)
+(*    (# arithmetic #)                                                        *)
+(*             : Negative    - returns the negative of the real part          *)
+(*             : Reciprocal  - returns 1 divided by the scalar field          *)
+(*             : Add         - returns the sum of two scalars                 *)
+(*             : Subtract    - returns the difference between two scalars     *)
+(*             : Multiply    - returns the product of two scalars             *)
+(*             : Divide      - returns the ratio of two scalars               *)
+(*             : Power       - raises a dimensionless scalar to a real power  *)
+(*             : Magnitude   - returns the absolute value of a scalar         *)
+(* Operators   : :=                         - assignment operator             *)
+(*             : -                          - uniary  operator                *)
+(*             : = | # | < | <= | > | >=    - logical operators               *)
+(*             : + | - | * | /              - binary arithmetic operators     *)
+(*             : **                         - exponentiation operator         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCcm.Scalars;
+
+   import
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      System.Byte   as Card8,   (* core type of  cardinal{8}  *)
+      System.UInt16 as Card16,  (* core type of  cardinal{16} *)
+      System.UInt32 as Card32,  (* core type of  cardinal{32} *)
+      System.UInt64 as Card64,  (* core type of  cardinal{64} *)
+      System.SByte  as Int8,    (* core type of  integer{8}   *)
+      System.Int16  as Int16,   (* core type of  integer{16}  *)
+      System.Int32  as Int32,   (* core type of  integer{32}  *)
+      System.Int64  as Int64,   (* core type of  integer{64}  *)
+      System.Single as Real32,  (* core type of  real{32}     *)
+      System.Double as Real64,  (* core type of  real{64}     *)
+      BelCore.Log     as L,
+      BelCore.Math    as M,
+      BelCore.Numbers as N,
+      BelCcm.Units    as U;
+
+   type {private}
+      CharArray = array * of char;
+
+   var {private}
+      one : N.Number;
+
+   type {public, value} Scalar = object
+
+      var {private}
+         u : U.Si;
+         x : N.Number;
+
+      procedure {public} Initialize;
+      begin {locked}
+         u.Initialize;
+         x.Initialize
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin {locked}
+         u.Nullify;
+         x.Nullify
+      end Nullify;
+
+      procedure {public} Clone () : Scalar;
+      var
+         s : Scalar;
+      begin
+         s.u := u.Clone();
+         s.x := x.Clone();
+         return s
+      end Clone;
+
+      procedure {public} Copy () : Scalar;
+      var
+         s : Scalar;
+      begin
+         s.u := u.Copy();
+         s.x := x.Copy();
+         return s
+      end Copy;
+
+      procedure {public} Load (br : BinaryReader);
+      begin {locked}
+         u.Load(br);
+         x.Load(br)
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      begin {locked}
+         u.Store(bw);
+         x.Store(bw)
+      end Store;
+
+      (* 'NaN', 'Infinity' and '-Infinity' are allowed for the number part *)
+      procedure {public} Parse (s : string);
+      var
+         a : CharArray;
+         b, c : array 36 of char;
+         i, j, k : integer;
+         y, z : string;
+      begin {locked}
+         a := new CharArray(len(s)+1);
+         copy(s, a);
+         (* pass over any leading white space or tabs *)
+         k := 0;
+         while ((a[k] = " ") or (a[k] = 09X)) do
+            inc(k)
+         end;
+         (* read a contiguous string of characters - the number *)
+         i := 0;
+         repeat
+            b[i] := a[k];
+            inc(i);
+            inc(k);
+         until (a[k] = " ");
+         (* pass over any intermediate white space *)
+         while a[k] = " " do
+            inc(k)
+         end;
+         (* read another contiguous string of characters - the SI units *)
+         j := 0;
+         repeat
+            c[j] := a[k];
+            inc(j);
+            inc(k)
+         until (a[k] = " ") or (k = len(s));
+         (* add white space to be caught by their respective parsers *)
+         b[i] := " ";
+         c[j] := " ";
+         (* parse each component *)
+         copy(b, y);
+         x.Parse(y);
+         copy(c, z);
+         u.Parse(z)
+      end Parse;
+
+      procedure {public} Typeset () : string;
+      var
+         s : string;
+      begin {locked}
+         s := x.Typeset() + u.Typeset();
+         return s
+      end Typeset;
+
+      procedure {public} Get () : N.Number;
+      begin
+         return x
+      end Get;
+
+      procedure {public} GetUnits () : U.Si;
+      begin
+         return u
+      end GetUnits;
+
+      procedure {public} Set (r : N.Number);
+      begin {locked}
+         x := r
+      end Set;
+
+      procedure {public} SetUnits (si : U.Si);
+      begin {locked}
+         u := si
+      end SetUnits;
+
+      procedure {public} IsFinite () : boolean;
+      begin
+         return x.IsFinite()
+      end IsFinite;
+
+      procedure {public} IsInfinite () : boolean;
+      begin
+         return x.IsInfinite()
+      end IsInfinite;
+
+      procedure {public} IsNegativeInfinity () : boolean;
+      begin
+         return x.IsNegativeInfinity()
+      end IsNegativeInfinity;
+
+      procedure {public} IsPositiveInfinity () : boolean;
+      begin
+         return x.IsPositiveInfinity()
+      end IsPositiveInfinity;
+
+      procedure {public} IsNaN () : boolean;
+      begin
+         return x.IsNaN()
+      end IsNaN;
+
+      procedure {public} IsDimensionless () : boolean;
+      begin
+         return u.IsDimensionless()
+      end IsDimensionless;
+
+      procedure {public} Equals (s : Scalar) : boolean;
+      begin
+         return (u.Equals(s.u) & x.Equals(s.x))
+      end Equals;
+
+      procedure {public} NotEqual (s : Scalar) : boolean;
+      begin
+         return (~u.Equals(s.u) or x.NotEqual(s.x))
+      end NotEqual;
+
+      procedure {public} GreaterThan (s : Scalar) : boolean;
+      begin
+         if u.Equals(s.u) then
+            return x.GreaterThan(s.x)
+         else
+            L.WarningMessage(101,424, "BelBelCcm.Scalars.Scalar.GreaterThan");
+            L.Message("The left argument was  " + self.Typeset());
+            L.Message("The right argument was " + s.Typeset());
+            return false
+         end
+      end GreaterThan;
+
+      procedure {public} GreaterThanOrEqual (s : Scalar) : boolean;
+      begin
+         if u.Equals(s.u) then
+            return x.GreaterThanOrEqual(s.x)
+         else
+            L.WarningMessage(101,424,
+               "BelBelCcm.Scalars.Scalar.GreaterThanOrEqual");
+            L.Message("The left argument was  " + self.Typeset());
+            L.Message("The right argument was " + s.Typeset());
+            return false
+         end
+      end GreaterThanOrEqual;
+
+      procedure {public} LessThan (s : Scalar) : boolean;
+      begin
+         if u.Equals(s.u) then
+            return x.LessThan(s.x)
+         else
+            L.WarningMessage(101,424, "BelBelCcm.Scalars.Scalar.LessThan");
+            L.Message("The left argument was  " + self.Typeset());
+            L.Message("The right argument was " + s.Typeset());
+            return false
+         end
+      end LessThan;
+
+      procedure {public} LessThanOrEqual (s : Scalar) : boolean;
+      begin
+         if u.Equals(s.u) then
+            return x.LessThanOrEqual(s.x)
+         else
+            L.WarningMessage(101,424,
+               "BelBelCcm.Scalars.Scalar.LessThanOrEqual");
+            L.Message("The left argument was  " + self.Typeset());
+            L.Message("The right argument was " + s.Typeset());
+            return false
+         end
+      end LessThanOrEqual;
+
+      procedure {public} Negative () : Scalar;
+      var
+         y : Scalar;
+      begin
+         y.u := u;
+         y.x := x.Negative();
+         return y
+      end Negative;
+
+      procedure {public} Reciprocal () : Scalar;
+      var
+         si : U.Si;
+         y : Scalar;
+      begin
+         si.Initialize;
+         y.u := si.Subtract(u);
+         y.x := one.Divide(x);
+         return y
+      end Reciprocal;
+
+      procedure {public} Add (s : Scalar) : Scalar;
+      var
+         y : Scalar;
+      begin
+         if u.Equals(s.u) then
+            y.u := u;
+            y.x := x.Add(s.x)
+         else
+            L.ErrorMessage(101,422, "BelBelCcm.Scalars.Scalar.Add");
+            L.Message("The left argument was  " + self.Typeset());
+            L.Message("The right argument was " + s.Typeset());
+            y.u.Initialize;
+            y.x := N.NaN
+         end;
+         return y
+      end Add;
+
+      procedure {public} Subtract (s : Scalar) : Scalar;
+      var
+         y : Scalar;
+      begin
+         if u.Equals(s.u) then
+            y.u := u;
+            y.x := x.Subtract(s.x)
+         else
+            L.ErrorMessage(101,422, "BelBelCcm.Scalars.Scalar.Subtract");
+            L.Message("The left argument was  " + self.Typeset());
+            L.Message("The right argument was " + s.Typeset());
+            y.u.Initialize;
+            y.x := N.NaN
+         end;
+         return y
+      end Subtract;
+
+      procedure {public} Multiply (s : Scalar) : Scalar;
+      var
+         y : Scalar;
+      begin
+         y.u := u.Add(s.u);
+         y.x := x.Multiply(s.x);
+         return y
+      end Multiply;
+
+      procedure {public} Divide (s : Scalar) : Scalar;
+      var
+         y : Scalar;
+      begin
+         y.u := u.Subtract(s.u);
+         y.x := x.Divide(s.x);
+         return y
+      end Divide;
+
+      procedure {public} Scale (r : N.Number) : Scalar;
+      var
+         y : Scalar;
+      begin
+         y.u := u;
+         y.x := x.Multiply(r);
+         return y
+      end Scale;
+
+      procedure {public} Power (r : N.Number) : Scalar;
+      var
+         y : Scalar;
+      begin
+         if u.IsDimensionless() then
+            y.x := x.Power(r)
+         else
+            L.ErrorMessage(101,422, "BelBelCcm.Scalars.Scalar.Power");
+            L.Message("The left argument was  " + self.Typeset());
+            L.Message("The right argument was " + r.Typeset());
+            y.u.Initialize;
+            y.x := N.NaN
+         end;
+         return y
+      end Power;
+
+      procedure {public} Magnitude () : Scalar;
+      var
+         y : Scalar;
+      begin
+         y.u := u;
+         y.x := x.Magnitude();
+         return y
+      end Magnitude;
+
+   begin
+      Initialize
+   end Scalar;
+
+   (* OVERLOADED OPERATORS *)
+   (* places wrappers around the associated scalar methods *)
+
+   operator {public} '-' (x : Scalar) : Scalar;
+   begin {locked}
+      return x.Negative()
+   end '-';
+
+   (* logic operators *)
+
+   operator {public} '=' (l, r : Scalar) : boolean;
+   begin {locked}
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : N.Number; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Card8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Card16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Card32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Card64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Int8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Int16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Int32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelBelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Int64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Real32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Real64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         b := y.Equals(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : N.Number) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Card8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Card16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Card32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Card64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Int8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Int16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Int32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Int64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Real32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '=' (l : Scalar; r : Real64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         b := l.Equals(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '=';
+
+   operator {public} '#' (l, r : Scalar) : boolean;
+   begin {locked}
+      return l.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : N.Number; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Card8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Card16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Card32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Card64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Int8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Int16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Int32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Int64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Real32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Real64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         b := y.NotEqual(r)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : N.Number) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Card8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Card16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Card32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Card64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Int8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Int16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Int32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Int64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Real32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '#' (l : Scalar; r : Real64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         b := l.NotEqual(y)
+      else
+         b := true
+      end;
+      return b
+   end '#';
+
+   operator {public} '<' (l, r : Scalar) : boolean;
+   begin {locked}
+      return l.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : N.Number; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Card8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Card16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Card32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Card64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Int8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Int16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Int32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Int64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Real32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Real64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         b := y.LessThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : N.Number) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Card8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Card16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Card32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Card64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Int8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Int16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Int32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Int64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Real32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<' (l : Scalar; r : Real64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         b := l.LessThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<';
+
+   operator {public} '<=' (l, r : Scalar) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : N.Number; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Card8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Card16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Card32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Card64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Int8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Int16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Int32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Int64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Real32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Real64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         b := y.LessThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : N.Number) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Card8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Card16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Card32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Card64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Int8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Int16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Int32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Int64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Real32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '<=' (l : Scalar; r : Real64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         b := l.LessThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'<='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '<=';
+
+   operator {public} '>' (l, r : Scalar) : boolean;
+   begin {locked}
+      return l.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : N.Number; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Card8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Card16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Card32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Card64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Int8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Int16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Int32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Int64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Real32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Real64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         b := y.GreaterThan(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : N.Number) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Card8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Card16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Card32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Card64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Int8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Int16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Int32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Int64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Real32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>' (l : Scalar; r : Real64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         b := l.GreaterThan(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>';
+
+   operator {public} '>=' (l, r : Scalar) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : N.Number; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Card8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Card16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Card32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Card64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Int8; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Int16; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Int32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Int64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Real32; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Real64; r : Scalar) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         b := y.GreaterThanOrEqual(r)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : N.Number) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Card8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Card16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Card32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Card64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Int8) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Int16) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Int32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Int64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Real32) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   operator {public} '>=' (l : Scalar; r : Real64) : boolean;
+   var
+      b : boolean;
+      y : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         b := l.GreaterThanOrEqual(y)
+      else
+         b := false;
+         L.WarningMessage(102,424, "BelCcm.Scalars.'>='");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return b
+   end '>=';
+
+   (* arithemtic operators *)
+
+   operator {public} '+' (l, r : Scalar) : Scalar;
+   begin {locked}
+      return l.Add(r)
+   end '+';
+
+   operator {public} '+' (l : N.Number; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Card8; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Card16; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Card32; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Card64; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Int8; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Int16; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Int32; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Int64; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Real32; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Real64; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         z := y.Add(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : N.Number) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Card8) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Card16) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Card32) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Card64) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Int8) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Int16) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Int32) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Int64) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Real32) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '+' (l : Scalar; r : Real64) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         z := l.Add(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'+'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '+';
+
+   operator {public} '-' (l, r : Scalar) : Scalar;
+   begin {locked}
+      return l.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : N.Number; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(l);
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Card8; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card8ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Card16; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card16ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Card32; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card32ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Card64; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Card64ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Int8; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int8ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Int16; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int16ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Int32; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int32ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Int64; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Int64ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Real32; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real32ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Real64; r : Scalar) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if r.IsDimensionless() then
+         y.Set(N.Real64ToNumber(l));
+         z := y.Subtract(r)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.ToString());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : N.Number) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(r);
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.Typeset())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Card8) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card8ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Card16) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card16ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Card32) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card32ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Card64) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Card64ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Int8) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int8ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Int16) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int16ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Int32) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int32ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Int64) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Int64ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Real32) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real32ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '-' (l : Scalar; r : Real64) : Scalar;
+   var
+      y, z : Scalar;
+   begin {locked}
+      if l.IsDimensionless() then
+         y.Set(N.Real64ToNumber(r));
+         z := l.Subtract(y)
+      else
+         L.WarningMessage(101,428, "BelCcm.Scalars.'-'");
+         L.Message("The left argument was  " + l.Typeset());
+         L.Message("The right argument was " + r.ToString())
+      end;
+      return z
+   end '-';
+
+   operator {public} '*' (l, r : Scalar) : Scalar;
+   begin {locked}
+      return l.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : N.Number; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(l)
+   end '*';
+
+   operator {public} '*' (l : Card8; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Card8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card16; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Card16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card32; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Card32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card64; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Card64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int8; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Int8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int16; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Int16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int32; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Int32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int64; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Int64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real32; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Real32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real64; r : Scalar) : Scalar;
+   begin {locked}
+      return r.Scale(N.Real64ToNumber(l))
+   end '*';
+
+   operator {public} '/' (l, r : Scalar) : Scalar;
+   begin {locked}
+      return l.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : N.Number) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(r);
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Card8) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card8ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Card16) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card16ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Card32) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Card64) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Int8) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int8ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Int16) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int16ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Int32) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Int64) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Real32) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Real32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Scalar; r : Real64) : Scalar;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Real64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : N.Number; r : Scalar) : Scalar;
+   var
+      y : Scalar;
+   begin {locked}
+      y := r.Reciprocal();
+      return y.Scale(l)
+   end '/';
+
+   operator {public} '/' (l : Card8; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Card8ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Card16; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Card16ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Card32; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Card32ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Card64; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Card64ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Int8; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Int8ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Int16; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Int16ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Int32; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Int32ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Int64; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Int64ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Real32; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Real32ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Real64; r : Scalar) : Scalar;
+   var
+      x : N.Number;
+      y : Scalar;
+   begin {locked}
+      x := N.Real64ToNumber(l);
+      y := r.Reciprocal();
+      return y.Scale(x)
+   end '/';
+
+   operator {public} '**' (l : Scalar; r : N.Number) : Scalar;
+   begin {locked}
+      return l.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Card8) : Scalar;
+   begin {locked}
+      return l.Power(N.Card8ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Card16) : Scalar;
+   begin {locked}
+      return l.Power(N.Card16ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Card32) : Scalar;
+   begin {locked}
+      return l.Power(N.Card32ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Card64) : Scalar;
+   begin {locked}
+      return l.Power(N.Card64ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Int8) : Scalar;
+   begin {locked}
+      return l.Power(N.Int8ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Int16) : Scalar;
+   begin {locked}
+      return l.Power(N.Int16ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Int32) : Scalar;
+   begin {locked}
+      return l.Power(N.Int32ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Int64) : Scalar;
+   begin {locked}
+      return l.Power(N.Int64ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Real32) : Scalar;
+   begin {locked}
+      return l.Power(N.Real32ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Scalar; r : Real64) : Scalar;
+   begin {locked}
+      return l.Power(N.Real64ToNumber(r))
+   end '**';
+
+begin
+   one := 1.0E0
+end Scalars.

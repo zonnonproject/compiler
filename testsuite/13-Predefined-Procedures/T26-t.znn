@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The size(T) procedure.
+ *
+ * Positive test: converting size{T} for integer{32} and char{8} types.
+ *)
+module Main;
+	var szinteger, szchar : integer;
+begin
+	szinteger := size( integer{32} );
+	szchar    := size( char{8} );
+	
+	if (szinteger = 4) & (szchar = 1) 
+	then halt(1) else halt(0) end;
+end Main.

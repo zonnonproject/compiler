@@ -1,0 +1,16 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.1. The-Granularity-of-Concurrency
+ *
+ *	Positive test: Simple activity declaration
+ *)
+
+module {protected} Main;
+
+	activity A;
+	begin
+	end A;
+
+begin
+	halt(1)  (* success *)
+end Main.

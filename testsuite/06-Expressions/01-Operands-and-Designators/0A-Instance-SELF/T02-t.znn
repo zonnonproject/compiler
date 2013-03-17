@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * A. Instance = self
+ *
+ * Positive test: access to public variable.
+ *)
+object A;
+	var	{ public } 
+		i : integer;
+
+	var	{ public, immutable } 
+		k : integer;
+
+	var	{ private } 
+		j : integer;
+begin
+	self.i := 1;
+	self.i := self.i + 1;
+end A.
+
+module Main;
+	import A;
+
+	var a : A;
+begin	
+	if a.i = 2 
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,15 @@
+(* ********* Zonnon online collection ***********
+ * Character constant
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Example_3_1;
+
+var ch:char;
+begin 
+  ch := 100X;
+  writeln(ch);
+end Example_3_1.

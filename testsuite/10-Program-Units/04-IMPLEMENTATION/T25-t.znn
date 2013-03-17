@@ -1,0 +1,40 @@
+(** 
+ * 11.Program Units.
+ * 13.4. implementation
+ *
+ * Positive test: procedure in implementation implemnts definition
+ * 
+ *)
+
+definition A.N;
+procedure P;
+end N.
+
+implementation A.N;
+procedure P implements A.N.P;
+begin
+	writeln("A.N.P");
+end P;
+end N.
+
+definition B.N;
+procedure P;
+end N.
+
+implementation B.N;
+procedure P implements B.N.P;
+begin
+	writeln("B.N.P");
+end P;
+end N.
+
+module Main;
+import System.Random;
+
+var d: System.Random;
+
+begin
+ d := new System.Random;
+ halt(1)
+end Main.
+

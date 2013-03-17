@@ -1,0 +1,20 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Positive test: first label contains obtained value.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 1;
+	j := 2;
+
+	case i + j of
+		  3 : j := 3;
+		| 4 : j := 4;
+	end;
+
+	if j = 3 
+	then halt(1) else halt(0) end;
+end Main.

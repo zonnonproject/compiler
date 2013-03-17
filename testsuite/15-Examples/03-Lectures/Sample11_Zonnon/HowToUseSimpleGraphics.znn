@@ -1,0 +1,56 @@
+(* ********* Zonnon online collection ***********
+ * Test Simple Graphics
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module TestSg;
+
+import 
+	SimpleGraphics,
+	System.Threading.Thread as Thread;
+
+begin	
+	SimpleGraphics.Init(200.0, 200.0, 0.0, 0);
+	Thread.Sleep(500); (* important *)
+
+	SimpleGraphics.Turn(30.0);
+	SimpleGraphics.Line(100.0);
+	SimpleGraphics.Turn(-60.0);
+	SimpleGraphics.Line(100.0);
+	SimpleGraphics.Turn(-60.0);
+	SimpleGraphics.Line(130.0);
+	SimpleGraphics.Turn(-90.0);
+	SimpleGraphics.Line(173.0);
+	SimpleGraphics.Turn(-90.0);
+	SimpleGraphics.Line(130.0);
+
+	SimpleGraphics.Color(2);
+
+	SimpleGraphics.Turn(-90.0);
+	SimpleGraphics.Go(20.0);
+	SimpleGraphics.Turn(-90.0);
+	SimpleGraphics.Go(20.0);
+
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(90.0);
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(90.0);
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(90.0);
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(180.0);
+
+	SimpleGraphics.Go(83.0);
+
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(-90.0);
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(-90.0);
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(-90.0);
+	SimpleGraphics.Line(50.0);
+	SimpleGraphics.Turn(180.0);
+end TestSg.

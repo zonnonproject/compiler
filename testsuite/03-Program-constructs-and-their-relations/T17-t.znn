@@ -1,0 +1,22 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: module implements definition.
+ * Note: a warning will be issued, but the compilation
+ * should not fail
+ *)
+definition A;
+end A.
+
+	module B implements C, A;
+	end B.
+
+definition C;
+end C.
+
+module Main;
+	import B, C;
+begin
+	if B implements C
+	then halt(1) else halt(0) end
+end Main.

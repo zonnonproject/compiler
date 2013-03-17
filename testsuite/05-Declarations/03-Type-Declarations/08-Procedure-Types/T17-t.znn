@@ -1,0 +1,25 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: the procedure from the module
+ * is used as procedure call parameter. 
+ *)
+module Main;
+	type PType = procedure;
+
+	procedure P(p : PType);
+	begin p() end P;
+
+	procedure Q;
+	begin res := true end Q;
+
+	var res : boolean;
+begin
+	res := false;
+	P(Q);
+
+	if res then halt(1) else halt(0) end;
+end Main.
+

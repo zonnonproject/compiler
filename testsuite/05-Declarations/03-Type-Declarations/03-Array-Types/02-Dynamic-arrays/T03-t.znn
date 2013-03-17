@@ -1,0 +1,30 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: 1-dimensional dynamic array creating and indexing.
+ * The indexed elements are out of the array.
+ *)
+module Main;
+	import System.IndexOutOfRangeException;
+
+	type Move = object
+	end Move;
+
+	type History = array * of Move;
+
+	var chessHistory : History;
+	var chessMove : Move;
+begin
+	chessHistory := new History(100);
+
+	do
+		chessMove := chessHistory[100];
+		chessHistory[100] := chessMove;
+	on IndexOutOfRangeException do
+		halt(1);
+	end;
+
+	halt(0);
+end Main.

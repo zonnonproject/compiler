@@ -1,0 +1,17 @@
+module Main;
+
+const N = 10000;
+
+var 
+	i : integer;
+	s : string;	
+begin
+	i := N-1;
+(*
+	write("N-1 = "); writeln(N-1);
+	write("i = "); writeln(i);
+	readln(s);
+*)
+	if i = 9999
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,20 @@
+(** 
+ * 7. Statement 
+ * 7.3. if statement.
+ *
+ * Positive test: the first and second conditions are true.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 1;
+	j := 2;
+
+	if    i = 1 then j := 3;
+	elsif i = 1	then j := 4;
+	else             j := 5;
+	end;
+
+	if j = 3 
+	then halt(1) else halt(0) end;
+end Main.

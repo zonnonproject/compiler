@@ -1,0 +1,29 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: mixed indexing
+ *)
+
+module Main;
+
+type t1 = array {math} *, *, *, *, * of real;
+type t2 = array {math} *, *, * of real;
+
+var
+	a : t1;
+	b : t2;
+	i : array {math} 3 of integer;
+	j : array {math} 3 of boolean;
+begin	
+	a := new t1(3, 5, 8, 3, 6);
+	i := [0, 2, 1];
+	j := [false, true, true];
+	b := a[i, 2, 4.., j, 5];
+	if (len(b, 0) = 3) & (len(b, 1) = 4) & (len(b, 2) = 2)
+	then
+		halt(1);
+	else
+		halt(0);
+	end;
+end Main.

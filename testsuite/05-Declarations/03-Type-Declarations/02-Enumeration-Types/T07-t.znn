@@ -1,0 +1,23 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.2. Enumeration types.
+ *
+ * Positive test: wrong parameter value for predefined pred procedure.
+ *)
+module Main;
+
+type NumberKind = ( Bin, Oct, Dec, Hex );
+
+var nk : NumberKind;
+	
+begin
+	do
+		nk := pred(NumberKind.Bin);
+		halt(0);
+	on OutOfRange do
+		halt(1);
+	end
+end Main.
+
+

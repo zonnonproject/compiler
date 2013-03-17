@@ -1,0 +1,46 @@
+(** 
+ * 17. Math extensions.
+ * 17.5. Additional functions
+ * 
+ * Positive test: find
+ * with scalar
+ *)
+
+module Main;
+
+type vi = array {math} * of integer;
+type vr = array {math} * of real;
+type mi = array {math} *,* of integer;
+type mr = array {math} *,* of real;
+type mb = array {math} *,* of boolean;
+type vb = array {math} * of boolean;
+
+var
+	Ab : mb;
+	Ai : mi;
+	ai : vi;
+	ab : vb;
+	ii, ji : vi;
+	ib : vb;
+	
+	i, j : integer;
+	qb : boolean;
+	r : range;
+  
+begin
+	Ab := [[true, false, true], [false, false, true]];  
+	Ai := [[1, 2, 4], [2, 4, 6]];
+	
+	ai := [4, 6, 7];
+	ab := [false, true, true, false, true];
+	
+	ai := find(true, ab);
+	if (len(ai) # 3) or (ai[0] # 1) or (ai[1] # 2) or (ai[2] # 4)
+	then
+		halt(0);
+	else
+		halt(1);
+	end;
+	
+end Main.
+

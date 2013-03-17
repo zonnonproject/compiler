@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: casting from real {32} to real {64}.
+ *)
+module Main;
+	var r32 : real { 32 };
+	var r64 : real { 64 };
+begin
+	r32 := 3.333{32};
+	r64 := real(r32, 64);
+
+	if r64 - 3.333 < 0.00000001 
+	then halt(1) else halt(0) end;
+end Main.

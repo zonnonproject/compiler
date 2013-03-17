@@ -1,0 +1,32 @@
+(** 
+ * 11.Program Units.
+ * 11.4. implementation
+ *
+ * Positive test: the variable (b) is declared in DEFINITION A.
+ * The variable is initialized in default IMPLEMENTATION A.
+ *)
+object { value } B;
+	var { public }
+		i : integer;
+end B.
+
+definition A;
+	import B;
+
+	var { public }
+		b : B;
+end A.
+
+implementation A;
+var j:integer;
+begin 	
+	b.i := 5;
+	j := b.i;
+	writeln("2 line was called, b.i=",j);
+end A.
+
+module Main implements A;
+begin
+	if b.i = 5
+	then halt(1) else halt(0) end;
+end Main.

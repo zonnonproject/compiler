@@ -1,0 +1,18 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Positive test: predefined function result in the FOR circle expression.
+ *)
+module Main;
+var 
+	k : integer; 
+	a : array 3 of integer;
+begin
+	for k := 0 to len(a)-1 do
+		a[k] := 5 
+	end;
+
+	if a[2] = 5 
+	then halt(1) else halt(0) end
+end Main.

@@ -1,0 +1,24 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: integer vector indexing:
+ * incompatible sizes
+ *)
+
+module Main;
+
+type v = array {math} * of integer;
+
+var
+	b : v;
+	a : array {math} 5 of real;
+begin	
+	b := [1, 3];
+	do
+		a[b] := [-1., -2., 4.];
+	on IncompatibleSizes do
+		halt(1);
+	end;
+	halt(0);
+end Main.

@@ -1,0 +1,234 @@
+module {public} Main;
+
+   import
+      System.IO.BinaryReader     as BinaryReader,
+      System.IO.BinaryWriter     as BinaryWriter,
+      System.IO.Path             as Path,
+      System.IO.StreamReader     as StreamReader,
+      System.IO.StreamWriter     as StreamWriter,
+      System.Reflection.Assembly as Assembly,
+      BelCore.DataFiles as DF,
+      BelCore.TextFiles as TF,
+      BelCore.Log  as L,
+      BelCcm.Units as U;
+
+   var {private}
+      asm : Assembly;
+      dir, file, loc, path : string;
+
+   procedure {public} StringIO;
+   var
+      i : integer;
+      s : string;
+      area, force, strain, strainRate, stress, u : U.Si;
+   begin
+      writeln("Addmissible units are from the set {A, cd, K, kg, m, mol, s}");
+      writeln("   A    denotes ampere   - electric current");
+      writeln("   cd   denotes candela  - luminous intensity");
+      writeln("   K    denotes kelvin   - thermodynamic temperature");
+      writeln("   kg   denotes kilogram - mass");
+      writeln("   m    denotes meter    - length");
+      writeln("   mol  denotes mole     - amount of substance");
+      writeln("   s    denotes second   - time");
+      writeln;
+      writeln("Examples of some basic SI units are:");
+      s := "strain:      " + strain.Typeset();
+      s := s + "         where '~' denotes dimensionless units";
+      writeln(s);
+      strainRate.SetSecond(-1);
+      s := "strain rate: " + strainRate.Typeset();
+      writeln(s);
+      area.SetMeter(2);
+      s := "area:        " + area.Typeset();
+      writeln(s);
+      force.SetKilogram(1);
+      force.SetMeter(1);
+      force.SetSecond(-2);
+      s := "force:       " + force.Typeset();
+      writeln(s);
+      stress.SetKilogram(1);
+      stress.SetMeter(-1);
+      stress.SetSecond(-2);
+      s := "stress:      " + stress.Typeset();
+      writeln(s);
+      writeln;
+      writeln("Now enter your own SI unit string for parsing.");
+      writeln("Units are in alphebical order in the numerator and denominator.");
+      readln(s);
+      u.Parse(s);
+      s := "The units you supplied were parsed as: " + u.Typeset();
+      writeln(s);
+      writeln;
+      writeln("SI units can be tested for dimensionality; for example,");
+      s := "strain is";
+      if ~strain.IsDimensionless() then
+         s := s + " not"
+      end;
+      s := s + " dimensionless,";
+      writeln(s);
+      s := "stress is";
+      if ~stress.IsDimensionless() then
+         s := s + " not"
+      end;
+      s := s + " dimensionless,";
+      writeln(s);
+      s := "and the units you supplied above are";
+      if ~u.IsDimensionless() then
+         s := s + " not"
+      end;
+      s := s + " dimensionless.";
+      writeln(s);
+      writeln;
+      writeln("Now we test unit arithmetic, which applies to the exponents.");
+      writeln("First we check out the methods Add and Subtract:");
+      u := stress.Add(area);
+      s := "stress.Add(area) returns " + u.Typeset();
+      s := s + " which should be the units of force.";
+      writeln(s);
+      u := force.Subtract(area);
+      s := "force.Subtract(area) returns " + u.Typeset();
+      s := s + " which should be the units of stress.";
+      writeln(s);
+      writeln("and now we check out the operators + and -:");
+      u := stress + area;
+      s := "stress + area returns " + u.Typeset();
+      s := s + " which should be the units of force.";
+      writeln(s);
+      u := force - area;
+      s := "force - area returns " + u.Typeset();
+      s := s + " which should be the units of stress.";
+      writeln(s);
+      writeln;
+      writeln("Here we test the unit logic.");
+      writeln("First we check the method Equals:");
+      s := "stress.Equals(force - area) returns ";
+      if stress.Equals(u) then
+         s := s + "true"
+      else
+         s := s + "false"
+      end;
+      writeln(s);
+      writeln("and now we check out the operators = and #:");
+      s := "stress = (force - area) returns ";
+      if stress = u then
+         s := s + "true"
+      else
+         s := s + "false"
+      end;
+      writeln(s);
+         s := "stress # strain returns ";
+      if stress # strain then
+         s := s + "true"
+      else
+         s := s + "false"
+      end;
+      writeln(s)
+   end StringIO;
+
+   procedure {public} Store;
+   var
+      bw : BinaryWriter;
+      f, s : string;
+      i : integer;
+      sw : StreamWriter;
+      u : U.Si;
+   begin
+      s := "";
+      f := "testUnits";
+      bw := DF.OpenWriter(f);
+      sw := TF.OpenWriter(f);
+      (* use the Store procedure to write some data *)
+      writeln("Enter five sets of units to store to file.");
+      for i := 1 to 5 do
+         readln(s);
+         sw.WriteLine(s);
+         u.Parse(s);
+         u.Store(bw);
+         s := "   the ";
+         if i = 1 then
+            s := s + "first "
+         elsif i = 2 then
+            s := s + "second"
+         elsif i = 3 then
+            s := s + "third "
+         elsif i = 4 then
+            s := s + "fourth"
+         else
+            s := s + "fifth "
+         end;
+         s := s + " unit stored to file was: " + u.Typeset();
+         writeln(s)
+      end;
+      DF.CloseWriter(bw);
+      TF.CloseWriter(sw)
+   end Store;
+
+   procedure Load;
+   var
+      br : BinaryReader;
+      f, s : string;
+      i : integer;
+      sr : StreamReader;
+      u : U.Si;
+   begin
+      f := "testUnits";
+      br := DF.OpenReader(f);
+      sr := TF.OpenReader(f);
+      (* read in the data *)
+      for i := 1 to 5 do
+         u.Load(br);
+         s := "   the ";
+         if i = 1 then
+            s := s + "first "
+         elsif i = 2 then
+            s := s + "second"
+         elsif i = 3 then
+            s := s + "third "
+         elsif i = 4 then
+            s := s + "fourth"
+         else
+            s := s + "fifth "
+         end;
+         s := s + " unit read from the binary file was: " + u.Typeset();
+         writeln(s);
+         s := sr.ReadLine();
+         u.Parse(s);
+         s := "   the ";
+         if i = 1 then
+            s := s + "first "
+         elsif i = 2 then
+            s := s + "second"
+         elsif i = 3 then
+            s := s + "third "
+         elsif i = 4 then
+            s := s + "fourth"
+         else
+            s := s + "fifth "
+         end;
+         s := s + " unit read from the  text  file was: " + u.Typeset();
+         writeln(s)
+      end;
+      DF.CloseReader(br);
+      TF.CloseReader(sr)
+   end Load;
+
+begin
+   StringIO;
+   writeln;
+   Store;
+   writeln("Data have been stored in the files");
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   file := Path.Combine(dir, "testUnits.dat");
+   writeln(file + " and");
+   file := Path.Combine(dir, "testUnits.txt");
+   writeln(file + ".");
+   writeln;
+   Load;
+   writeln;
+   writeln("Press 'Enter' to quit.");
+   readln;
+   L.Close
+end Main.

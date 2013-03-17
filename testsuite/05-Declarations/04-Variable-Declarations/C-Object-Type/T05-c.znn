@@ -1,0 +1,20 @@
+(**
+ * 5. Declarations.
+ * 6.4. Variable declarations.
+ * Object type of a variable
+ *
+ * Positive test: variable X has the type object B.
+ * The object type B is used before it is declared.
+ *)
+object A;
+	import B; (* The object B itself import, not its namespace import! *)
+	var	X : B;
+end A.
+
+object B;
+end B.
+
+module Main;
+begin
+	halt(1);
+end Main.

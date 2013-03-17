@@ -1,0 +1,40 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: definition is defined after its use.
+ *)
+
+module Main;
+
+type A = object implements D
+
+procedure {public} P implements D.P;
+begin
+	writeln("A");
+end P;
+
+end A;
+
+type B = object implements D
+
+procedure {public} P implements D.P;
+begin
+	writeln("B");
+end P;
+
+end B;
+
+definition D;
+procedure P;
+end D;
+
+var o:object{D};
+	a:A;
+	b:B;
+begin
+ o := a;
+ o.P;
+ o := b;
+ o.P;
+ halt(1)
+end Main.

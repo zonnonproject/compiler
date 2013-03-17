@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * real type
+ *
+ * Negative test: wrong real type variable assignment.
+ * 
+ *)
+module Main;
+	var r64 : real { 64 };
+	var r80 : real { 80 };
+begin
+	r64 := 1.28;
+	r80 := 3.14;
+
+	r64 := r80 ;
+	halt(0);
+end Main.

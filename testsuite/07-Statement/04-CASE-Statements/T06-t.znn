@@ -1,0 +1,23 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Positive test: enumeration is used in case expression.
+ *)
+module Main;
+	type E = ( one, two );
+
+	var e : E;
+		j : integer;
+begin
+	e := E.one;
+	j := 2;
+
+	case e of
+		  E.one : j := 3;
+		| E.two : j := 4;
+	end;
+
+	if j = 3 
+	then halt(1) else halt(0) end;
+end Main.

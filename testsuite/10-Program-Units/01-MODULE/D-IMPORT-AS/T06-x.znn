@@ -1,0 +1,18 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports x as clause
+ *
+ * Negative test: the short name in as clause and imported object name are same.
+ *)
+module Main;
+	import A.B as C, C;
+begin
+	halt(0);
+end Main.
+
+object C;
+end C.
+
+object A.B;
+end B.

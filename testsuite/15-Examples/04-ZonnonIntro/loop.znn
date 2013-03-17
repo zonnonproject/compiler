@@ -1,0 +1,16 @@
+(* ********* Zonnon online collection ***********
+ * Using for cycle
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module example610;
+const N = 100;
+var i: integer;
+    a: array N of integer;
+begin
+   for i := 0 to N - 1 do a[i] := i end;
+   for i := 0 to N - 1 do write(a[i]:4) end;
+end example610.

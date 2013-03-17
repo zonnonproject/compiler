@@ -1,0 +1,10 @@
+module Main;
+
+type t1 = array {sparse} *,*,* of integer;
+
+var
+  
+begin
+	halt(0);
+end Main.
+

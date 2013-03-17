@@ -1,0 +1,850 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The MATH modules provide advanced math functions and operations for Zonnon *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Returns the percentage-point statistics for various distribution functions *)
+(*   Type      : Certainty    - percentage points of certainty                *)
+(*                            - "sixtyPercent"                  60.0%         *)
+(*                            - "eightyPercent"                 80.0%         *)
+(*                            - "ninetyPercent"                 90.0%         *)
+(*                            - "ninetyFivePercent"             95.0%         *)
+(*                            - "ninetySevenPointFivePercent"   97.5%         *)
+(*                            - "ninetyNinePercent"             99.0%         *)
+(*                            - "ninetyNinePointFivePercent"    99.5%         *)
+(*   Procedure : ChiSquared   - returns chi-squared percentage points         *)
+(*                  percentagePoint  : instance of Certainty                  *)
+(*                  degreesOfFreedom : an integer between  1 and 25           *)
+(*             : StudentT     - returns student-t precentage points           *)
+(*                  percentagePoint  : instance of Certainty                  *)
+(*                  degreesOfFreedom : an integer between  1 and 25           *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelMath.Distributions;
+
+   import
+      BelCore.Log      as L,
+      BelCore.Numbers  as N,
+      BelCore.Matrices as M;
+
+   var {private}
+      chiSq, stuT : N.Number;
+      chiSquared, studentT : M.Matrix;
+
+   type {public}
+      Certainty = (sixty, eighty, ninety, ninetyFive, ninetySevenPointFive,
+                   ninetyNine, ninetyNinePointFive);
+
+   procedure {public} ChiSquared
+      (percentagePoint : Certainty; degreesOfFreedom : integer) : N.Number;
+   var
+      x : N.Number;
+   begin
+      if (degreesOfFreedom >= 1) & (degreesOfFreedom <= 25) then
+         case percentagePoint of
+            Certainty.sixty :
+            x := chiSquared[degreesOfFreedom, 1]
+         |  Certainty.eighty :
+            x := chiSquared[degreesOfFreedom, 2]
+         |  Certainty.ninety :
+            x := chiSquared[degreesOfFreedom, 3]
+         |  Certainty.ninetyFive :
+            x := chiSquared[degreesOfFreedom, 4]
+         |  Certainty.ninetySevenPointFive :
+            x := chiSquared[degreesOfFreedom, 5]
+         |  Certainty.ninetyNine :
+            x := chiSquared[degreesOfFreedom, 6]
+         |  Certainty.ninetyNinePointFive :
+            x := chiSquared[degreesOfFreedom, 7]
+         else
+            L.WarningMessage(71,422, "BelCalc.Distributions.ChiSquared");
+            x := N.NaN
+         end
+      else
+         L.WarningMessage(70,422, "BelCalc.Distributions.ChiSquared");
+         x := N.NaN
+      end;
+      return x
+   end ChiSquared;
+
+   procedure {public} StudentT
+      (percentagePoint : Certainty; degreesOfFreedom : integer) : N.Number;
+   var
+      x : N.Number;
+   begin
+      if (degreesOfFreedom >= 1) & (degreesOfFreedom <= 25) then
+         case percentagePoint of
+            Certainty.sixty :
+            x := studentT[degreesOfFreedom, 1]
+         |  Certainty.eighty :
+            x := studentT[degreesOfFreedom, 2]
+         |  Certainty.ninety :
+            x := studentT[degreesOfFreedom, 3]
+         |  Certainty.ninetyFive :
+            x := studentT[degreesOfFreedom, 4]
+         |  Certainty.ninetySevenPointFive :
+            x := studentT[degreesOfFreedom, 5]
+         |  Certainty.ninetyNine :
+            x := studentT[degreesOfFreedom, 6]
+         |  Certainty.ninetyNinePointFive :
+            x := studentT[degreesOfFreedom, 7]
+         else
+            L.WarningMessage(71,422, "BelCalc.Distributions.StudentT");
+            x := N.NaN
+         end
+      else
+         L.WarningMessage(70,422, "BelCalc.Distributions.StudentT");
+         x := N.NaN
+      end;
+      return x
+   end StudentT;
+
+begin
+   (* Chi squared data are from the tables of:                               *)
+   (* H. L. Harter, "A new table of percentage points of the chi-square      *)
+   (* distribution", Biometrika, 1964, vol. 51, pp. 231-239.                 *)
+   (* Rows    : degrees of freedom                                           *)
+   (* Columns : values at 60%, 80%, 90%, 95%, 97.5%, 99%, and 99.5%          *)
+   chiSquared.Initialize(25,7);
+   (* 60% values *)
+   chiSq            := 0.708326;
+   chiSquared[1,1]  := chiSq;
+   chiSq            := 1.83258;
+   chiSquared[2,1]  := chiSq;
+   chiSq            := 2.94617;
+   chiSquared[3,1]  := chiSq;
+   chiSq            := 4.04463;
+   chiSquared[4,1]  := chiSq;
+   chiSq            := 5.13187;
+   chiSquared[5,1]  := chiSq;
+   chiSq            := 6.21076;
+   chiSquared[6,1]  := chiSq;
+   chiSq            := 7.28321;
+   chiSquared[7,1]  := chiSq;
+   chiSq            := 8.35053;
+   chiSquared[8,1]  := chiSq;
+   chiSq            := 9.41364;
+   chiSquared[9,1]  := chiSq;
+   chiSq            := 10.4732;
+   chiSquared[10,1] := chiSq;
+   chiSq            := 11.5298;
+   chiSquared[11,1] := chiSq;
+   chiSq            := 12.5838;
+   chiSquared[12,1] := chiSq;
+   chiSq            := 13.6356;
+   chiSquared[13,1] := chiSq;
+   chiSq            := 14.6853;
+   chiSquared[14,1] := chiSq;
+   chiSq            := 15.7332;
+   chiSquared[15,1] := chiSq;
+   chiSq            := 16.7795;
+   chiSquared[16,1] := chiSq;
+   chiSq            := 17.8244;
+   chiSquared[17,1] := chiSq;
+   chiSq            := 18.8679;
+   chiSquared[18,1] := chiSq;
+   chiSq            := 19.9102;
+   chiSquared[19,1] := chiSq;
+   chiSq            := 20.9514;
+   chiSquared[20,1] := chiSq;
+   chiSq            := 21.9915;
+   chiSquared[21,1] := chiSq;
+   chiSq            := 23.0307;
+   chiSquared[22,1] := chiSq;
+   chiSq            := 24.0689;
+   chiSquared[23,1] := chiSq;
+   chiSq            := 25.1063;
+   chiSquared[24,1] := chiSq;
+   chiSq            := 26.1430;
+   chiSquared[25,1] := chiSq;
+   (* 80% values *)
+   chiSq            := 1.64237;
+   chiSquared[1,2]  := chiSq;
+   chiSq            := 3.21888;
+   chiSquared[2,2]  := chiSq;
+   chiSq            := 4.64163;
+   chiSquared[3,2]  := chiSq;
+   chiSq            := 5.98862;
+   chiSquared[4,2]  := chiSq;
+   chiSq            := 7.28928;
+   chiSquared[5,2]  := chiSq;
+   chiSq            := 8.55806;
+   chiSquared[6,2]  := chiSq;
+   chiSq            := 9.80325;
+   chiSquared[7,2]  := chiSq;
+   chiSq            := 11.0301;
+   chiSquared[8,2]  := chiSq;
+   chiSq            := 12.2421;
+   chiSquared[9,2]  := chiSq;
+   chiSq            := 13.4420;
+   chiSquared[10,2] := chiSq;
+   chiSq            := 14.6314;
+   chiSquared[11,2] := chiSq;
+   chiSq            := 15.8120;
+   chiSquared[12,2] := chiSq;
+   chiSq            := 16.9848;
+   chiSquared[13,2] := chiSq;
+   chiSq            := 18.1508;
+   chiSquared[14,2] := chiSq;
+   chiSq            := 19.3107;
+   chiSquared[15,2] := chiSq;
+   chiSq            := 20.4651;
+   chiSquared[16,2] := chiSq;
+   chiSq            := 21.6146;
+   chiSquared[17,2] := chiSq;
+   chiSq            := 22.7595;
+   chiSquared[18,2] := chiSq;
+   chiSq            := 23.9004;
+   chiSquared[19,2] := chiSq;
+   chiSq            := 25.0375;
+   chiSquared[20,2] := chiSq;
+   chiSq            := 26.1711;
+   chiSquared[21,2] := chiSq;
+   chiSq            := 27.3015;
+   chiSquared[22,2] := chiSq;
+   chiSq            := 28.4288;
+   chiSquared[23,2] := chiSq;
+   chiSq            := 29.5533;
+   chiSquared[24,2] := chiSq;
+   chiSq            := 30.6752;
+   chiSquared[25,2] := chiSq;
+   (* 90% values *)
+   chiSq            := 2.70554;
+   chiSquared[1,3]  := chiSq;
+   chiSq            := 4.60517;
+   chiSquared[2,3]  := chiSq;
+   chiSq            := 6.25139;
+   chiSquared[3,3]  := chiSq;
+   chiSq            := 7.77944;
+   chiSquared[4,3]  := chiSq;
+   chiSq            := 9.23636;
+   chiSquared[5,3]  := chiSq;
+   chiSq            := 10.6446;
+   chiSquared[6,3]  := chiSq;
+   chiSq            := 12.0170;
+   chiSquared[7,3]  := chiSq;
+   chiSq            := 13.3616;
+   chiSquared[8,3]  := chiSq;
+   chiSq            := 14.6837;
+   chiSquared[9,3]  := chiSq;
+   chiSq            := 15.9872;
+   chiSquared[10,3] := chiSq;
+   chiSq            := 17.2750;
+   chiSquared[11,3] := chiSq;
+   chiSq            := 18.5493;
+   chiSquared[12,3] := chiSq;
+   chiSq            := 19.8119;
+   chiSquared[13,3] := chiSq;
+   chiSq            := 21.0641;
+   chiSquared[14,3] := chiSq;
+   chiSq            := 22.3071;
+   chiSquared[15,3] := chiSq;
+   chiSq            := 23.5418;
+   chiSquared[16,3] := chiSq;
+   chiSq            := 24.7690;
+   chiSquared[17,3] := chiSq;
+   chiSq            := 25.9894;
+   chiSquared[18,3] := chiSq;
+   chiSq            := 27.2036;
+   chiSquared[19,3] := chiSq;
+   chiSq            := 28.4120;
+   chiSquared[20,3] := chiSq;
+   chiSq            := 29.6151;
+   chiSquared[21,3] := chiSq;
+   chiSq            := 30.8133;
+   chiSquared[22,3] := chiSq;
+   chiSq            := 32.0069;
+   chiSquared[23,3] := chiSq;
+   chiSq            := 33.1962;
+   chiSquared[24,3] := chiSq;
+   chiSq            := 34.3816;
+   chiSquared[25,3] := chiSq;
+   (* 95% values *)
+   chiSq            := 3.84146;
+   chiSquared[1,4]  := chiSq;
+   chiSq            := 5.99146;
+   chiSquared[2,4]  := chiSq;
+   chiSq            := 7.81473;
+   chiSquared[3,4]  := chiSq;
+   chiSq            := 9.48773;
+   chiSquared[4,4]  := chiSq;
+   chiSq            := 11.0705;
+   chiSquared[5,4]  := chiSq;
+   chiSq            := 12.5916;
+   chiSquared[6,4]  := chiSq;
+   chiSq            := 14.0671;
+   chiSquared[7,4]  := chiSq;
+   chiSq            := 15.5073;
+   chiSquared[8,4]  := chiSq;
+   chiSq            := 16.9190;
+   chiSquared[9,4]  := chiSq;
+   chiSq            := 18.3070;
+   chiSquared[10,4] := chiSq;
+   chiSq            := 19.6751;
+   chiSquared[11,4] := chiSq;
+   chiSq            := 21.0261;
+   chiSquared[12,4] := chiSq;
+   chiSq            := 22.3620;
+   chiSquared[13,4] := chiSq;
+   chiSq            := 23.6848;
+   chiSquared[14,4] := chiSq;
+   chiSq            := 24.9958;
+   chiSquared[15,4] := chiSq;
+   chiSq            := 26.2962;
+   chiSquared[16,4] := chiSq;
+   chiSq            := 27.5871;
+   chiSquared[17,4] := chiSq;
+   chiSq            := 28.8693;
+   chiSquared[18,4] := chiSq;
+   chiSq            := 30.1435;
+   chiSquared[19,4] := chiSq;
+   chiSq            := 31.4104;
+   chiSquared[20,4] := chiSq;
+   chiSq            := 32.6706;
+   chiSquared[21,4] := chiSq;
+   chiSq            := 33.9244;
+   chiSquared[22,4] := chiSq;
+   chiSq            := 35.1725;
+   chiSquared[23,4] := chiSq;
+   chiSq            := 36.4150;
+   chiSquared[24,4] := chiSq;
+   chiSq            := 37.6525;
+   chiSquared[25,4] := chiSq;
+   (* 97.5% values *)
+   chiSq            := 5.02389;
+   chiSquared[1,5]  := chiSq;
+   chiSq            := 7.37776;
+   chiSquared[2,5]  := chiSq;
+   chiSq            := 9.34840;
+   chiSquared[3,5]  := chiSq;
+   chiSq            := 11.1433;
+   chiSquared[4,5]  := chiSq;
+   chiSq            := 12.8325;
+   chiSquared[5,5]  := chiSq;
+   chiSq            := 14.4494;
+   chiSquared[6,5]  := chiSq;
+   chiSq            := 16.0128;
+   chiSquared[7,5]  := chiSq;
+   chiSq            := 17.5345;
+   chiSquared[8,5]  := chiSq;
+   chiSq            := 19.0228;
+   chiSquared[9,5]  := chiSq;
+   chiSq            := 20.4832;
+   chiSquared[10,5] := chiSq;
+   chiSq            := 21.9201;
+   chiSquared[11,5] := chiSq;
+   chiSq            := 23.3367;;
+   chiSquared[12,5] := chiSq;
+   chiSq            := 24.7356;
+   chiSquared[13,5] := chiSq;
+   chiSq            := 26.1189;
+   chiSquared[14,5] := chiSq;
+   chiSq            := 27.4884;
+   chiSquared[15,5] := chiSq;
+   chiSq            := 28.8453;
+   chiSquared[16,5] := chiSq;
+   chiSq            := 30.1910;
+   chiSquared[17,5] := chiSq;
+   chiSq            := 31.5264;
+   chiSquared[18,5] := chiSq;
+   chiSq            := 32.8523;
+   chiSquared[19,5] := chiSq;
+   chiSq            := 34.1696;
+   chiSquared[20,5] := chiSq;
+   chiSq            := 35.4789;
+   chiSquared[21,5] := chiSq;
+   chiSq            := 36.7807;
+   chiSquared[22,5] := chiSq;
+   chiSq            := 38.0756;
+   chiSquared[23,5] := chiSq;
+   chiSq            := 39.3641;
+   chiSquared[24,5] := chiSq;
+   chiSq            := 40.6465;
+   chiSquared[25,5] := chiSq;
+   (* 99% values *)
+   chiSq            := 6.63490;
+   chiSquared[1,6]  := chiSq;
+   chiSq            := 9.21034;
+   chiSquared[2,6]  := chiSq;
+   chiSq            := 11.3449;
+   chiSquared[3,6]  := chiSq;
+   chiSq            := 13.2767;
+   chiSquared[4,6]  := chiSq;
+   chiSq            := 15.0863;
+   chiSquared[5,6]  := chiSq;
+   chiSq            := 16.8119;
+   chiSquared[6,6]  := chiSq;
+   chiSq            := 18.4753;
+   chiSquared[7,6]  := chiSq;
+   chiSq            := 20.0902;
+   chiSquared[8,6]  := chiSq;
+   chiSq            := 21.6660;
+   chiSquared[9,6]  := chiSq;
+   chiSq            := 23.2093;
+   chiSquared[10,6] := chiSq;
+   chiSq            := 24.7250;
+   chiSquared[11,6] := chiSq;
+   chiSq            := 26.2170;
+   chiSquared[12,6] := chiSq;
+   chiSq            := 27.6882;
+   chiSquared[13,6] := chiSq;
+   chiSq            := 29.1412;
+   chiSquared[14,6] := chiSq;
+   chiSq            := 30.5779;
+   chiSquared[15,6] := chiSq;
+   chiSq            := 31.9999;
+   chiSquared[16,6] := chiSq;
+   chiSq            := 33.4087;
+   chiSquared[17,6] := chiSq;
+   chiSq            := 34.8053;
+   chiSquared[18,6] := chiSq;
+   chiSq            := 36.1909;
+   chiSquared[19,6] := chiSq;
+   chiSq            := 37.5662;
+   chiSquared[20,6] := chiSq;
+   chiSq            := 38.9322;
+   chiSquared[21,6] := chiSq;
+   chiSq            := 40.2894;
+   chiSquared[22,6] := chiSq;
+   chiSq            := 41.6384;
+   chiSquared[23,6] := chiSq;
+   chiSq            := 42.9798;
+   chiSquared[24,6] := chiSq;
+   chiSq            := 44.3141;
+   chiSquared[25,6] := chiSq;
+   (* 99.5% values *)
+   chiSq            := 7.87944;
+   chiSquared[1,7]  := chiSq;
+   chiSq            := 10.5966;
+   chiSquared[2,7]  := chiSq;
+   chiSq            := 12.8382;
+   chiSquared[3,7]  := chiSq;
+   chiSq            := 14.8603;
+   chiSquared[4,7]  := chiSq;
+   chiSq            := 16.7496;
+   chiSquared[5,7]  := chiSq;
+   chiSq            := 18.5476;
+   chiSquared[6,7]  := chiSq;
+   chiSq            := 20.2777;
+   chiSquared[7,7]  := chiSq;
+   chiSq            := 21.9550;
+   chiSquared[8,7]  := chiSq;
+   chiSq            := 23.5893;
+   chiSquared[9,7]  := chiSq;
+   chiSq            := 25.1882;
+   chiSquared[10,7] := chiSq;
+   chiSq            := 26.7568;
+   chiSquared[11,7] := chiSq;
+   chiSq            := 28.2995;
+   chiSquared[12,7] := chiSq;
+   chiSq            := 29.8195;
+   chiSquared[13,7] := chiSq;
+   chiSq            := 31.3193;
+   chiSquared[14,7] := chiSq;
+   chiSq            := 32.8013;
+   chiSquared[15,7] := chiSq;
+   chiSq            := 34.2672;
+   chiSquared[16,7] := chiSq;
+   chiSq            := 35.7185;
+   chiSquared[17,7] := chiSq;
+   chiSq            := 37.1565;
+   chiSquared[18,7] := chiSq;
+   chiSq            := 38.5822;
+   chiSquared[19,7] := chiSq;
+   chiSq            := 39.9968;
+   chiSquared[20,7] := chiSq;
+   chiSq            := 41.4011;
+   chiSquared[21,7] := chiSq;
+   chiSq            := 42.7956;
+   chiSquared[22,7] := chiSq;
+   chiSq            := 44.1813;
+   chiSquared[23,7] := chiSq;
+   chiSq            := 45.5585;
+   chiSquared[24,7] := chiSq;
+   chiSq            := 46.9279;
+   chiSquared[25,7] := chiSq;
+   (* Student's T percentage point data are from the tables of:              *)
+   (* D.V. Lindley and W.F. Scott, "New Cambridge Elementary Statistical     *)
+   (* Tables, Cambridge University Press, Cambridge, 1984.                   *)
+   (* Rows    : degrees of freedom                                           *)
+   (* Columns : values at 60%, 80%, 90%, 95%, 97.5%, 99%, and 99.5%          *)
+   studentT.Initialize(25,7);
+   (* 60% values *)
+   stuT           := 0.3249;
+   studentT[1,1]  := stuT;
+   stuT           := 0.2887;
+   studentT[2,1]  := stuT;
+   stuT           := 0.2767;
+   studentT[3,1]  := stuT;
+   stuT           := 0.2707;
+   studentT[4,1]  := stuT;
+   stuT           := 0.2672;
+   studentT[5,1]  := stuT;
+   stuT           := 0.2648;
+   studentT[6,1]  := stuT;
+   stuT           := 0.2632;
+   studentT[7,1]  := stuT;
+   stuT           := 0.2619;
+   studentT[8,1]  := stuT;
+   stuT           := 0.2610;
+   studentT[9,1]  := stuT;
+   stuT           := 0.2602;
+   studentT[10,1] := stuT;
+   stuT           := 0.2596;
+   studentT[11,1] := stuT;
+   stuT           := 0.2590;
+   studentT[12,1] := stuT;
+   stuT           := 0.2586;
+   studentT[13,1] := stuT;
+   stuT           := 0.2582;
+   studentT[14,1] := stuT;
+   stuT           := 0.2579;
+   studentT[15,1] := stuT;
+   stuT           := 0.2576;
+   studentT[16,1] := stuT;
+   stuT           := 0.2573;
+   studentT[17,1] := stuT;
+   stuT           := 0.2571;
+   studentT[18,1] := stuT;
+   stuT           := 0.2569;
+   studentT[19,1] := stuT;
+   stuT           := 0.2567;
+   studentT[20,1] := stuT;
+   stuT           := 0.2566;
+   studentT[21,1] := stuT;
+   stuT           := 0.2564;
+   studentT[22,1] := stuT;
+   stuT           := 0.2563;
+   studentT[23,1] := stuT;
+   stuT           := 0.2562;
+   studentT[24,1] := stuT;
+   stuT           := 0.2561;
+   studentT[25,1] := stuT;
+   (* 80% values *)
+   stuT           := 1.3764;
+   studentT[1,2]  := stuT;
+   stuT           := 1.0607;
+   studentT[2,2]  := stuT;
+   stuT           := 0.9785;
+   studentT[3,2]  := stuT;
+   stuT           := 0.9410;
+   studentT[4,2]  := stuT;
+   stuT           := 0.9195;
+   studentT[5,2]  := stuT;
+   stuT           := 0.9057;
+   studentT[6,2]  := stuT;
+   stuT           := 0.8960;
+   studentT[7,2]  := stuT;
+   stuT           := 0.8889;
+   studentT[8,2]  := stuT;
+   stuT           := 0.8834;
+   studentT[9,2]  := stuT;
+   stuT           := 0.8791;
+   studentT[10,2] := stuT;
+   stuT           := 0.8755;
+   studentT[11,2] := stuT;
+   stuT           := 0.8726;
+   studentT[12,2] := stuT;
+   stuT           := 0.8702;
+   studentT[13,2] := stuT;
+   stuT           := 0.8681;
+   studentT[14,2] := stuT;
+   stuT           := 0.8662;
+   studentT[15,2] := stuT;
+   stuT           := 0.8647;
+   studentT[16,2] := stuT;
+   stuT           := 0.8633;
+   studentT[17,2] := stuT;
+   stuT           := 0.8620;
+   studentT[18,2] := stuT;
+   stuT           := 0.8610;
+   studentT[19,2] := stuT;
+   stuT           := 0.8600;
+   studentT[20,2] := stuT;
+   stuT           := 0.8591;
+   studentT[21,2] := stuT;
+   stuT           := 0.8583;
+   studentT[22,2] := stuT;
+   stuT           := 0.8575;
+   studentT[23,2] := stuT;
+   stuT           := 0.8569;
+   studentT[24,2] := stuT;
+   stuT           := 0.8562;
+   studentT[25,2] := stuT;
+   (* 90% values *)
+   stuT           := 3.078;
+   studentT[1,3]  := stuT;
+   stuT           := 1.886;
+   studentT[2,3]  := stuT;
+   stuT           := 1.638;
+   studentT[3,3]  := stuT;
+   stuT           := 1.533;
+   studentT[4,3]  := stuT;
+   stuT           := 1.476;
+   studentT[5,3]  := stuT;
+   stuT           := 1.440;
+   studentT[6,3]  := stuT;
+   stuT           := 1.415;
+   studentT[7,3]  := stuT;
+   stuT           := 1.397;
+   studentT[8,3]  := stuT;
+   stuT           := 1.383;
+   studentT[9,3]  := stuT;
+   stuT           := 1.372;
+   studentT[10,3] := stuT;
+   stuT           := 1.363;
+   studentT[11,3] := stuT;
+   stuT           := 1.356;
+   studentT[12,3] := stuT;
+   stuT           := 1.350;
+   studentT[13,3] := stuT;
+   stuT           := 1.345;
+   studentT[14,3] := stuT;
+   stuT           := 1.341;
+   studentT[15,3] := stuT;
+   stuT           := 1.337;
+   studentT[16,3] := stuT;
+   stuT           := 1.333;
+   studentT[17,3] := stuT;
+   stuT           := 1.330;
+   studentT[18,3] := stuT;
+   stuT           := 1.328;
+   studentT[19,3] := stuT;
+   stuT           := 1.325;
+   studentT[20,3] := stuT;
+   stuT           := 1.323;
+   studentT[21,3] := stuT;
+   stuT           := 1.321;
+   studentT[22,3] := stuT;
+   stuT           := 1.319;
+   studentT[23,3] := stuT;
+   stuT           := 1.318;
+   studentT[24,3] := stuT;
+   stuT           := 1.316;
+   studentT[25,3] := stuT;
+   (* 95% values *)
+   stuT           := 6.314;
+   studentT[1,4]  := stuT;
+   stuT           := 2.920;
+   studentT[2,4]  := stuT;
+   stuT           := 2.353;
+   studentT[3,4]  := stuT;
+   stuT           := 2.132;
+   studentT[4,4]  := stuT;
+   stuT           := 2.015;
+   studentT[5,4]  := stuT;
+   stuT           := 1.943;
+   studentT[6,4]  := stuT;
+   stuT           := 1.895;
+   studentT[7,4]  := stuT;
+   stuT           := 1.860;
+   studentT[8,4]  := stuT;
+   stuT           := 1.833;
+   studentT[9,4]  := stuT;
+   stuT           := 1.812;
+   studentT[10,4] := stuT;
+   stuT           := 1.796;
+   studentT[11,4] := stuT;
+   stuT           := 1.782;
+   studentT[12,4] := stuT;
+   stuT           := 1.771;
+   studentT[13,4] := stuT;
+   stuT           := 1.761;
+   studentT[14,4] := stuT;
+   stuT           := 1.753;
+   studentT[15,4] := stuT;
+   stuT           := 1.746;
+   studentT[16,4] := stuT;
+   stuT           := 1.740;
+   studentT[17,4] := stuT;
+   stuT           := 1.734;
+   studentT[18,4] := stuT;
+   stuT           := 1.729;
+   studentT[19,4] := stuT;
+   stuT           := 1.725;
+   studentT[20,4] := stuT;
+   stuT           := 1.721;
+   studentT[21,4] := stuT;
+   stuT           := 1.717;
+   studentT[22,4] := stuT;
+   stuT           := 1.714;
+   studentT[23,4] := stuT;
+   stuT           := 1.711;
+   studentT[24,4] := stuT;
+   stuT           := 1.708;
+   studentT[25,4] := stuT;
+   (* 97.5% values *)
+   stuT           := 12.706;
+   studentT[1,5]  := stuT;
+   stuT           := 4.303;
+   studentT[2,5]  := stuT;
+   stuT           := 3.182;
+   studentT[3,5]  := stuT;
+   stuT           := 2.776;
+   studentT[4,5]  := stuT;
+   stuT           := 2.571;
+   studentT[5,5]  := stuT;
+   stuT           := 2.447;
+   studentT[6,5]  := stuT;
+   stuT           := 2.365;
+   studentT[7,5]  := stuT;
+   stuT           := 2.306;
+   studentT[8,5]  := stuT;
+   stuT           := 2.262;
+   studentT[9,5]  := stuT;
+   stuT           := 2.228;
+   studentT[10,5] := stuT;
+   stuT           := 2.201;
+   studentT[11,5] := stuT;
+   stuT           := 2.179;
+   studentT[12,5] := stuT;
+   stuT           := 2.160;
+   studentT[13,5] := stuT;
+   stuT           := 2.145;
+   studentT[14,5] := stuT;
+   stuT           := 2.131;
+   studentT[15,5] := stuT;
+   stuT           := 2.120;
+   studentT[16,5] := stuT;
+   stuT           := 2.110;
+   studentT[17,5] := stuT;
+   stuT           := 2.101;
+   studentT[18,5] := stuT;
+   stuT           := 2.093;
+   studentT[19,5] := stuT;
+   stuT           := 2.086;
+   studentT[20,5] := stuT;
+   stuT           := 2.080;
+   studentT[21,5] := stuT;
+   stuT           := 2.074;
+   studentT[22,5] := stuT;
+   stuT           := 2.069;
+   studentT[23,5] := stuT;
+   stuT           := 2.064;
+   studentT[24,5] := stuT;
+   stuT           := 2.060;
+   studentT[25,5] := stuT;
+   (* 99% values *)
+   stuT           := 31.821;
+   studentT[1,6]  := stuT;
+   stuT           := 6.965;
+   studentT[2,6]  := stuT;
+   stuT           := 4.541;
+   studentT[3,6]  := stuT;
+   stuT           := 3.747;
+   studentT[4,6]  := stuT;
+   stuT           := 3.365;
+   studentT[5,6]  := stuT;
+   stuT           := 3.143;
+   studentT[6,6]  := stuT;
+   stuT           := 2.998;
+   studentT[7,6]  := stuT;
+   stuT           := 2.896;
+   studentT[8,6]  := stuT;
+   stuT           := 2.821;
+   studentT[9,6]  := stuT;
+   stuT           := 2.764;
+   studentT[10,6] := stuT;
+   stuT           := 2.718;
+   studentT[11,6] := stuT;
+   stuT           := 2.681;
+   studentT[12,6] := stuT;
+   stuT           := 2.650;
+   studentT[13,6] := stuT;
+   stuT           := 2.624;
+   studentT[14,6] := stuT;
+   stuT           := 2.602;
+   studentT[15,6] := stuT;
+   stuT           := 2.583;
+   studentT[16,6] := stuT;
+   stuT           := 2.567;
+   studentT[17,6] := stuT;
+   stuT           := 2.552;
+   studentT[18,6] := stuT;
+   stuT           := 2.539;
+   studentT[19,6] := stuT;
+   stuT           := 2.528;
+   studentT[20,6] := stuT;
+   stuT           := 2.518;
+   studentT[21,6] := stuT;
+   stuT           := 2.508;
+   studentT[22,6] := stuT;
+   stuT           := 2.500;
+   studentT[23,6] := stuT;
+   stuT           := 2.492;
+   studentT[24,6] := stuT;
+   stuT           := 2.485;
+   studentT[25,6] := stuT;
+   (* 99.5% values *)
+   stuT           := 63.657;
+   studentT[1,7]  := stuT;
+   stuT           := 9.925;
+   studentT[2,7]  := stuT;
+   stuT           := 5.841;
+   studentT[3,7]  := stuT;
+   stuT           := 4.604;
+   studentT[4,7]  := stuT;
+   stuT           := 4.032;
+   studentT[5,7]  := stuT;
+   stuT           := 3.707;
+   studentT[6,7]  := stuT;
+   stuT           := 3.499;
+   studentT[7,7]  := stuT;
+   stuT           := 3.355;
+   studentT[8,7]  := stuT;
+   stuT           := 3.250;
+   studentT[9,7]  := stuT;
+   stuT           := 3.169;
+   studentT[10,7] := stuT;
+   stuT           := 3.106;
+   studentT[11,7] := stuT;
+   stuT           := 3.055;
+   studentT[12,7] := stuT;
+   stuT           := 3.012;
+   studentT[13,7] := stuT;
+   stuT           := 2.977;
+   studentT[14,7] := stuT;
+   stuT           := 2.947;
+   studentT[15,7] := stuT;
+   stuT           := 2.921;
+   studentT[16,7] := stuT;
+   stuT           := 2.898;
+   studentT[17,7] := stuT;
+   stuT           := 2.878;
+   studentT[18,7] := stuT;
+   stuT           := 2.861;
+   studentT[19,7] := stuT;
+   stuT           := 2.845;
+   studentT[20,7] := stuT;
+   stuT           := 2.831;
+   studentT[21,7] := stuT;
+   stuT           := 2.819;
+   studentT[22,7] := stuT;
+   stuT           := 2.807;
+   studentT[23,7] := stuT;
+   stuT           := 2.797;
+   studentT[24,7] := stuT;
+   stuT           := 2.787;
+   studentT[25,7] := stuT
+end Distributions.

@@ -1,0 +1,14 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: object contains module.
+ *)
+object A;
+	module B;
+	end B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

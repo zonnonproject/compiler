@@ -1,0 +1,200 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ROTORdebug|AnyCPU' ">
+    <OutputPath>bin\ROTORdebug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;ROTOR</DefineConstants>
+    <BaseAddress>285212672</BaseAddress>
+    <Optimize>false</Optimize>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C9B31FDE-EE7E-4B46-8BE3-63F384B5F760}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Zonnon.RTL</AssemblyName>
+    <AssemblyOriginatorKeyFile>InterimKey.snk</AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Zonnon.RTL</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <SignAssembly>true</SignAssembly>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ROTOR-RELEASE|AnyCPU' ">
+    <OutputPath>bin\ROTOR-RELEASE\</OutputPath>
+    <DefineConstants>ROTOR</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ROTORrelease|AnyCPU' ">
+    <OutputPath>bin\ROTORrelease\</OutputPath>
+    <DefineConstants>ROTOR</DefineConstants>
+    <BaseAddress>285212672</BaseAddress>
+    <Optimize>true</Optimize>
+    <DebugType>
+    </DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '2008Release|AnyCPU' ">
+    <OutputPath>bin\2008Release\</OutputPath>
+    <BaseAddress>285212672</BaseAddress>
+    <Optimize>true</Optimize>
+    <DebugType>
+    </DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '2008Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\2008Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <BaseAddress>285212672</BaseAddress>
+    <FileAlignment>4096</FileAlignment>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Compiler\zcversion.cs">
+      <Link>zcversion.cs</Link>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ColSPA.cs" />
+    <Compile Include="Compute\Codelet.cs" />
+    <Compile Include="Compute\ComputeDevice.cs" />
+    <Compile Include="Compute\ComputeHelper.cs" />
+    <Compile Include="Compute\ComputeManager.cs" />
+    <Compile Include="Compute\KernelManager.cs" />
+    <Compile Include="Compute\Data.cs" />
+    <Compile Include="Compute\DependencyManager.cs" />
+    <Compile Include="Compute\DeviceMemorySpace.cs" />
+    <Compile Include="Compute\Mutex.cs" />
+    <Compile Include="Compute\Task.cs" />
+    <Compile Include="OpenCL.Wrapper\Buffer.cs" />
+    <Compile Include="OpenCL.Wrapper\BufferFlags.cs" />
+    <Compile Include="OpenCL.Wrapper\CommandExecutionStatus.cs" />
+    <Compile Include="OpenCL.Wrapper\CommandProfilingInfo.cs" />
+    <Compile Include="OpenCL.Wrapper\CommandQueue.cs" />
+    <Compile Include="OpenCL.Wrapper\CommandQueueFlags.cs" />
+    <Compile Include="OpenCL.Wrapper\CompiledProgram.cs" />
+    <Compile Include="OpenCL.Wrapper\Context.cs" />
+    <Compile Include="OpenCL.Wrapper\ContextProperty.cs" />
+    <Compile Include="OpenCL.Wrapper\Device.cs" />
+    <Compile Include="OpenCL.Wrapper\DeviceInfo.cs" />
+    <Compile Include="OpenCL.Wrapper\DeviceType.cs" />
+    <Compile Include="OpenCL.Wrapper\EventInfo.cs" />
+    <Compile Include="OpenCL.Wrapper\EventObject.cs" />
+    <Compile Include="OpenCL.Wrapper\GetInfoArrayCache.cs" />
+    <Compile Include="OpenCL.Wrapper\GetInfoCallback.cs" />
+    <Compile Include="OpenCL.Wrapper\GetInfoStringCache.cs" />
+    <Compile Include="OpenCL.Wrapper\GetInfoStructCache.cs" />
+    <Compile Include="OpenCL.Wrapper\Helpers.cs" />
+    <Compile Include="OpenCL.Wrapper\Kernel.cs" />
+    <Compile Include="OpenCL.Wrapper\NativeMethods.cs" />
+    <Compile Include="OpenCL.Wrapper\OpenCLBoolean.cs" />
+    <Compile Include="OpenCL.Wrapper\OpenCLException.cs" />
+    <Compile Include="OpenCL.Wrapper\Platform.cs" />
+    <Compile Include="OpenCL.Wrapper\ProgramBuildInfo.cs" />
+    <Compile Include="OpenCL.Wrapper\ReturnCode.cs" />
+    <Compile Include="RowSPA.cs" />
+    <Compile Include="RTL.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SPA.cs" />
+    <Compile Include="SparseMatrix.cs" />
+    <Compile Include="SparseVector.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="InterimKey.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

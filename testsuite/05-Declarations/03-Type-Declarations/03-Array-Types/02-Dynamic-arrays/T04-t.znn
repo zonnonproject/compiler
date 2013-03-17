@@ -1,0 +1,27 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.2. Dynamic arrays
+ *
+ * Positive test: 1-dimensional dynamic array creating and indexing.
+ *)
+module Main;
+	type { ref } Move = object
+	end Move;
+
+	type History = array * of Move;
+
+	var chessHistory : History;
+	var chessMove : Move;
+begin
+	chessHistory := new History(100);
+	chessMove := new Move;
+
+	chessHistory[0] := chessMove;
+	chessHistory[99] := chessHistory[0];
+
+	if chessHistory[0] = chessHistory[99]
+	then halt(1)
+	else halt(0)
+	end;
+end Main.

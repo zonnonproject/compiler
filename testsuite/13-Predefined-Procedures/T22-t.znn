@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The pred (x) procedure.
+ *
+ * Positive test: pred of integer type value.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 5;
+	j := pred(i); 
+
+	if j = 4 
+	then halt(1) else halt(0) end;
+end Main.

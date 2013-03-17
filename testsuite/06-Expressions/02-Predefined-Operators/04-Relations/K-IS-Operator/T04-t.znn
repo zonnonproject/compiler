@@ -1,0 +1,18 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * is operator.
+ *
+ * Positive test: is operator is used to check integer variable.
+ * The result is true.
+ *)
+module Main;
+	var 
+		ai : array 2 of integer;
+		k : integer;
+begin
+	k := 0;
+	if ai[k+1] is integer
+	then halt(1) else halt(0) end;
+end Main.

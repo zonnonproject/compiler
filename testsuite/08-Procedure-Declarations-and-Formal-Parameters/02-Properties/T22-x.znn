@@ -1,0 +1,58 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.2 Properties
+ *
+ * Negative test: assignment to read only
+ *)
+
+module ContainerTest;
+
+type {public} 
+
+A = object
+
+end A;
+
+T = object implements []
+
+procedure {public} Set(i,j: integer; v:A) implements [].Set;
+begin 
+	writeln("Set called");
+end Set;
+
+procedure {public} Get(i,j: integer):A implements [].Get;
+begin 
+	writeln("Get called, but shouldn't be");
+end Get;
+
+end T;
+
+T2 = object implements []
+
+procedure {public} Get(i,j: integer):A implements [].Get;
+begin 
+	writeln("Get called and it's the only way");
+end Get;
+
+end T2;
+
+operator {public} ":=" (var l:A; r:A);
+begin
+	writeln("Assignment is called");
+end ":=";
+
+end ContainerTest.
+
+module Main;
+
+import ContainerTest as CT;
+
+var cn:CT.T; cn2:CT.T2; a:CT.A;
+
+begin
+	writeln("=====");
+	cn[0,1] := a;
+	writeln("=====");
+	cn2[0,1] := a;
+	readln
+end Main.

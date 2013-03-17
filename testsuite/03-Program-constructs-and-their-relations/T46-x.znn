@@ -1,0 +1,26 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: implementation refines definition.
+ *)
+
+(* I. The refined definition A is declared after the refiner implementation B. *)
+implementation B refines A;
+end B.
+
+definition A;
+end A.
+
+(* II. The refined definition D is declared before the refiner implementation C. *)
+definition D;
+end D.
+
+implementation C refines D;
+end D.
+
+module Main;
+begin
+	halt(0);
+end Main.
+
+

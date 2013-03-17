@@ -1,0 +1,19 @@
+(* ********* Zonnon online collection ***********
+ * min() and max() values
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Example_3_1;
+type
+	word = integer{16};
+var i:integer;
+	j:word;
+begin
+  i := max(integer);
+  writeln(i," ",min(integer));
+  i := max(word);
+  writeln(i," ",min(word));
+end Example_3_1.

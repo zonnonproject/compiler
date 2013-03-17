@@ -1,0 +1,466 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The MATH modules provide advanced math functions and operations for Zonnon *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Use Gauss-Kronrod weights and quadratures to estimate an integral          *)
+(*   y = int_a^b f(x) dx                                                      *)
+(* where                                                                      *)
+(*   y  is the solution sought                                                *)
+(*   f  is a user-supplied function, the integrand                            *)
+(*   a  is the lower limit of integration                                     *)
+(*   b  is the upper limit of integration                                     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Type       : Method      -  select method for estimating an integral    *)
+(*                 trapezoidal :  (b - a)(f(a) + f(b))/2                      *)
+(*                 simpson     :  (b - a)(f(a) + 4f((a+b)/2) + f(b))/6        *)
+(*                 threeEights :  (b - a)(f(a) + 3f((2a+b)/3)                 *)
+(*                                             + 3f((a+2b)/3) +f(b))/8        *)
+(*                 romberg     :  trapezoidal with richardson extrapolation   *)
+(*                 gauss       :  Gauss with a Kronrod error estimate         *)
+(* type       : F              -  a procedure type                            *)
+(*                 x           :  argument of the function                    *)
+(* Type       : Datum          -  internal, used with Gauss-Kronrod method    *)
+(* Procedure  : Integrate      -  int_a^b f(x) dx                             *)
+(*                 f           :  an instance of F                            *)
+(*                 a           :  the lower limit of integration              *)
+(*                 b           :  the upper limit of integration              *)
+(*                 s           :  an instance of Method                    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelMath.Integrals;
+
+   import
+      System.Convert         as Convert,
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      BelCore.Log     as L,
+      BelCore.Numbers as N,
+      BelCore.Math    as Fn,
+      BelCore.Arrays  as A,
+      BelData.Keys    as K,
+      BelData.List    as List,
+      BelData.Object,
+      BelData.Datum;
+
+   type {public}
+      (* selects the method of differencing *)
+      Method = (trapezoidal, simpson, threeEights, romberg, gauss);
+      (* function type whose derivative is sought *)
+      F = procedure (N.Number) : N.Number;
+
+   var {private}
+      maxKey : N.Number;
+      nodes : integer;
+      node, wgtGauss, wgtKronrod : A.Array;
+
+   const
+      (* stops Richardson extrapolation in Romberg integrator when exceeded *)
+      maxIterations = 100;
+      (* stops Romberg and Guass integration whenever error goes below this *)
+      tolerance = 0.0000000001;
+
+   procedure {public} Integrate
+                      (f : F; a, b : N.Number; m : Method) : N.Number;
+   var
+      h, y : N.Number;
+   begin
+      if f # nil then
+         if a = b then
+            y := 0
+         elsif a > b then
+            y := Integrate(f, b, a, m);
+            y := -y
+         else
+            case m of Method.trapezoidal :
+               h := (b - a)/2;
+               y := h*(f(a) + f(b))
+            | Method.simpson :
+               h := (b - a)/6;
+               y := h*(f(a) + 4*f((a+b)/2) + f(b))
+            | Method.threeEights :
+               h := (b - a)/8;
+               y := h*(f(a) + 3*f((2*a+b)/3) + 3*f((a+2*b)/3) + f(b))
+            | Method.romberg :
+               y := Romberg(f, a, b)
+            | Method.gauss :
+               y := Gauss(f, a, b)
+            else
+               L.WarningMessage(70,415, "BelMath.Integrals.Integrate")
+            end
+         end
+      else
+         L.WarningMessage(500,415, "BelMath.Integrals.Integrate")
+      end;
+      return y
+   end Integrate;
+
+   procedure {private} Romberg (f : F; a, b : N.Number) : N.Number;
+   var
+      eCurr, eLast, h, p, sum, y : N.Number;
+      i, j, k : integer;
+      yCurr, yLast : A.Array;
+   begin
+      h := (b - a)/2;
+      j := 1;
+      k := 2;
+      p := 4;
+      yLast.Initialize(1);
+      yLast[1] := h*(f(a) + f(b));
+      yCurr.Initialize(2);
+      yCurr[1] := yLast[1]/2 + h*f(a + h);
+      yCurr[2] := yCurr[1] + (yCurr[1] - yLast[1])/(p - 1);
+      if Fn.Abs(yCurr[2]) < 1 then
+         eCurr := Fn.Abs(yCurr[2] - yLast[1])
+      else
+         eCurr := Fn.Abs((yCurr[2] - yLast[1])/yCurr[2])
+      end;
+      loop
+         h := h/2;
+         j := 2*j;
+         inc(k);
+         sum := 0;
+         for i := 1 to j do
+            sum := sum + f(a + (2*i-1)*h)
+         end;
+         yLast := yCurr;
+         yCurr.Initialize(k);
+         yCurr[1] := yLast[1]/2 + h*sum;
+         for i := 2 to k do
+            p := 4*p;
+            yCurr[i] := yCurr[i-1] + (yCurr[i-1] - yLast[i-1])/(p - 1)
+         end;
+         eLast := eCurr;
+         if Fn.Abs(yCurr[k]) < 1 then
+            eCurr := Fn.Abs(yCurr[k] - yLast[k-1])
+         else
+            eCurr := Fn.Abs((yCurr[k] - yLast[k-1])/yCurr[k])
+         end;
+         if eCurr < tolerance then
+            y := yCurr[k];
+            exit
+         end;
+         if eCurr > eLast then
+            y := yLast[k-1];
+            L.WarningMessage(55,-1, "BelMath.Integrals.Romberg");
+            exit
+         end;
+         if k > maxIterations then
+            y := yCurr[k];
+            L.WarningMessage(80,-1, "BelMath.Integrals.Romberg");
+            exit
+         end
+      end;
+      return y
+   end Romberg;
+
+   (* the following are used by the Gauss-Kronrod itegrator *)
+
+   procedure {private} Gauss (f : F; a, b : N.Number) : N.Number;
+   var
+      bigError, err, error, midPoint, tol, y : N.Number;
+      bigKey, key : K.Key;
+      converged, ignor, moved : boolean;
+      d : object{BelData.Datum};
+      history : List;
+      ld, rider : Datum;
+      s : string;
+   begin
+      converged := false;
+      ignor := true;
+      moved := false;
+      history := new List;
+      ld := new Datum;
+      tol := 100*N.Epsilon;
+      GaussKronrod(f, a, b, err, y);
+      ld.a := a;
+      ld.b := b;
+      ld.error := err;
+      ld.soln  := y;
+      key := GetKey(a, b, b);
+      history.Insert(ld, key, ignor);
+      repeat
+         (* search for the interval with largest error estimate *)
+         history.Home;
+         d := history.GetData();
+         rider := Datum(d);
+         bigError := rider.error;
+         bigKey := history.GetKey();
+         history.Next(moved);
+         while moved do
+            d := history.GetData();
+            rider := Datum(d);
+            if rider.error > bigError then
+               bigError := rider.error;
+               bigKey := history.GetKey()
+            end;
+            history.Next(moved)
+         end;
+         (* bisect interval with largest error estimate *)
+         history.Find(bigKey, ignor);
+         d := history.GetData();
+         rider := Datum(d);
+         midPoint := (rider.a + rider.b)/2;
+         key := GetKey(a, b, midPoint);
+         if key < bigKey then
+            (* remove that part of solution with greatest error *)
+            err := err - rider.error;
+            y := y - rider.soln;
+            (* reintegrate the left half of this sub-interval *)
+            ld.a := rider.a;
+            ld.b := midPoint;
+            GaussKronrod(f, ld.a, ld.b, error, ld.soln);
+            ld.error := error*(ld.b - ld.a)/(b - a);
+            history.Insert(ld, key, ignor);
+            err := err + ld.error;
+            y := y + ld.soln;
+            (* reintegrate the right half of this sub-interval *)
+            ld.a := midPoint;
+            ld.b := rider.b;
+            GaussKronrod(f, ld.a, ld.b, error, ld.soln);
+            ld.error := error*(ld.b - ld.a)/(b - a);
+            history.Update(ld, bigKey, ignor);
+            err := err + ld.error;
+            y := y + ld.soln;
+            if Fn.Abs(y) < 1 then
+               error := err
+            else
+               error := Fn.Abs(err/y)
+            end;
+            if error < tol then
+               converged := true
+            end
+         else
+            s := "In a call to BelMath.Integrals.Gauss";
+            L.Message(s);
+            s := "   integration was not able to further sub-divide";
+            L.Message(s);
+            s := "   its interval of integration at x = ";
+            s := s + rider.b.Typeset();
+            L.Message(s);
+            converged := true
+         end
+      until converged;
+      history.Nullify;
+      return y
+   end Gauss;
+
+   procedure {private} GaussKronrod (f : F; a, b : N.Number;
+                                     var absError, result : N.Number);
+   var
+      i : integer;
+      abscissa, center, fAbove, fBelow, fCenter, fSum,
+      gauss, halfLength, kronrod, rndError : N.Number;
+   begin
+      center := (a + b)/2;
+      halfLength := (b - a)/2;
+      fCenter := f(center);
+      kronrod := wgtKronrod[nodes]*fCenter;
+      if odd(nodes) then
+         gauss := 0
+      else
+         gauss := wgtGauss[nodes div 2]*fCenter
+      end;
+      for i := 1 to nodes-1 do
+         abscissa := halfLength*node[i];
+         fAbove := f(center + abscissa);
+         fBelow := f(center - abscissa);
+         fSum := fAbove + fBelow;
+         kronrod := kronrod + wgtKronrod[i]*fSum;
+         if ~odd(i) then
+            gauss := gauss + wgtGauss[i div 2]*fSum
+         end
+      end;
+      result := halfLength*kronrod;
+      absError := Fn.Abs(halfLength*(kronrod - gauss));
+      rndError := Fn.Abs(N.Epsilon*result);
+      absError := Fn.Max(absError, rndError)
+   end GaussKronrod;
+
+   procedure {private} GetKey (a, b, atX : N.Number) : K.Key;
+   var
+      k : K.Key;
+      r, ratio : N.Number;
+   begin
+      ratio := (atX - a)/(b - a);
+      r := ratio * maxKey;
+      k.Set(Convert.ToInt64(r.Get()));
+      return k
+   end GetKey;
+
+   type {public, ref} Datum = object implements BelData.Datum
+      var {public}
+         a, b, error, soln : N.Number;
+
+      procedure {public} Initialize
+         implements BelData.Object.Initialize;
+      begin
+         a := 0;
+         b := 0;
+         error := 0;
+         soln := 0
+      end Initialize;
+
+      procedure {public} Nullify
+         implements BelData.Object.Nullify;
+      begin
+         Initialize
+      end Nullify;
+
+      procedure {public} Load (br : BinaryReader)
+         implements BelData.Object.Load;
+      begin
+         a.Load(br);
+         b.Load(br);
+         error.Load(br);
+         soln.Load(br)
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter)
+         implements BelData.Object.Store;
+      begin
+         a.Store(bw);
+         b.Store(bw);
+         error.Store(bw);
+         soln.Store(bw)
+      end Store;
+
+      procedure {public} Clone () : object{BelData.Object}
+         implements BelData.Datum.Clone;
+      var
+         d : Datum;
+         o : object{BelData.Object};
+      begin
+         d := new Datum;
+         d.a := a.Clone();
+         d.b := b.Clone();
+         d.error := error.Clone();
+         d.soln := soln.Clone();
+         o := BelData.Object(d);
+         return o
+      end Clone;
+
+      procedure {public} Copy () : object{BelData.Object}
+         implements BelData.Datum.Copy;
+      var
+         d : Datum;
+         o : object{BelData.Object};
+      begin
+         d := new Datum;
+         d.a := a.Copy();
+         d.b := b.Copy();
+         d.error := error.Copy();
+         d.soln := soln.Copy();
+         o := BelData.Object(d);
+         return o
+      end Copy;
+
+   begin
+      Initialize
+   end Datum;
+
+begin
+   maxKey := max(integer{64});
+   nodes := 31;
+   node.Initialize(nodes);
+   node[1] := 0.99948441005049063757E+0;
+   node[2] := 0.99689348407464954027E+0;
+   node[3] := 0.99163099687040459485E+0;
+   node[4] := 0.98366812327974720997E+0;
+   node[5] := 0.97311632250112626837E+0;
+   node[6] := 0.96002186496830751221E+0;
+   node[7] := 0.94437444474855997941E+0;
+   node[8] := 0.92620004742927432587E+0;
+   node[9] := 0.90557330769990779854E+0;
+   node[10] := 0.88256053579205268154E+0;
+   node[11] := 0.85720523354606109895E+0;
+   node[12] := 0.82956576238276839744E+0;
+   node[13] := 0.79972783582183908301E+0;
+   node[14] := 0.76777743210482619491E+0;
+   node[15] := 0.73379006245322680472E+0;
+   node[16] := 0.69785049479331579693E+0;
+   node[17] := 0.66006106412662696137E+0;
+   node[18] := 0.62052618298924286114E+0;
+   node[19] := 0.57934523582636169175E+0;
+   node[20] := 0.53662414814201989926E+0;
+   node[21] := 0.49248046786177857499E+0;
+   node[22] := 0.44703376953808917678E+0;
+   node[23] := 0.40040125483039439253E+0;
+   node[24] := 0.35270472553087811347E+0;
+   node[25] := 0.30407320227362507737E+0;
+   node[26] := 0.25463692616788984643E+0;
+   node[27] := 0.20452511668230989143E+0;
+   node[28] := 0.15386991360858354696E+0;
+   node[29] := 0.10280693796673703014E+0;
+   node[30] := 0.05147184255531769583E+0;
+   node[31] := 0.00000000000000000000E+0;
+   wgtGauss.Initialize(15);
+   wgtGauss[1] := 0.00796819249616660561E+0;
+   wgtGauss[2] := 0.01846646831109095914E+0;
+   wgtGauss[3] := 0.02878470788332336934E+0;
+   wgtGauss[4] := 0.03879919256962704959E+0;
+   wgtGauss[5] := 0.04840267283059405290E+0;
+   wgtGauss[6] := 0.05749315621761906648E+0;
+   wgtGauss[7] := 0.06597422988218049512E+0;
+   wgtGauss[8] := 0.07375597473770520626E+0;
+   wgtGauss[9] := 0.08075589522942021535E+0;
+   wgtGauss[10] := 0.08689978720108297980E+0;
+   wgtGauss[11] := 0.09212252223778612871E+0;
+   wgtGauss[12] := 0.09636873717464425963E+0;
+   wgtGauss[13] := 0.09959342058679526706E+0;
+   wgtGauss[14] := 0.10176238974840550459E+0;
+   wgtGauss[15] := 0.10285265289355884034E+0;
+   wgtKronrod.Initialize(nodes);
+   wgtKronrod[1] := 0.00138901369867700762E+0;
+   wgtKronrod[2] := 0.00389046112709988405E+0;
+   wgtKronrod[3] := 0.00663070391593129217E+0;
+   wgtKronrod[4] := 0.00927327965951776342E+0;
+   wgtKronrod[5] := 0.01182301525349634174E+0;
+   wgtKronrod[6] := 0.01436972950704580481E+0;
+   wgtKronrod[7] := 0.01692088918905327262E+0;
+   wgtKronrod[8] := 0.01941414119394238117E+0;
+   wgtKronrod[9] := 0.02182803582160919229E+0;
+   wgtKronrod[10] := 0.02419116207808060136E+0;
+   wgtKronrod[11] := 0.02650995488233310161E+0;
+   wgtKronrod[12] := 0.02875404876504129284E+0;
+   wgtKronrod[13] := 0.03090725756238776247E+0;
+   wgtKronrod[14] := 0.03298144705748372603E+0;
+   wgtKronrod[15] := 0.03497933802806002413E+0;
+   wgtKronrod[16] := 0.03688236465182122922E+0;
+   wgtKronrod[17] := 0.03867894562472759295E+0;
+   wgtKronrod[18] := 0.04037453895153595911E+0;
+   wgtKronrod[19] := 0.04196981021516424614E+0;
+   wgtKronrod[20] := 0.04345253970135606931E+0;
+   wgtKronrod[21] := 0.04481480013316266319E+0;
+   wgtKronrod[22] := 0.04605923827100698811E+0;
+   wgtKronrod[23] := 0.04718554656929915394E+0;
+   wgtKronrod[24] := 0.04818586175708712914E+0;
+   wgtKronrod[25] := 0.04905543455502977888E+0;
+   wgtKronrod[26] := 0.04979568342707420635E+0;
+   wgtKronrod[27] := 0.05040592140278234684E+0;
+   wgtKronrod[28] := 0.05088179589874960649E+0;
+   wgtKronrod[29] := 0.05122154784925877217E+0;
+   wgtKronrod[30] := 0.05142612853745902593E+0;
+   wgtKronrod[31] := 0.05149472942945156755E+0
+end Integrals.

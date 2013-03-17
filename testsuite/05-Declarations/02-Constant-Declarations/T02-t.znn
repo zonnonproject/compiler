@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.2. Constant Declarations.
+ *
+ * Positive test on constant expression.
+ * The operations + - div * was used in constant expressions.
+ *)
+module Main;
+	const N = 10;
+	const L = 10;
+	const M = 2 * N + 4 * (3 * L - N); (* 100 *)
+	const X = (M + 4) div 2;
+begin
+	if X = 52 
+	then halt(1) else halt(0) end;
+end Main.

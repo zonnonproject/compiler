@@ -1,0 +1,31 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: the procedure-delegate from object A
+ * is used in assignment to variable with procedure type.
+ *)
+object A;
+	procedure {public} P(var i : integer) : integer;
+	begin
+		i := i + 1;
+		return i;
+	end P;
+end A.
+
+module Main;
+	import A;
+
+	type PT = procedure(var integer) : integer;
+
+	var pt : PT;
+		a : A;
+		k : integer;
+begin
+	k := 3;
+	pt := a.P;
+	pt(k);
+	
+	halt(1);
+end Main.

@@ -1,0 +1,21 @@
+(** 
+ * 7. Statement 
+ * 7.10. Block statement and exception handling.
+ *
+ * Positive test: Cast exception.
+ *)
+module Main;
+
+var 
+	r : real;
+	ch : char;
+	exc : boolean;
+begin
+	r := 2.0;
+	exc := false;
+	ch := char(r);
+
+	if char(integer("A")+integer(ch)) = "C"
+	then halt(1) else halt(0) end;
+end Main.
+

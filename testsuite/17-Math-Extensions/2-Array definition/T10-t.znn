@@ -1,0 +1,23 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Definition
+ * 
+ * Positive test: dynamic math array creation & expression array definition
+ *)
+
+module Main;
+var
+	a : array {math} *, * of real;
+	b : array {math} * of cardinal;
+	c : array {math} *, *, * of integer;
+begin
+	a := [[1., 2., 3.],[4., 5., 6.]];
+	b := [7, 8, 9, 10];
+	c := [[[-1, -2, -3],[-4, -5, -6]], [[-7, -8, -9],[-10, -11, -12]]];
+	if (a[1, 1] = 5.) & (b[1] = 8) & (c[1, 0, 2] = -9)
+	then 
+		halt(1);
+	else
+		halt(0);
+        end;
+end Main.

@@ -1,0 +1,12 @@
+module {public} Main;
+
+   import
+      System.Double  as Double;
+
+   var {public}
+      x : Double;
+begin
+   x:= 10.0;
+   x := - x;
+   if x = -10.0 then halt(1) else halt(0) end
+end Main.

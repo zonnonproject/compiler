@@ -1,0 +1,57 @@
+(** 
+ * 17. Math extensions.
+ * 17.5. Additional functions
+ * 
+ * Positive test: min, max
+ * with scalar
+ *)
+
+module Main;
+
+type vi = array {math} * of integer;
+type vr = array {math} * of real;
+type mi = array {math} *,* of integer;
+type mr = array {math} *,* of real;
+type vb = array {math} * of boolean;
+
+var
+	Ai, Bi, Ci : mi;
+	ai, bi, ci : vi;
+	Ar, Br, Cr : mr;
+	ar, br, cr : vr;
+	ab, bb, cb : vb;
+	
+	ii, ji : vi;
+	ib, jb : vb;
+	
+	i, j : integer;
+	qi : integer;
+	qr : real;
+	r : range;
+  
+begin
+	  
+	ai := [1,2];
+	  
+	Ai := [[1, 2, 4], [6, -1, 7]];  
+	Ar := [[-3.1, 2.5], [5.1, -4.6]];  
+	ai := [4, -3];
+	bi := [-2, 4, 8];
+	
+	ii := [0, 1, 2];
+	ji := [0, 2, 1, 0];
+	ib := [true, true];
+	
+	r := 0..1;
+	
+	qr := min(Ar);
+	
+	if qr # -4.6
+	then
+		halt(0);
+	end;
+	
+	halt(1);
+	
+end Main.
+

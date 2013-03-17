@@ -1,0 +1,31 @@
+module Main;
+
+type t1 = array {sparse} *,* of integer;
+
+var
+	a, b : t1;
+	i : array {math} * of integer;
+	j : array {math} * of integer;
+	s : array {math} * of integer;
+	c : array {math} *,* of boolean;
+  
+begin
+	i := [1, 1, 0];
+	j := [2, 0, 1];
+	s := [3, 7, 11];	
+	a := new t1(i, j, s, 3, 3);
+	i := [1, 1, 0, 1];
+	j := [2, 0, 0, 1];
+	s := [5, 7, 9, 7];	
+	b := new t1(i, j, s, 3, 3);
+	
+	c := a .< b;
+	
+	if (c[1, 2] = true) & (c[0, 1] = false) & (c[1, 1] = true) & (c[2, 2] = false)
+		& (len(c, 0) = 3) & (len(c, 1) = 3)
+		then halt(1);
+	end;
+	
+	halt(0);
+	
+end Main.

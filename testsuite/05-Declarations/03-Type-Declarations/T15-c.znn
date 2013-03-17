@@ -1,0 +1,25 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Negative test: the postulated interface is used in type declaration.
+ * The module B is declared after it is used.
+ *)
+module A;
+	import B;
+
+	type T = object { B.E };
+end A.
+
+module B;
+	definition {public} E;
+    end E;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+
+
+

@@ -1,0 +1,20 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports clause
+ *
+ * Negative test: the module A uses wrong imported name B.C.D in imports clause.
+ * The element B of the name is module B name already.
+ * The module B declared before it is used.
+ *)
+module B;
+end B.
+
+module A;
+    import B.C.D;
+end A.
+
+module Main;
+begin
+    halt(0);
+end Main.

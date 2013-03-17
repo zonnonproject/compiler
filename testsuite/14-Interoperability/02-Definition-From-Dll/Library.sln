@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{D2755667-4DC6-49D9-A42F-077B518EFAD7}") = "Library", "Library\Library.znnproj", "{5E531CD9-FC76-489D-BC76-7F1AB7E0C405}"
+EndProject
+Project("{D2755667-4DC6-49D9-A42F-077B518EFAD7}") = "UserLibrary", "UserLibrary\UserLibrary.znnproj", "{E437A701-9AA0-4261-B73D-B08CDB27DA56}"
+EndProject
+Project("{D2755667-4DC6-49D9-A42F-077B518EFAD7}") = "Use", "Use\Use.znnproj", "{FE341AC3-53CE-4838-A622-AC46DB3553AF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|.NET = Debug|.NET
+		Release|.NET = Release|.NET
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E531CD9-FC76-489D-BC76-7F1AB7E0C405}.Debug|.NET.ActiveCfg = Debug|.NET
+		{5E531CD9-FC76-489D-BC76-7F1AB7E0C405}.Debug|.NET.Build.0 = Debug|.NET
+		{5E531CD9-FC76-489D-BC76-7F1AB7E0C405}.Release|.NET.ActiveCfg = Release|.NET
+		{5E531CD9-FC76-489D-BC76-7F1AB7E0C405}.Release|.NET.Build.0 = Release|.NET
+		{E437A701-9AA0-4261-B73D-B08CDB27DA56}.Debug|.NET.ActiveCfg = Debug|.NET
+		{E437A701-9AA0-4261-B73D-B08CDB27DA56}.Debug|.NET.Build.0 = Debug|.NET
+		{E437A701-9AA0-4261-B73D-B08CDB27DA56}.Release|.NET.ActiveCfg = Release|.NET
+		{E437A701-9AA0-4261-B73D-B08CDB27DA56}.Release|.NET.Build.0 = Release|.NET
+		{FE341AC3-53CE-4838-A622-AC46DB3553AF}.Debug|.NET.ActiveCfg = Debug|.NET
+		{FE341AC3-53CE-4838-A622-AC46DB3553AF}.Debug|.NET.Build.0 = Debug|.NET
+		{FE341AC3-53CE-4838-A622-AC46DB3553AF}.Release|.NET.ActiveCfg = Release|.NET
+		{FE341AC3-53CE-4838-A622-AC46DB3553AF}.Release|.NET.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

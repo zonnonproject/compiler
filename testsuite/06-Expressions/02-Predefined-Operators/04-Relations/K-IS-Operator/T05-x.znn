@@ -1,0 +1,16 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * IS operator.
+ *
+ * Negative test: is operator is used to check integer variable.
+ * The result is true.
+ *)
+module Main;
+	object A;
+	end A;
+begin
+	if A is integer
+	then halt(1) else halt(0) end;
+end Main.

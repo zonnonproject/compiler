@@ -1,0 +1,131 @@
+(*************************************************************************
+Solving a linear programming problem.
+
+Solving a linear programming problem:
+Maximize (cx) 
+if Ax <= b
+using modified simplex method.
+
+Method description: http://en.wikipedia.org/wiki/Simplex_method
+
+Author: Nina Gonova                     
+Last change: 13.04.2009
+**************************************************************************)
+
+module ModifSimplexMethodAdv;
+	
+type {public} TypeOfArray = real;
+type {public, ref} Vector = array {math} * of TypeOfArray;
+type {public, ref} Matrix = array {math} *, * of TypeOfArray;
+type {public, ref} VectorInt = array {math} * of integer;
+
+(*for vector indexes; returns elements of V, which indices are not in 0:(n-1)*)
+procedure GetRestVectorInt(V : VectorInt; n : integer) : VectorInt;
+var
+	VRes : VectorInt;
+	lenVRes, i, j, k : integer;
+begin
+	lenVRes := n - len(V);
+	VRes := new VectorInt(lenVRes);
+	k := 0;
+	
+	for i := 0 to n - 1 do
+		j := 0;
+		loop
+			if j = len(V) then
+				exit;
+			end;
+			if V[j] = i then
+				exit;
+			end;
+			inc(j);
+		end;
+		if j = len(V) then
+			VRes[k] := i;
+			inc(k);
+		end;
+	end;
+	
+	return VRes;
+end GetRestVectorInt;
+
+
+(*Solution of linear programming problem*)
+(*Jb = numbers of columns, which form starting admissible base*)
+procedure {public} Solution(Q : Matrix; c, b : Vector; Jb : VectorInt) : Vector;
+var
+	B, N : Matrix; (*B = basic matrix, N = not basic matrix*)
+	i, j, s, r : integer; (*s = leading column, r = leading row*)	
+	V, u, a : Vector; (*V = the result*)
+	Jn : VectorInt; (*Jn = column numbers, which are not in B*)
+	cn, cb : Vector; (*_n = not basic, _b = basic*)
+	m, n : integer; (*m = NRows, n = NCols*)
+	VBool : array {math} * of boolean;
+	help_vr : array {math} * of real;
+
+begin
+
+	V := nil;
+	m := len(b);
+	n := len(c);
+	
+	Jn := GetRestVectorInt(Jb, n);
+	
+	cb := c[Jb]; (*vector: (c[Jb[1]], ... , c[Jb[len(Jb)-1]])*)
+	cn := c[Jn]; (*vector: (c[Jn[1]], ... , c[Jn[len(Jn)-1]])*)
+	B := Q[.., Jb];
+	N := Q[.., Jn];
+	
+	loop		
+		u := cb / B;
+		b := B \ b;
+		cn := cn - u*N;
+		
+		(*chose s, but this s corresponds N, not Q*)
+		VBool := cn .< 0;
+		if all(~VBool) = true then	(*Current vector is not optimal yet*)
+			V := new Vector(n);
+			V[Jb] := b;
+			exit;
+		end;
+		
+		s := find(VBool) [0];	(*find(VBool) finds indices of true elements*) (*or find(VBool, true), see MatLab*)
+			
+		a := B \ N[.., s];
+		
+		(*chose r*)
+		VBool := a .> 0;
+		if all(VBool) = false then
+			return nil;		(*max cx = infinity*)
+		end;
+		
+		(*r := minind(b[VBool] / a[VBool]);*)
+		help_vr := b[VBool] ./ a[VBool];
+		r := find(min(help_vr), help_vr) [0];
+		
+		(*change base*)
+		cb[r] := c[s];
+		B[.., r] := Q[.., s];
+		Jb[r] := s;	
+		cn := c[Jn];
+		N := Q[.., Jn];			
+	end;
+	
+	return V;
+
+end Solution;
+
+
+begin
+
+end ModifSimplexMethodAdv.
+
+(***********)
+
+module Main;
+
+begin
+
+end Main.
+
+

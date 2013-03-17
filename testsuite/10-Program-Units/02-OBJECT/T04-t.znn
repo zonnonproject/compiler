@@ -1,0 +1,54 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ *
+ * Cross references for objects.
+ *)
+module Main;
+	import A, B;
+
+	var 
+		a : A;
+		b : B;
+begin
+	a := new A;
+	b := new B;
+
+	a.b := b;
+	b.a := a;
+	
+	a.b.a.x := 1;
+	b.a.b.y := 2;
+
+	if (a.b.y = 2) & (b.a.x = 1)
+	then halt(1) else halt(0) end;	
+end Main.
+
+object {public, ref} A;
+	import B;
+	
+	var {public}
+		a : A; 
+		b : B;
+		x : integer;
+
+	procedure {public} P;
+	begin
+		a := b.a;
+	end P;
+end A.
+
+object {public, ref} B;
+	import A;
+	
+	var {public}
+		a : A; 
+		b : B;
+		y : integer;
+
+	procedure {public} P;
+	begin
+		b := a.b;
+	end P;
+end B.
+

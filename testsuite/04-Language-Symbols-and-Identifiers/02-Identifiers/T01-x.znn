@@ -1,0 +1,11 @@
+(* 
+	4. Language symbols and identifiers.
+	4.2 Identifiers
+	Negative test: the wrong identifier 1etter.
+*)
+module Main;
+var 1etter : char;
+	
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,107 @@
+(* ********* Zonnon online collection ***********
+ * OptTree (Chapter 4, Example 4.6)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module OptTree; 
+
+	const N = 100; (* max no. of keywords *) 
+		  ARRAY_SIZE = N+1; (* N+1 because we want [0..N]*)
+  			       	 (* [0..N] consist of N+1 element *) 
+	var ch: char; 
+		i, j, n: integer; 
+		key: array ARRAY_SIZE of string; 
+		a:   array ARRAY_SIZE of integer;
+		b:   array ARRAY_SIZE of integer; 
+		p,w: array ARRAY_SIZE, ARRAY_SIZE of integer; 
+		r:   array ARRAY_SIZE, ARRAY_SIZE of integer; 
+ 
+	procedure BalTree(i,j: integer): integer; 
+		var k: integer; 
+	begin k := (i+j+1) div 2; r[i,j] := k; 
+		if i >= j then return 0 
+			else return BalTree(i,k-1) + BalTree(k,j) + w[i,j] 
+		end 
+	end BalTree; 
+ 
+	procedure OptTree; 
+		var x, min: integer; 
+			i, j, k, h, m: integer; 
+	begin  (*argument: W, results: p, r*) 
+		for i := 0 to n do p[i,i] := 0 end; 
+		for i := 0 to n-1 do 
+			j := i+1; p[i,j] := w[i,j]; r[i,j] := j 
+		end ; 
+		for h := 2 to n do 
+			for i := 0 to n-h do 
+				j := i+h; m := r[i,j-1]; min := p[i,m-1] + p[m,j]; 
+				for k := m+1 to r[i+1,j] do 
+					x := p[i,k-1] + p[k,j]; 
+					if x < min then 
+						m := k; min := x 
+					end 
+				end; 
+				p[i,j] := min + w[i,j]; r[i,j] := m ;
+			end;
+		end; 
+	end OptTree; 
+ 
+	procedure PrintTree(i, j, level: integer); 
+		var k: integer; 
+	begin 
+		if i < j then 
+			PrintTree(i, r[i,j]-1, level+1); 
+			for k := 1 to level do write("     ") end ; 
+			writeln(key[r[i,j]]); 
+			PrintTree(r[i,j], j, level+1) 
+		end 
+	end PrintTree; 
+ 
+begin (*main program*) 
+	n := 0; 
+	writeln("Example 4.6");
+	writeln("Please enter b[n] a[n+1] key for each line");
+	writeln("type second var -1 to finish");
+	writeln("You can copy smaple data from example_4_6.in");
+	for i:= 0 to N do key[i] := "NONE"; end;
+	loop    
+        write("b[",n:2,"] a[",n+1:2,"]  ");
+        read(b[n]); 
+		read(j); 
+		if j = -1 then exit end; 
+		n := n+1; 
+        a[n] := j; 
+		readln(key[n]);
+	end ; 
+
+	(*compute w from a and b*) 
+	for i := 0 to n do 
+		w[i,i] := b[i]; 
+		for j := i+1 to n do 
+			w[i,j] := w[i,j-1] + a[j] + b[j] 
+		end;
+	end ; 
+	writeln("Total weight = ",w[0,n]:6);
+	writeln("Pathlength of balanced tree = ",BalTree(0, n): 6); 
+	PrintTree(0, n, 0); 
+	writeln;
+	readln; 
+	OptTree; 
+	writeln("Pathlength of optimal tree = ,p[0,n]: 6"); 
+	PrintTree(0, n, 0); writeln; 
+	readln; 
+	for i := 0 to n do 
+		w[i,i] := 0; 
+		for j := i+1 to n do 
+			w[i,j] := w[i,j-1] + a[j];
+		end;
+	end; 
+	OptTree; 
+	writeln("optimal tree ~ considering b");
+	PrintTree(0, n, 0); writeln; 
+	writeln("Type 'q' to quit");
+end OptTree. 
+

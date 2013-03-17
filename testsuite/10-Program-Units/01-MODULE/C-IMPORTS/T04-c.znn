@@ -1,0 +1,19 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports clause
+ *
+ * Positive test: the module A uses module B in import clause.
+ * The module B is declared before it is used.
+ *)
+module A;
+	import B;
+end A.
+
+module B;
+end B.
+
+module Main;
+begin
+    halt(1);
+end Main.

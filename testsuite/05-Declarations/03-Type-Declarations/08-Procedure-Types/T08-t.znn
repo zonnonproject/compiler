@@ -1,0 +1,27 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: procedure type with result type.
+ *)
+module Main;
+	type PT = procedure(integer, integer) : integer;
+
+	(* The procedure makes sum of i and j and puts the result to j. *)
+	procedure Sum(j : integer; i : integer) : integer;
+	begin
+		return j + i;
+	end Sum;
+
+	var k : integer;
+		pt : PT;
+begin
+	k  := 3;
+	pt := Sum;
+	k := pt(k, 1);
+	
+	(* Check result of the iteration. *)
+	if k = 4 
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,17 @@
+(** 
+ * 7. Statement 
+ * 7.3. if statement.
+ *
+ * Negative test: condition is missing
+ *)
+
+module Main;
+var x: real;
+      i: integer;
+begin
+ 
+ if then
+   writeln("1.");
+ end;
+ 
+end Main.

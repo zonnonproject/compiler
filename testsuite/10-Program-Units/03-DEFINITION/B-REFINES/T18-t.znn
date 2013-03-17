@@ -1,0 +1,65 @@
+definition{public} Graphical;
+	procedure MoveTo (newX, newY: integer);
+	procedure MoveBy (dx, dy: integer);
+	procedure Draw;
+	procedure Draw2;
+end Graphical.
+
+implementation Graphical;
+	import Main;
+	var x, y: integer; (* object\\\\\\\\'s position *)
+
+	procedure MoveTo (newX, newY: integer);
+	begin
+		inc(Main.ok);
+		writeln("Graphical.MoveTo");
+		x := newX; y := newY
+	end MoveTo;
+
+	procedure MoveBy (dx, dy: integer);
+	begin
+		writeln("Graphical.MoveBy");
+		x := x + dx; y := y + dy
+	end MoveBy;
+
+	procedure{public} Draw implements Graphical.Draw;
+	begin
+		writeln("Graphical.Draw");
+	end Draw;
+
+	procedure{public} Draw2 implements Graphical.Draw2;
+	begin
+	end Draw2;
+
+end Graphical.
+
+definition Rectangle refines Graphical;
+var width, height: integer;
+
+	procedure{public} Area(): integer;
+end Rectangle.
+
+object{ref} Box implements Rectangle;
+import Main;
+	procedure{public} Area(): integer implements Rectangle.Area;
+	begin
+		inc(Main.ok);
+		writeln("Box.Area");
+		return 0
+	end Area;
+
+end Box.
+
+module Main;
+import Box;
+var {public} ok : integer;
+
+var b: Box;
+
+begin
+b := new Box();
+ok := 0;
+b.Area(); 
+b.MoveTo(10,10);
+if ok = 2 then halt(1) else halt(0) end
+end Main.

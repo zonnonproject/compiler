@@ -1,0 +1,19 @@
+(**
+ * 11. Program Units.
+ * 11.2. object
+ * Object name
+ * 
+ * Negative tests: 
+ * a) wrong simple name F at object B.E end.
+ * a) the simple name C is absent at object A.B.C end.
+ *)
+object B.E;
+end F.
+
+object A.B.C;
+end.
+
+module Main;
+begin
+	halt(0);
+end Main.

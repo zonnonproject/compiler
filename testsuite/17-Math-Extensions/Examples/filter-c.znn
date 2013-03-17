@@ -1,0 +1,97 @@
+module Filter;
+
+type Matrix = array {math} *,* of cardinal{8};
+type Vector = array {math} * of cardinal{8};
+
+
+procedure Darkness(var p: Vector; Amount: integer);
+begin
+  p := cardinal{8}(p - ((p*Amount) div 255));
+end Darkness;
+
+procedure Embossing(var m: Matrix);
+var 
+	ker: array {math} 3, 3 of integer;
+	src: Matrix;
+	i, j, k, height, width: integer;
+begin
+	height := len(m, 0);
+	width := len(m, 1);
+	src := m;
+
+	ker := [[-1, -1, -1], 
+			[-1,  8, -1], 
+			[-1, -1, -1]];
+	
+	for i := 0 to height - 3
+	do
+		for j := 0 to width - 7	
+		do
+			m[i + 1, j + 3] := cardinal{8}(
+				abs((sum( src[i .. i+2, j .. j+6 by 3] .* ker ) + 127) mod 255));
+		end;
+	end;
+	
+end Embossing;
+
+
+procedure BoxBlur(var m: Matrix);
+var 
+	src: Matrix;
+	i, j, k, width, height: integer;
+begin
+	height := len(m, 0);
+	width := len(m, 1);
+	src := m;
+	k := 3;
+		
+	for i := 0 to height - 3
+	do
+		for j := 0 to width - 7
+		do	
+			m[i+1, j+3] := cardinal{8}(
+				sum( cardinal{16}(src[i .. i+2, j .. j+6 by 3]) ) div 9);
+		end;
+	end;
+	
+end BoxBlur;
+
+
+procedure MakeMatrixFromVector(var v: Vector; var m: Matrix);
+var
+	width, height, i: integer;
+begin
+	height := len(m, 0);
+	width := len(m, 1);
+	for i := 0 to height - 1 
+	do
+		m[i, .. ] := v[i*width..(i+1)*width - 1];
+	
+	end;
+	
+end MakeMatrixFromVector;
+
+procedure MakeVectorFromMatrix(var m: Matrix; var v: Vector);
+var
+	width, height, i: integer;
+begin
+	height := len(m, 0);
+	width := len(m, 1);
+	for i := 0 to height - 1 
+	do
+		v[i*width..(i+1)*width - 1] := m[i, .. ];
+	end;
+end MakeVectorFromMatrix;
+
+begin
+
+end Filter.
+
+(***********)
+
+module Main;
+
+begin
+
+end Main.
+

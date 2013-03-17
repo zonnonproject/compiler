@@ -1,0 +1,17 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * The public & private modifiers
+ *
+ * Negative test: call of private procedure B;
+ *)
+module A;
+	procedure { private } B;
+	begin end B;
+end A.
+
+module Main;
+	import A;
+begin
+	A.B();
+	halt(0);
+end Main.

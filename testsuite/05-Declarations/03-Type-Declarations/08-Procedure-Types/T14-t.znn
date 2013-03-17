@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: parameter name is used in procedure type.
+ * Warning from compiler.
+ *)
+module Main;
+	type PT = procedure(i : integer) : integer;
+
+	var pt : PT;
+begin
+	halt(1);
+end Main.

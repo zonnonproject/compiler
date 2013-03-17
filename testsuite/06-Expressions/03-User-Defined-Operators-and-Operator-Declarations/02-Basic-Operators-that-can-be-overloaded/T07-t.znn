@@ -1,0 +1,31 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.2. Basic operators that can be overloaded.
+ *
+ * Positive test: points equality.
+ *)
+module Main;
+	type {public} Point = object
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator "=" (p1, p2 : Point) : boolean;
+	begin 
+		return (p1.x = p2.x) & (p1.y = p2.y);
+	end "=";
+
+	var { public } 
+		p1, p2 : Point;
+begin
+	p1.x := 2;
+	p1.y := 2;
+
+	p2.x := 2;
+	p2.y := 2;
+
+	if p1 = p2 then halt(1) else halt(0) end;
+end Main.

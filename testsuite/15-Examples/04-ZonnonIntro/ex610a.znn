@@ -1,0 +1,41 @@
+(* ********* Zonnon online collection ***********
+ * Arrays as function argument
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module example610b;
+
+procedure InitializeMatrix(
+					var mat: *,* of real
+				);
+	var i, j: integer; 
+begin
+	for i := 0 to len(mat, 0) - 1 do
+		for j := 0 to len(mat, 1) - 1 do
+			mat[i][j] := i * 10 + j;
+		end
+	end
+end InitializeMatrix;
+
+procedure PrintMatrix(
+					var mat: *,* of real
+				);
+	var i, j: integer; 
+begin
+	for i := 0 to len(mat, 0) - 1 do
+		for j := 0 to len(mat, 1) - 1 do
+			write(mat[i][j]:3:0);
+		end;
+		writeln;
+	end
+end PrintMatrix;
+
+var m: array 10 of array 10 of real;
+begin
+  InitializeMatrix(m);
+  writeln;
+  PrintMatrix(m);
+end example610b.

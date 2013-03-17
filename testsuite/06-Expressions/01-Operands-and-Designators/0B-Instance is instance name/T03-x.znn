@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Negative test: access to private variable.
+ * The object A.B is declared after it is used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	b.j := 1;
+	i := b.j;
+	halt(0);
+end Main.
+
+object A.B;
+	var { public } 
+		i : integer;
+
+	var { public, immutable } 
+		k : integer;
+
+	var { private } 
+		j : integer;
+end B.

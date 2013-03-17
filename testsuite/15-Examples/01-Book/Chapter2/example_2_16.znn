@@ -1,0 +1,225 @@
+(* ********* Zonnon online collection ***********
+ * Polyphase (Chapter 2, Example 2.16)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module FileSystem;
+   const MaxLength = 4096;
+   object {value, public} Sequence;
+      var {public}
+          pos, length: integer;
+          eof: boolean;
+          a: array MaxLength of integer; (* word? *)
+   end Sequence;
+
+   procedure {public} Open(var f:Sequence);
+   begin
+      f.length := 0;
+      f.pos := 0;
+      f.eof := false;
+   end Open;
+
+   procedure {public} WriteInt(var f:Sequence; w:integer);
+   begin
+      if f.pos < MaxLength then
+         f.a[f.pos] := w; f.pos := f.pos+1; f.length := f.pos;
+      else
+         halt(0);
+      end;
+   end WriteInteger;
+
+   procedure {public} Reset(var f:Sequence);
+   begin
+      f.pos := 0; f.eof := false;
+   end Reset;
+
+   procedure {public} ReadInt(var f:Sequence; var w:integer);
+   begin
+      if f.pos = f.length then f.eof := true; w:=-1;
+      else w:= f.a[f.pos]; f.pos := f.pos + 1;
+      end;
+   end ReadInteger;
+
+   procedure {public} Close(var f:Sequence);
+   begin
+      (* nothing to do *)
+   end Close;
+end FileSystem.
+
+
+
+module Sequences;
+   import FileSystem;
+   object {value, public} Sequence;
+      var {public} first: integer;
+          eor, eof: boolean;
+          f: FileSystem.Sequence;
+   end Sequence;
+
+   procedure {public} OpenSeq(var s: Sequence);
+   begin FileSystem.Open(s.f);
+   end OpenSeq;
+
+   procedure {public} OpenRandomSeq(var s:Sequence; length, seed: integer);
+   var i: integer;
+   begin
+      FileSystem.Open(s.f);
+      for i:=0 to length-1 do
+         FileSystem.WriteInt(s.f, seed); seed := (31 * seed) mod 997 + 5;
+      end;
+   end OpenRandomSeq;
+
+   procedure {public} StartRead(var s:Sequence);
+   begin
+      FileSystem.Reset(s.f); 
+      FileSystem.ReadInt(s.f, s.first); 
+      s.eof := s.f.eof;
+   end StartRead;
+
+   procedure {public} StartWrite(var s:Sequence);
+   begin
+      FileSystem.Reset(s.f);
+      s.f.length := 0;
+   end StartWrite;
+
+   procedure {public} Copy(var x, y:Sequence);
+   begin
+      y.first := x.first;
+      if ~x.eof then 
+        FileSystem.WriteInt(y.f,y.first); 
+        FileSystem.ReadInt(x.f, x.first);
+      end; 
+      x.eof := x.f.eof;
+      x.eor := x.eof or (x.first < y.first);
+   end Copy;
+
+   procedure {public} CopyRun(var x,y:Sequence); 
+   begin
+     repeat Copy(x,y);
+     until x.eor;
+   end CopyRun;
+
+   procedure {public} CloseSeq(var s: Sequence);
+   begin
+      FileSystem.Close(s.f);
+   end CloseSeq;
+
+   procedure {public} ListSeq(var s:Sequence);
+   var i,L: integer;
+   begin
+      FileSystem.Reset(s.f); i:=0; L:=s.f.length;
+      while i<L do
+         write(s.f.a[i]:6); i := i + 1;
+         if i mod 10 = 0 then writeln; end;
+      end;
+      writeln;
+   end ListSeq;
+
+end Sequences.
+
+
+
+
+(**************************************************)
+(**************************************************)
+
+
+module Polyphase;
+import Sequences;
+
+const N = 6;
+var i,j,mx,tn,k,dn,z,level: integer;
+    x, min: integer;
+    a,d,t,ta: array N+1 of integer; (* +1 just for test *)
+    f0: Sequences.Sequence;
+    f: array N+1 of Sequences.Sequence;
+
+procedure Select;
+var i,z: integer;
+begin
+   if d[j] < d[j+1] then j := j+1;
+   else 
+      if d[j] = 0 then
+         level := level + 1; z := a[1];
+         for i:= 1 to N-1 do
+            d[i] := z + a[i+1] - a[i]; a[i] := z + a[i+1];
+         end;
+      end;
+      j := 1;
+   end;
+   d[j] := d[j] - 1;
+end Select;
+
+procedure CopyRun; (*from f0 to f[j] *)
+begin
+  repeat Sequences.Copy(f0, f[j]) until f0.eor;
+end CopyRun;
+
+var temp,temp2:integer;
+begin 
+   Sequences.OpenRandomSeq(f0, 100, 561); 
+   Sequences.ListSeq(f0);
+   for i:= 1 to N do Sequences.OpenSeq(f[i]); end;
+
+   for i := 1 to N-1 do
+      a[i] := 1; d[i] := 1; Sequences.StartWrite(f[i]);
+   end;
+   level := 1; j := 1; a[N] := 0; d[N] := 0; Sequences.StartRead(f0);
+   repeat Select; CopyRun;
+   until f0.eof or (j = N-1);
+   while ~f0.eof do
+      Select;
+      if f[j].first <= f0.first then
+         CopyRun;
+         if f0.eof then d[j] := d[j] + 1; else CopyRun; end;
+      else CopyRun;
+      end;
+   end;
+
+   for i:= 1 to N-1 do t[i] := i; Sequences.StartRead(f[i]); end;
+   t[N] := N;
+
+   repeat (* t[1] ... t[N-1] --> t[N] *)
+      z := a[N-1]; d[N] :=0; 
+      temp := t[N]; Sequences.StartWrite(f[temp]);  
+
+      repeat k:=0; (* one series *)
+           for i := 1 to N-1 do
+              if d[i] > 0 then d[i] := d[i] - 1;
+              else k := k+1; ta[k] := t[i];
+              end;
+           end;
+           if k=0 then d[N] := d[N]+1;
+           else (* t[1]..t[k] --> t[N] *)
+              repeat
+                 i:=1; mx := 1; min := f[ta[1]].first;
+                 while i<k do
+                   i := i+1; x := f[ta[i]].first;
+                   if x < min then min := x; mx := i; end;
+                 end;
+                 temp:=ta[mx]; temp2:=t[N];
+                 Sequences.Copy(f[temp], f[temp2]); 
+                 (*0177: (0,0): Values of type System.IntPtr cannot be implicitly coerced to type System.Int32*)
+                 if f[ta[mx]].eor then
+                    ta[mx] := ta[k]; k:= k-1;
+                 end;
+              until k = 0;
+           end;
+           z := z-1;
+      until z = 0;
+      temp := t[N]; Sequences.StartRead(f[temp]); 
+      tn := t[N]; dn :=  d[N]; z := a[N-1];
+      for i := N to 2 by -1 do 
+         t[i] := t[i-1]; d[i] := d[i-1]; a[i] := a[i-1]-z;
+      end;
+      t[1]:= tn; d[1]:= dn; a[1] := z;
+      temp := t[N]; Sequences.StartWrite(f[temp]); 
+      level := level - 1;
+   until level = 0;
+
+   Sequences.ListSeq(f[t[1]]);
+   for i:=1 to N do Sequences.CloseSeq(f[i]); end;
+end Polyphase.

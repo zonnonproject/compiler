@@ -1,0 +1,11 @@
+(** 
+ * 5. Declarations.
+ * 5.2. Constant Declarations.
+ *
+ * Positive test: set constant.
+ *)
+module Main;
+	const opCodeMask = { 0..3 };
+begin
+	halt(1);
+end Main.

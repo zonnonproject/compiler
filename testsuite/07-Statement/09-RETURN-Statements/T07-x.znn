@@ -1,0 +1,14 @@
+(** 
+ * 7. Statement 
+ * 7.9. return statement.
+ *
+ * Negative test: function with not declared variable in RETURN .
+ *)
+module Main;
+	procedure p(i : integer) : integer;
+	begin 
+		return j 
+	end p;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,20 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * cardinal type
+ *
+ * Negative test: wrong cardinal variable assignment.
+ * Const expression is used for cardinal type width.
+ *)
+module Main;
+	const N = 2;
+	var i8  : cardinal{ 3 + 5  };
+	var i16 : cardinal{ N + 14 };
+begin
+	i8  := 1;
+	i16 := 2;
+
+	i8 := i16; (* Wrong assignment: left type width {8} < right type width {16} *)
+	halt(0);
+end Main.

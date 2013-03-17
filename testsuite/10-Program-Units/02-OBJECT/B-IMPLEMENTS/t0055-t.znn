@@ -1,0 +1,27 @@
+module Main;
+
+type {public} Vec = object implements []
+var val: real;
+procedure {public} Set(i:integer; v:real) implements [].Set;
+begin
+	val := v;
+end Set;
+
+procedure {public} Get(i:integer): real implements [].Get;
+begin
+    return val;
+end Get;
+
+end Vec;
+
+var a: real;
+   vec: Vec;
+begin
+   vec[1] := 1.25;
+   a := vec[1];
+   if a # 1.25 then halt(0) end;
+   vec.Set(1, 2.70);
+   a := vec.Get(1);
+   if a # 2.70 then halt(0) end;
+   halt(1);
+end Main.

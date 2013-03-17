@@ -1,0 +1,120 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The modules in CORE form a foundation for computation modeling in Zonnon.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates write-to and read-from UTF8-encoded text files for the framework.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* All text files have a '.txt' extension.  No extension is required for the  *)
+(* passed variable 'fileName' in procedures FileExists, OpenReader, and       *)
+(* OpenWriter.  All text files are located in the directory 'iofiles' beneath *)
+(* the executable.                                                            *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Procedures :    FileExists          - boolean check for existence of file  *)
+(*                 OpenReader          - opens a UTF8 text file for reading   *)
+(*                 OpenWriter          - opens a UTF8 text file for writing   *)
+(*                 CloseReader         - closes a UTF8 text read-only file    *)
+(*                 CloseWriter         - closes a UTF8 text write-only file   *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCore.TextFiles;
+
+   import
+      System.IO.Directory        as Directory,
+      System.IO.DirectoryInfo    as DirectoryInfo,
+      System.IO.File             as File,
+      System.IO.Path             as Path,
+      System.IO.StreamReader     as StreamReader,
+      System.IO.StreamWriter     as StreamWriter,
+      System.Reflection.Assembly as Assembly,
+      System.Text.Encoding       as Encoding,
+      BelCore.Log                   as L;
+
+   var {private}
+      asm : Assembly;
+      dir, loc, path : string;
+      info : DirectoryInfo;
+
+   procedure {public} FileExists (fileName : string) : boolean;
+   var
+      file : string;
+   begin
+      file := Path.Combine(dir, fileName);
+      file := Path.ChangeExtension(file, ".txt");
+      return File.Exists(file)
+   end FileExists;
+
+   procedure {public} OpenReader (fileName : string) : StreamReader;
+   var
+      file, s : string;
+      sr : StreamReader;
+   begin {locked}
+      file := Path.Combine(dir, fileName);
+      file := Path.ChangeExtension(file, ".txt");
+      if ~File.Exists(file) then
+         L.WarningMessage(61,-1, "BelCore.TextFiles.OpenReader")
+      end;
+      sr := new StreamReader(file, Encoding.UTF8());
+      return sr
+   end OpenReader;
+
+   procedure {public} OpenWriter (fileName : string) : StreamWriter;
+   var
+      autoFlush : boolean;
+      backup, file : string;
+      sw : StreamWriter;
+   begin {locked}
+      file := Path.Combine(dir, fileName);
+      file := Path.ChangeExtension(file, ".txt");
+      if File.Exists(file) then
+         backup := Path.ChangeExtension(file, ".txt.bak");
+         if File.Exists(backup) then
+            File.Delete(backup)
+         end;
+         File.Move(file, backup)
+      end;
+      autoFlush := true;
+      sw := new StreamWriter(file, autoFlush, Encoding.UTF8());
+      return sw
+   end OpenWriter;
+
+   procedure {public} CloseReader (sr : StreamReader);
+   begin {locked}
+      sr.Close
+   end CloseReader;
+
+   procedure {public} CloseWriter (sw : StreamWriter);
+   begin {locked}
+      sw.Close
+   end CloseWriter;
+
+begin
+   asm  := Assembly.GetExecutingAssembly();
+   loc  := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir  := Path.Combine(path, "iofiles");
+   if ~Directory.Exists(dir) then
+      info := Directory.CreateDirectory(dir)
+   end
+end TextFiles.

@@ -1,0 +1,26 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Initialisation
+ *)
+
+module {protected} Main;
+
+activity A(j : integer);
+begin
+	return integer(j + 1)
+end A;
+
+var 
+	a : A;
+	i : integer;
+begin
+	a := new A(integer(100));
+	i := a();
+
+	if i = 101 then
+		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end
+end Main.

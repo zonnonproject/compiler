@@ -1,0 +1,81 @@
+(* ********* Zonnon online collection ***********
+ * Selection (Chapter 3, Example 3.7)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Selection;
+
+const n = 10;
+object {value} TObj;
+var {public}
+ value, weight :integer;
+end TObj;
+
+
+var
+   i:integer;
+   obj: array n of TObj;
+   limw, totv, maxv: integer;
+   s, opts: set{32};
+   WeightInc, WeightLimit: integer;
+   tick: array 2 of char;
+
+procedure Try(i,tw,av:integer);
+var av1: integer;
+begin
+   if tw + obj[i].weight <= limw then
+      s := s + {i};
+      if i < n then 
+         Try(i+1, tw + obj[i].weight, av);
+      else
+        if av > maxv then maxv := av; opts := s; end;
+      end;
+      s := s - {i};
+   end;
+
+   av1 := av - obj[i].value;
+   if av1 > maxv then
+      if i < n then Try(i+1, tw, av1)
+      else maxv := av1;  opts := s;
+      end;
+   end;
+end Try;
+
+begin
+   writeln("Example 3.7 (Selection)");   
+   writeln("Enter ",n," pairs of numbers:");   
+   writeln("You can just copy sample data from example_3_7.in");   
+  
+   totv := 0; limw := 0;
+   tick[0] := ' '; tick[1] := '*';
+   for i := 0 to n - 1 do
+      read(obj[i].weight, obj[i].value);
+      totv := totv + obj[i].value;
+   end;
+   read(WeightInc, WeightLimit);
+   write("Weigth");
+   for i := 0 to n - 1 do write(obj[i].weight:5) end;
+   writeln; write("Value");
+   for i := 0 to n - 1 do write(obj[i].value:5); end;
+   writeln;
+   repeat
+      limw := limw + WeightInc; maxv := 0;
+      s := {};
+      opts := {}; 
+      Try(0,0,totv);
+      write(limw:6);
+      for i := 0 to n - 1 do
+        if i in opts then
+         write(" ",tick[1]);
+        else
+         write(" ",tick[0]);
+        end;
+      end;
+      writeln(maxv:8); 
+   until limw >= WeightLimit;
+   writeln("Type 'q' to exit");	
+end Selection.
+   

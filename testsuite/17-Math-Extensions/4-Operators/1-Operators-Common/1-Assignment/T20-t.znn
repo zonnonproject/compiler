@@ -1,0 +1,31 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Assignment
+ * 
+ * Positive test: mixed indexing: arrays in the left and in the right part are the same
+ *)
+
+module Main;
+
+type vb = array {math} * of boolean;
+type vi = array {math} * of integer;
+type vmi = array {math} * of integer;
+
+var
+	a1, a2 : vmi;
+	b : vb;
+	i : vi;
+begin	
+
+	a1 := [4, 5, 6, 7, 8];
+	b := [false, false, true, true, false];
+	
+	a1[b] := a1[0..3 by 2];
+	if (a1[0] = 4) & (a1[1] = 5) & (a1[2] = 4) & (a1[3] = 6) & (a1[4] = 8)
+	then
+		halt(1);
+	else
+		halt(0);
+	end;		
+end Main.

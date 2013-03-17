@@ -1,0 +1,7 @@
+PASSED - overall positive decision about the test
+NOT PASSED - overall negative decision about the test
+SUCCESS - compilation / execution successful
+ERROR - compilation failed with normal syntax or semantic error
+ABORT - compilation failed because of an internal compiler error
+NOT RUN - the test was not / not supposed to be executed
+FAIL - execution failed

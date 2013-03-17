@@ -1,0 +1,21 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * The public & private modifiers
+ *
+ * Negative test: the private operation using.
+ * The private is default visibility of a module procedures.
+ *)
+module {public} A;
+	procedure B;
+	begin end B;
+end A.
+
+module Main;
+	import A;
+begin
+	A.B();
+	halt(1);
+end Main.
+
+
+

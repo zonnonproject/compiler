@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Negative test: the name C is not type name in module B.
+ * The module B is declared before it is used.
+ *)
+module B;
+	var {public} C : integer;
+end B.
+
+module A;
+	import B;
+
+	type T = B.C;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

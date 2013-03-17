@@ -1,0 +1,22 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: The string type is type from underlined environment.
+ * Test for string and System.String compatibility.
+ *)
+module Main;
+
+import System.String as String;
+
+var     s1 : String;
+	s2 : string;
+
+begin
+	s1 := "abc";
+	s2 := s1;
+
+	if s2.StartsWith("ab")
+	then halt(1) else halt(0) end;
+end Main.

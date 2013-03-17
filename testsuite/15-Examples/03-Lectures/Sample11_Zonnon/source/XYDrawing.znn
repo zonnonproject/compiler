@@ -1,0 +1,111 @@
+(* ********* Zonnon online collection ***********
+ * XYDrawing
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module {public} XYDrawing; 
+
+import 
+	System.Drawing.Size as Size, 
+	System.Drawing.Point as Point, 
+	System.Drawing.Rectangle as Rectangle, 
+	System.Drawing.Color as Color, 
+	System.Drawing.Graphics as Graphics,  
+
+	System.Threading.Thread as Thread, 
+	System.Threading.ThreadStart as ThreadStart, 
+
+	System.Windows.Forms.Control as Control,
+	System.Windows.Forms.KeyPressEventHandler as KeyPressEventHandler,
+	System.Windows.Forms.KeyPressEventArgs as KeyPressEventArgs,
+	System.Windows.Forms.Application as Application,
+	System.Windows.Forms.Form as Form;
+
+const
+	thread_sleep_t = 50; (* Time to wait until form is initialized. *)
+
+var {public}
+	form_init : boolean;
+	xsize, ysize : integer; (* Window *)
+	dbx, dby : integer;
+	currentChar : char;
+
+object {public, ref} DrawingForm implements Form;
+	var {public} 
+		dsize : Size;
+		rect  : Rectangle;
+		point : Point;
+
+	procedure {public} OnKeyPress(args : KeyPressEventArgs);
+	begin
+		currentChar := char(args.KeyChar)     
+	end processKeys;
+begin
+	rect.X := dbx; 
+	rect.Y := dby; 
+	rect.Width := 0; 
+	rect.Height := 0; 
+	DesktopBounds := rect;  
+	
+	dsize.Width := xsize; 
+	dsize.Height := ysize; 
+	ClientSize := dsize;
+
+	BackColor := Color.White;
+	Text := "XYDrawing";
+	ShowInTaskbar := true;
+	AutoScale := false;
+	AllowDrop := false;
+
+	form_init := true
+end DrawingForm;
+
+var
+	df : DrawingForm;
+
+(* Just a helper object, rg. *)
+object {ref, public} ThreadStarter;
+	procedure {public} Running;
+	begin
+		df := new DrawingForm();
+		Application.Run(df)  
+	end Running;
+end ThreadStarter;     
+type ThreadProcedure = procedure;
+
+var 
+	sysThreadObj : Thread;
+	sysThreadStartObj : ThreadStart;
+	starter : ThreadStarter; 
+
+procedure {public} Open(wx, wy : integer; var GraphicObj : Graphics);
+begin
+	xsize := wx; 
+	ysize := wy;
+
+	starter := new ThreadStarter(); 
+
+	sysThreadStartObj := new ThreadStart(starter.Running);
+	sysThreadObj := new Thread(sysThreadStartObj);
+	sysThreadObj.Start();
+
+	while ~form_init do 
+		Thread.Sleep(50) 
+	end;
+	
+	putGraphic(GraphicObj)		
+end Open;
+
+procedure putGraphic(var GraphicObj : Graphics); 
+begin
+	GraphicObj := df.CreateGraphics()  
+end putGraphic;
+
+begin  
+	dbx := 50; 
+	dby := 50;
+	form_init := false
+end XYDrawing.

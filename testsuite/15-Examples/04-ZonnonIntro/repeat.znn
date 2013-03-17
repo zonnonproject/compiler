@@ -1,0 +1,16 @@
+(* ********* Zonnon online collection ***********
+ * Example on using repeat
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module example525;
+var length: integer;
+begin
+  repeat 
+     write("Enter length ( > 0): "); readln(length);
+  until length > 0;
+  writeln("Acceped: ", length);
+end example525.

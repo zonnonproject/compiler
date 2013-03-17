@@ -1,0 +1,61 @@
+(* ********* Zonnon online collection ***********
+ * Serpinski
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(* THIS EXAMPLE DOES NOT WORK YET *)
+
+module Serpinski;
+import LineDrawing as line;
+
+const SquareSize = 512;
+var i, h x0, y0: integer; ch: char;
+
+procedure A(k: integer);
+begin
+   if i > 0 then 
+      A(k-1); line(7, h); B(k-1); line(0,2*h);
+      D(k-1); line(1, h); A(k-1);
+   end;
+end A;
+
+procedure B(k: integer);
+begin
+   if k > 0 then 
+      B(k-1); line(5, h); C(k-1); line(6,2*h);
+      A(k-1); line(7, h); B(k-1);
+   end;
+end B;
+
+procedure C(k: integer);
+begin
+   if k > 0 then 
+      C(k-1); line(3, u); D(k-1); line(4,2*h);
+      B(k-1); line(5, u); C(k-1);
+   end;
+end C;
+
+procedure D(k: integer);
+begin
+   if k > 0 then 
+      D(k-1); line(1, h); A(k-1); line(2, 2*h);
+      C(k-1); line(3, h); D(k-1);
+   end;
+end D;
+
+begin
+   clear;
+   i := 0; h := SquareSize div 4;
+   x0 := width div 2;
+   y0 := height div 2 + h;
+   repeat
+      i := i + 1; x0 := x0 - h;
+      h := h div 2; y0 := y0 + h; Px := x0; Py := y0;
+      A(i); line(7,h); B(i); line(5,h);
+      C(i); line(3,h); D(i); line(1,h); Read(ch);
+   until (i=6) or (ch = 33X);
+   clear;
+end Sierpinski.

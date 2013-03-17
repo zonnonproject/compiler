@@ -1,0 +1,31 @@
+module {public} Main;
+
+   import
+      BelCore.Log as L;
+
+   procedure {public} Run;
+   var
+      s : string;
+   begin
+      s := "You can write your own Message to the log file.";
+      L.Message(s);
+      s := "";
+      L.Message(s);
+      s := "Or you can log a builtin Warning Message like:";
+      L.Message(s);
+      L.WarningMessage(1,-1, "Main.Run");
+      s := "";
+      L.Message(s);
+      s := "Warning Messages do not terminate the program.";
+      L.Message(s);
+      s := "";
+      L.Message(s);
+      s := "Or you can terminate the program with an Error Message like:";
+      L.Message(s);
+      L.ErrorMessage(1,0, "Main.Run")
+   end Run;
+
+begin
+   Run;
+   L.Close
+end Main.

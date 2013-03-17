@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: object casting to its intrinsic type.
+ *)
+module Main;
+	var t, i : integer;
+begin
+	if t is integer 
+	then i := integer(t);
+	end;
+
+	halt(1);
+end Main.

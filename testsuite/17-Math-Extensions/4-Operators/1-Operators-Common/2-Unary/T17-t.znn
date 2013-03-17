@@ -1,0 +1,52 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Unary
+ * 
+ * Positive test: inversion + indices
+ *)
+
+module Main;
+
+type vb = array *,* of boolean;
+
+type iind = array {math} * of integer;
+type bind = array {math} * of boolean;
+
+var
+	ab1 : array {math} 2, 3 of boolean;
+	ab2 : vb;
+	
+	bi1, bi2 : iind;
+	bb1, bb2 : bind;
+	
+begin	
+	
+	ab1 := [[false, true, false], [true, false, true]];
+	
+	bi1 := [0, 1];
+	bi2 := [0, 1, 1];
+	bb1 := [false, true];
+	bb2 := [false, true, true];
+	
+	ab2 := ~ab1[0..1, bi2];
+	if (ab2[0, 0] # true) or (ab2[0, 1] # false) or (ab2[0, 2] # false) or (ab2[1, 0] # false) or (ab2[1, 1] # true) or (ab2[1, 2] # true)
+	then
+		halt(0);
+	end;
+	
+	ab2 := ~ab1[bb1, ..1];
+	if (ab2[0, 0] # false) or (ab2[0, 1] # true)
+	then
+		halt(0);
+	end;
+	
+	ab2 := ~ab1[bi2, bb2];
+	if (ab2[0, 0] # false) or (ab2[0, 1] # true) or (ab2[1, 0] # true) or (ab2[1, 1] # false)
+	then
+		halt(0);
+	end;
+		
+	halt(1);
+	
+end Main.

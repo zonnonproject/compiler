@@ -1,0 +1,65 @@
+module UserLibrary;
+import Library; 
+
+type {public, ref} GroupOfPoints = object
+var {public} x,y : Library.Point;
+			 p:   Library.Point3D;
+
+procedure {public} print;
+begin
+	write("["); x.print; write(", "); y.print; write(" at "); p.print; write("]");	
+end print;
+
+begin
+  x := new Library.Point;
+  y := new Library.Point;
+  p := new Library.Point3D;
+end GroupOfPoints;
+
+operator {public} "+" (a,b:GroupOfPoints):GroupOfPoints;
+var r:GroupOfPoints;
+begin
+	writeln(" (operator ""+"" (a,b:GroupOfPoints):GroupOfPoints;) "); 
+	r := new GroupOfPoints;
+	r.x := a.x + b.x;
+	r.y := a.y + b.y;
+	r.p := a.p + b.p;
+	return r;
+end "+";
+
+operator {public} "-" (a,b:GroupOfPoints):GroupOfPoints;
+var r:GroupOfPoints;
+begin
+    writeln(" (operator ""-"" (a,b:GroupOfPoints):GroupOfPoints;) "); 
+	r := new GroupOfPoints;
+	r.x := a.x - b.x;
+	r.y := a.y - b.y;
+	r.p := a.p - b.p;
+	return r;
+end "-";
+
+operator {public} ":=" (var a:GroupOfPoints; b:GroupOfPoints);
+begin
+	writeln(" (operator "":="" (var a:GroupOfPoints; b:GroupOfPoints);) "); 
+	a.x := b.x;
+	a.y := b.y;	
+	a.p := b.p;	
+end ":=";
+
+operator {public} "=" (a,b:GroupOfPoints):boolean;
+begin
+	writeln(" (operator ""="" (a,b:GroupOfPoints):boolean;) "); 
+	return (a.x = b.x) & (a.y = b.y) & (a.p = b.p);
+end "=";
+
+operator {public} "#" (a,b:GroupOfPoints):boolean;
+begin
+	writeln(" (operator ""#"" (a,b:GroupOfPoints):boolean;) "); 
+	return (a.x # b.x) or (a.y # b.y) or (a.p # b.p);
+end "#";
+
+  
+begin
+  if Library.A # 100 then halt(0) end;
+  writeln("Module UserLibrary is here!"); 
+end UserLibrary.

@@ -1,0 +1,18 @@
+(** 
+ * 5. Declarations.
+ * 5.2. Constant Declarations.
+ *
+ * Positive test: set constant is used as operation code mask.
+ *)
+module Main;
+	const opCodeMask = { 0..3 };
+
+	var opCode, word : set;
+begin
+	word := { 2 } + { 7 };
+	
+	opCode := word * opCodeMask; (* Extract the op-code. *)
+
+	if 2 in opCode
+	then halt(1) else halt(0) end;
+end Main.

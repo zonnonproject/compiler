@@ -1,0 +1,25 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Assignment
+ * 
+ * Negative test: dynamic array in the right part of assignment was not initialized
+ * math static := dynamic
+ *)
+
+module Main;
+
+type v = array *, *, * of integer;
+
+var
+	a : array {math} 2, 3, 4 of integer;
+	b : v;
+	
+begin	
+	do
+		a := b;	
+	on NilReference do
+		halt(1);
+	end;
+	halt(0);
+end Main.

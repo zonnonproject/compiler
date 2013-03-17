@@ -1,0 +1,13 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: array of objects.
+ *)
+module Main;
+    var a : array 8,8 of integer;
+    var b : array 2,8 of integer;
+begin
+    a := b;
+end Main.

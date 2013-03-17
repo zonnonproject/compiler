@@ -1,0 +1,14 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * char type
+ *
+ * Positive test: wrong char type width.
+ * Warning from compiler.
+ *)
+module Main;
+	var c : char { 64 };
+begin
+	halt(1);
+end Main.

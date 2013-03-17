@@ -1,0 +1,25 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: boolean vector indexing
+ *)
+
+module Main;
+
+type v = array {math} * of boolean;
+
+var
+	b : v;
+	a : array {math} 5 of real;
+begin	
+	b := [false, true, false, false, true];
+	a[b] := [-1., -2.];
+	
+	if (a[0] = 0) & (a[1] = -1.) & (a[2] = 0) & (a[3] = 0) & (a[4] = -2.) 
+	then
+		halt(1);
+	else 
+		halt(0);
+	end;
+end Main.

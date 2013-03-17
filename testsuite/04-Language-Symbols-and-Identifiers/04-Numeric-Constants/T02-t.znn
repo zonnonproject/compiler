@@ -1,0 +1,11 @@
+(** 
+ *	4. Language symbols and identifiers. 
+ *	4.4. Numeric Constants
+ *
+ *	Positive test: hexadecimal constant compiling with {8} width.
+ *)
+module Main;
+begin
+	if 0DH {8} = 13 
+	then halt(1) else halt(0) end;
+end Main.

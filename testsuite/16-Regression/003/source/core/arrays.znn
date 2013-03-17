@@ -1,0 +1,1780 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The modules in CORE form a foundation for computation modeling in Zonnon.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates an Nx1 array of Core.Numbers.Number for use in this framework.     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The row indexer goes from 1..N, not from 0..N-1 as in C and Zonnon.        *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Constants   : deepCopy      - used as flag for variable copyDepth          *)
+(*             : shallowCopy   - used as flag for variable copyDepth          *)
+(* Types       : ArrayCard8    - dynamic array of System.Byte                 *)
+(*             : ArrayCard16   - dynamic array of System.UInt16               *)
+(*             : ArrayCard32   - dynamic array of System.UInt32               *)
+(*             : ArrayCard64   - dynamic array of System.UInt64               *)
+(*             : ArrayInt8     - dynamic array of System.SByte                *)
+(*             : ArrayInt16    - dynamic array of System.Int16                *)
+(*             : ArrayInt32    - dynamic array of System.Int32                *)
+(*             : ArrayInt64    - dynamic array of System.Int64                *)
+(*             : ArrayReal32   - dynamic array of System.Single               *)
+(*             : ArrayReal64   - dynamic array of System.Double               *)
+(*             : ArrayString   - dynamic array of string                      *)
+(*             : ArrayNumber   - dynamic array of Core.Numbers.Number         *)
+(* Object      : Array         - a one-dimensional array object               *)
+(*    Methods  : Initialize;   - creates the internal vector array            *)
+(*             : Nullify       - sets the dynamic memory to nil               *)
+(*             : Clone         - returns an initialized array of same length  *)
+(*             : Copy          - returns a shallow or deep copy of the array  *)
+(*             : Load          - retrieves an array from a binary file        *)
+(*             : Store         - writes the array to a binary file            *)
+(*             : Length        - returns the dimension of the array           *)
+(*             : Get           - implements [].Get                            *)
+(*             : Set           - implements [].Set                            *)
+(*             : GetSubArray   - retrieves a subarray of the main array       *)
+(*             : SetSubArray   - assigns a subarray to the main array         *)
+(*             : GetArray      - retrieves the raw vector that is the array   *)
+(*             : SetArray      - assigns a raw vector of numbers to the array *)
+(*             : Equals        - checks two arrays for equality               *)
+(*             : IsANumber     - checks to see if the length is 1             *)
+(*    (# overwrite the internal array with the arithmetic result #)           *)
+(*             : Neg           - negates all elements of the array            *)
+(*             : IncBy         - increments the array by the vector argument  *)
+(*             : DecBy         - decrements the array by the vector argument  *)
+(*             : MulBy         - multiplies the array by the number argument  *)
+(*             : DivBy         - divides the array by the number argument     *)
+(*    (# return new objects of type Array with the arithmetic result #)       *)
+(*             : Negative      - returns the negative of the array            *)
+(*             : Add           - returns the sum of two arrays                *)
+(*             : Subtract      - returns the difference between two arrays    *)
+(*             : Multiply      - returns the product of an array and number   *)
+(*             : Divide        - returns the ratio of an array to a number    *)
+(*    (# some basic functions for arrays #)                                   *)
+(*             : Dot           - returns the dot product between two arrays   *)
+(*             : Normalize     - scales the array by a factor                 *)
+(*             : Sort          - arranges the elements in ascending order     *)
+(*             : Swap          - exchanges two rows in an array               *)
+(* Procedures  : ArrayCard8ToArray  - converts a System.Byte array to Array   *)
+(*             : ArrayCard16ToArray - converts a System.UInt16 array to Array *)
+(*             : ArrayCard32ToArray - converts a System.UInt32 array to Array *)
+(*             : ArrayCard64ToArray - converts a System.UInt64 array to Array *)
+(*             : ArrayInt8ToArray   - converts a System.SByte array to Array  *)
+(*             : ArrayInt16ToArray  - converts a System.Int16 array to Array  *)
+(*             : ArrayInt32ToArray  - converts a System.Int32 array to Array  *)
+(*             : ArrayInt64ToArray  - converts a System.Int64 array to Array  *)
+(*             : ArrayReal32ToArray - converts a System.Single array to Array *)
+(*             : ArrayReal64ToArray - converts a System.Double array to Array *)
+(*             : ArrayStringToArray - converts a string array to Array        *)
+(*             : ArrayNumberToArray - converts array of Core.Numbers.Number   *)
+(* Operators   : :=            - assignment                                   *)
+(*             : -             - uniary  operator                             *)
+(*             : = | #         - logical operators                            *)
+(*             : + | - | * | / - binary  operators                            *)
+(* Functions   : OneNorm       - returns the vector 1-norm                    *)
+(*             : TwoNorm       - returns the vector 2-norm, or Euclidean norm *)
+(*             : InfinityNorm  - returns the vector inifinity-norm            *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCore.Arrays;
+
+   import
+      System.Byte   as Card8,
+      System.Double as Real64,
+      System.Int16  as Int16,
+      System.Int32  as Int32,
+      System.Int64  as Int64,
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      System.SByte  as Int8,
+      System.Single as Real32,
+      System.UInt16 as Card16,
+      System.UInt32 as Card32,
+      System.UInt64 as Card64,
+      BelCore.Log     as L,
+      BelCore.Math    as M,
+      BelCore.Numbers as N;
+
+   var {private}
+      zero : N.Number;
+
+   var {public}
+      deepCopy, shallowCopy : boolean;
+
+   type {public}
+      ArrayCard8  = array * of Card8;
+      ArrayCard16 = array * of Card16;
+      ArrayCard32 = array * of Card32;
+      ArrayCard64 = array * of Card64;
+      ArrayInt8   = array * of Int8;
+      ArrayInt16  = array * of Int16;
+      ArrayInt32  = array * of Int32;
+      ArrayInt64  = array * of Int64;
+      ArrayReal32 = array * of Real32;
+      ArrayReal64 = array * of Real64;
+      ArrayString = array * of string;
+      ArrayNumber = array * of N.Number;
+
+   type {public, value} Array = object implements []
+
+      var {private}
+         v : ArrayNumber;
+
+      procedure {public} Initialize (length : integer);
+      var
+         i : integer;
+      begin {locked}
+         if Length() # length then
+            if length > 0 then
+               v := new ArrayNumber(length);
+               for i := 0 to length-1 do
+                  v[i] := zero
+               end
+            else
+               v := nil
+            end
+         end
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin
+         v := nil
+      end Nullify;
+
+      procedure {public} Clone () : Array;
+      var
+         a : Array;
+      begin
+         a.Initialize(Length());
+         return a
+      end Clone;
+
+      procedure {public} Copy (copyDepth : boolean) : Array;
+      var
+         a : Array;
+         i, j : integer;
+      begin
+         j := Length();
+         if (copyDepth = deepCopy) & (j > 0) then
+            a.v := new ArrayNumber(j);
+            for i := 0 to j-1 do
+               a.v[i] := v[i]
+            end
+         else
+            a.v := v
+         end;
+         return a
+      end Copy;
+
+      procedure {public} Load  (br : BinaryReader);
+      var
+         i, j, k : integer;
+         n : N.Number;
+      begin {locked}
+         j := br.ReadInt32();
+         if j = 0 then
+            Nullify
+         else
+            k := Length();
+            if j # k then
+               v := new ArrayNumber(j)
+            end;
+            for i := 0 to j-1 do
+               n.Set(br.ReadDouble());
+               v[i] := n
+            end
+         end
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      var
+         c, i : integer;
+         j : Int32;
+         n : N.Number;
+      begin
+         j := Length();
+         bw.Write(j);
+         bw.Flush;
+         c := 0;
+         for i := 0 to j-1 do
+            inc(c);
+            n := v[i];
+            bw.Write(n.Get());
+            if c = 10 then
+               c := 0;
+               bw.Flush
+            end
+         end;
+         bw.Flush
+      end Store;
+
+      procedure {public} Length () : integer;
+      begin
+         if v # nil then
+            return len(v)
+         else
+            return 0
+         end
+      end Length;
+
+      procedure {public} Get (row : integer) : N.Number
+         implements [].Get;
+      var
+         n : N.Number;
+      begin
+         if (row >= 1) & (row <= Length()) then
+            dec(row);
+            n := v[row]
+         else
+            L.WarningMessage(210,422, "BelCore.Arrays.Array.Get");
+            n := N.NaN
+         end;
+         return n
+      end Get;
+
+      procedure {public} Set (row : integer; x : N.Number)
+         implements [].Set;
+      begin {locked}
+         if (row >= 1) & (row <= Length()) then
+            dec(row);
+            v[row] := x
+         else
+            L.WarningMessage(210,415, "BelCore.Arrays.Array.Set")
+         end
+      end Set;
+
+      procedure {public} GetSubArray (startAt, endAt : integer) : Array;
+      var
+         i, j, k : integer;
+         sa : Array;
+      begin
+         k := endAt - startAt + 1;
+         if (startAt <= endAt) & (startAt >= 1) & (endAt <= Length()) then
+            j := startAt - 1;
+            sa.v := new ArrayNumber(k);
+            for i := 0 to k-1 do
+               sa.v[i] := v[i+j]
+            end
+         else
+            L.WarningMessage(210,426, "BelCore.Arrays.Array.GetSubArray");
+            sa.v := nil
+         end;
+         return sa
+      end GetSubArray;
+
+      procedure {public} SetSubArray (startAt : integer; a : Array);
+      var
+         i, j : integer;
+      begin {locked}
+         if (startAt >= 1) & (startAt + a.Length() <= Length()) then
+            j := startAt - 1;
+            for i := 0 to a.Length()-1 do
+               v[i+j] := a.v[i]
+            end
+         else
+            L.WarningMessage(210,205, "BelCore.Arrays.Array.SetSubArray")
+         end
+      end SetSubArray;
+
+      procedure {public} GetArray (copyDepth : boolean) : ArrayNumber;
+      var
+         a : ArrayNumber;
+         i, j : integer;
+      begin
+         j := Length();
+         if j > 0 then
+            if copyDepth = deepCopy then
+               a := new ArrayNumber(j);
+               for i := 0 to j-1 do
+                  a[i] := v[i]
+               end
+            else
+               a := v
+            end
+         else
+            a := nil
+         end;
+         return a
+      end GetArray;
+
+      procedure {public} SetArray (a : ArrayNumber; copyDepth : boolean);
+      var
+         i, j : integer;
+      begin {locked}
+         if a # nil then
+            if copyDepth = deepCopy then
+               j := len(a);
+               if Length() # j then
+                  Nullify;
+                  v := new ArrayNumber(j)
+               end;
+               for i := 0 to j-1 do
+                  v[i] := a[i]
+               end
+            else
+               v := a
+            end
+         else
+            Nullify
+         end
+      end SetArray;
+
+      procedure {public} Equals (r : Array) : boolean;
+      var
+         i, j : integer;
+         left, right : N.Number;
+      begin
+         j := Length();
+         if r.Length() = j then
+            if j = 0 then
+               return true
+            end;
+            i := -1;
+            repeat
+               inc(i);
+               left := v[i];
+               right := r.v[i];
+               if left.NotEqual(right) then
+                  return false
+               end
+            until i = j-1;
+            return true
+         else
+            return false
+         end
+      end Equals;
+
+      procedure {public} IsANumber() : boolean;
+      begin
+         return (Length() = 1)
+      end IsANumber;
+
+      (* overwrite the internal vector with the arithmetic result *)
+
+      procedure {public} Neg;
+      var
+         i : integer;
+         left : N.Number;
+      begin {locked}
+         for i := 0 to Length()-1 do
+            left := v[i];
+            v[i] := left.Negative()
+         end
+      end Neg;
+
+      procedure {public} IncBy (a : Array);
+      var
+         i, j : integer;
+         left, right : N.Number;
+      begin {locked}
+         j := Length();
+         if a.Length() = j then
+            for i := 0 to j-1 do
+               left := v[i];
+               right := a.v[i];
+               v[i] := left.Add(right)
+            end
+         else
+            L.WarningMessage(210,205, "BelCore.Arrays.Array.IncBy")
+         end
+      end IncBy;
+
+      procedure {public} DecBy (a : Array);
+      var
+         i, j : integer;
+         left, right : N.Number;
+      begin {locked}
+         j := Length();
+         if a.Length() = j then
+            for i := 0 to j-1 do
+               left := v[i];
+               right := a.v[i];
+               v[i] := left.Subtract(right)
+            end
+         else
+            L.WarningMessage(210,205, "BelCore.Arrays.Array.DecBy")
+         end
+      end DecBy;
+
+      procedure {public} MulBy (x : N.Number);
+      var
+         i : integer;
+         left : N.Number;
+      begin {locked}
+         for i := 0 to Length()-1 do
+            left := v[i];
+            v[i] := left.Multiply(x)
+         end
+      end MulBy;
+
+      procedure {public} DivBy (x : N.Number);
+      var
+         i : integer;
+         left : N.Number;
+      begin {locked}
+         for i := 0 to Length()-1 do
+            left := v[i];
+            v[i] := left.Divide(x)
+         end
+      end DivBy;
+
+      (* return new objects of type Array with the arithmetic result *)
+
+      procedure {public} Negative () : Array;
+      var
+         a : Array;
+         i, j : integer;
+         left : N.Number;
+      begin
+         j := Length();
+         a.v := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            left := v[i];
+            a.v[i] := left.Negative()
+         end;
+         return a
+      end Negative;
+
+      procedure {public} Add (r : Array) : Array;
+      var
+         a : Array;
+         i, j : integer;
+         left, right : N.Number;
+      begin
+         j := Length();
+         if r.Length() = j then
+            if j > 0 then
+               a.v := new ArrayNumber(j);
+               for i := 0 to j-1 do
+                  left := v[i];
+                  right := r.v[i];
+                  a.v[i] := left.Add(right)
+               end
+            end
+         else
+            L.WarningMessage(210,205, "BelCore.Arrays.Array.Add")
+         end;
+         return a
+      end Add;
+
+      procedure {public} Subtract (r : Array) : Array;
+      var
+         a : Array;
+         i, j : integer;
+         left, right : N.Number;
+      begin
+         j := Length();
+         if r.Length() = j then
+            if j > 0 then
+               a.v := new ArrayNumber(j);
+               for i := 0 to j-1 do
+                  left := v[i];
+                  right := r.v[i];
+                  a.v[i] := left.Subtract(right)
+               end
+            end
+         else
+            L.WarningMessage(210,205, "BelCore.Arrays.Array.Subtract")
+         end;
+         return a
+      end Subtract;
+
+      procedure {public} Multiply (x : N.Number) : Array;
+      var
+         a : Array;
+         i, j : integer;
+         left : N.Number;
+      begin
+         j := Length();
+         if j > 0 then
+            a.v := new ArrayNumber(j);
+            for i := 0 to j-1 do
+               left := v[i];
+               a.v[i] := left.Multiply(x)
+            end
+         end;
+         return a
+      end Multiply;
+
+      procedure {public} Divide (x : N.Number) : Array;
+      var
+         a : Array;
+         i, j : integer;
+         left : N.Number;
+      begin
+         j := Length();
+         if j > 0 then
+            a.v := new ArrayNumber(j);
+            for i := 0 to j-1 do
+               left := v[i];
+               a.v[i] := left.Divide(x)
+            end
+         end;
+         return a
+      end Divide;
+
+      procedure {public} Dot (r : Array) : N.Number;
+      var
+         dot, left, right : N.Number;
+         i, j : integer;
+      begin
+         j := Length();
+         if r.Length() = j then
+            for i := 0 to j-1 do
+               left := v[i];
+               right := r.v[i];
+               dot := dot.Add(left.Multiply(right))
+            end
+         else
+            L.WarningMessage(211,422, "BelCore.Arrays.Array.Dot");
+            dot := N.NaN
+         end;
+         return dot
+      end Dot;
+
+      (* determines a scaleFactor so that all elements belong to [-1.0, 1.0]  *)
+      (* plus it sets all elements to 0.0 that lie within (-epsilon, epsilon) *)
+      procedure {public} Normalize (var scaleFactor : N.Number);
+      var
+         i : integer;
+         x : N.Number;
+      begin {locked}
+         scaleFactor.Initialize;
+         (* find the maximum element *)
+         for i := 0 to Length()-1 do
+            x := M.Abs(v[i]);
+            if scaleFactor.LessThan(x) then
+               scaleFactor := x
+            end
+         end;
+         (* divide all elements by this maximum absolute value *)
+         if scaleFactor.GreaterThan(zero) then
+            DivBy(scaleFactor);
+            (* filter out all cells whose entries are near zero *)
+            for i := 0 to Length()-1 do
+               x := M.Abs(v[i]);
+               if x.LessThan(N.Epsilon) then
+                  v[i] := zero
+               end
+            end
+         end
+      end Normalize;
+
+      procedure {private} ThreeSort (l, c, r : integer);
+      var
+         sort : N.Number;
+      begin
+         if v[l] > v[c] then
+            sort := v[l];
+            v[l] := v[c];
+            v[c] := sort
+         end;
+         if v[l] > v[r] then
+            sort := v[l];
+            v[l] := v[r];
+            v[r] := sort
+         end;
+         if v[c] > v[r] then
+            sort := v[c];
+            v[c] := v[r];
+            v[r] := sort
+         end
+      end ThreeSort;
+
+      procedure {private} InsertionSort (l, r : integer);
+      var
+         i, j : integer;
+         point, sort : N.Number;
+      begin
+         for i := l+1 to r do
+            sort := v[i];
+            j := i;
+            point := v[j-1];
+            while (j > 0) & (point.GreaterThan(sort)) do
+               v[j] := point;
+               dec(j);
+               point := v[j-1]
+            end;
+            v[j] := sort
+         end
+      end InsertionSort;
+
+      procedure {private} QuickSort (l, r : integer);
+      var
+         c, i, j : integer;
+         point, sort, temp : N.Number;
+      begin
+         if r-l > 7 then
+            (* long vectors sort faster with the quick-sort algorithm *)
+            c := (l + r) div 2;
+            ThreeSort(l, c, r);
+            sort := v[r];
+            i := l - 1;
+            j := r;
+            repeat
+               repeat
+                  inc(i);
+                  point := v[i]
+               until point.GreaterThanOrEqual(sort);
+               repeat
+                  dec(j);
+                  point := v[j]
+               until point.LessThanOrEqual(sort);
+               temp := v[i];
+               v[i] := v[j];
+               v[j] := temp
+            until j < i;
+            v[j] := v[i];
+            v[i] := v[r];
+            v[r] := temp;
+            QuickSort(l, j);
+            QuickSort(i+1, r)
+         elsif r > l then
+            (* short vectors sort faster with the insertion algorithm *)
+            InsertionSort(l, r)
+         else
+            (* nothing to sort *)
+         end
+      end QuickSort;
+
+      (* rearrange elements so that v[i] <= v[i+1] for all i *)
+      procedure {public} Sort;
+      var
+         i : integer;
+      begin {locked}
+         i := Length();
+         if i > 0 then
+            QuickSort(0, i-1)
+         end
+      end Sort;
+
+      procedure {public} Swap (row1, row2 : integer);
+      var
+         i : integer;
+         temp : N.Number;
+      begin {locked}
+         i := Length();
+         if ((row1 >= 1) & (row1 <= i)) & ((row2 >= 1) & (row2 <= i)) then
+            dec(row1);
+            dec(row2);
+            temp := v[row1];
+            v[row1] := v[row2];
+            v[row2] := temp
+         else
+            L.WarningMessage(210,-1, "BelCore.Arrays.Array.Swap")
+         end
+      end Swap;
+
+   begin
+      Nullify
+   end Array;
+
+   (* type conversion procedures *)
+
+   procedure {public} ArrayCard8ToArray (r : ArrayCard8) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Card8ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayCard8ToArray;
+
+   procedure {public} ArrayCard16ToArray (r : ArrayCard16) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Card16ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayCard16ToArray;
+
+   procedure {public} ArrayCard32ToArray (r : ArrayCard32) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Card32ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayCard32ToArray;
+
+   procedure {public} ArrayCard64ToArray (r : ArrayCard64) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Card64ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayCard64ToArray;
+
+   procedure {public} ArrayInt8ToArray (r : ArrayInt8) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Int8ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayInt8ToArray;
+
+   procedure {public} ArrayInt16ToArray (r : ArrayInt16) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Int16ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayInt16ToArray;
+
+   procedure {public} ArrayInt32ToArray (r : ArrayInt32) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Int32ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayInt32ToArray;
+
+   procedure {public} ArrayInt64ToArray (r : ArrayInt64) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Int64ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayInt64ToArray;
+
+   procedure {public} ArrayReal32ToArray (r : ArrayReal32) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Real32ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayReal32ToArray;
+
+   procedure {public} ArrayReal64ToArray (r : ArrayReal64) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.Real64ToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayReal64ToArray;
+
+   procedure {public} ArrayStringToArray (r : ArrayString) : Array;
+   var
+      a : Array;
+      i, j : integer;
+      x : ArrayNumber;
+   begin {locked}
+      if r # nil then
+         j := len(r);
+         x := new ArrayNumber(j);
+         for i := 0 to j-1 do
+            x[i] := N.StringToNumber(r[i])
+         end;
+         a.SetArray(x, shallowCopy)
+      end;
+      return a
+   end ArrayStringToArray;
+
+   procedure {public} ArrayNumberToArray (r : ArrayNumber) : Array;
+   var
+      a : Array;
+   begin {locked}
+      if r # nil then
+         a.SetArray(r, deepCopy)
+      end;
+      return a
+   end ArrayNumberToArray;
+
+   (* OVERLOADED OPERATORS *)
+   (* places wrappers around those methods that create new Array's *)
+
+   (* NOTE: assignment operators produce deep copies   *)
+   (* if a shallow copy is needed, use the Copy method *)
+
+   operator {public} ':=' (var l : Array; r : Array);
+   begin {locked}
+      l.SetArray(r.GetArray(shallowCopy), deepCopy)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayCard8);
+   begin {locked}
+      l := ArrayCard8ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayCard16);
+   begin {locked}
+      l := ArrayCard16ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayCard32);
+   begin {locked}
+      l := ArrayCard32ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayCard64);
+   begin {locked}
+      l := ArrayCard64ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayInt8);
+   begin {locked}
+      l := ArrayInt8ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayInt16);
+   begin {locked}
+      l := ArrayInt16ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayInt32);
+   begin {locked}
+      l := ArrayInt32ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayInt64);
+   begin {locked}
+      l := ArrayInt64ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayReal32);
+   begin {locked}
+      l := ArrayReal32ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayReal64);
+   begin {locked}
+      l := ArrayReal64ToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayString);
+   begin {locked}
+      l := ArrayStringToArray(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Array; r : ArrayNumber);
+   begin {locked}
+      l := ArrayNumberToArray(r)
+   end ':=';
+
+   (* unary operator *)
+
+   operator {public} '-' (a : Array) : Array;
+   begin {locked}
+      return a.Negative()
+   end '-';
+
+   (* logic operators *)
+
+   operator {public} '=' (l, r : Array) : boolean;
+   begin {locked}
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayCard8) : boolean;
+   begin {locked}
+      return l.Equals(ArrayCard8ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayCard16) : boolean;
+   begin {locked}
+      return l.Equals(ArrayCard16ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayCard32) : boolean;
+   begin {locked}
+      return l.Equals(ArrayCard32ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayCard64) : boolean;
+   begin {locked}
+      return l.Equals(ArrayCard64ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayInt8) : boolean;
+   begin {locked}
+      return l.Equals(ArrayInt8ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayInt16) : boolean;
+   begin {locked}
+      return l.Equals(ArrayInt16ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayInt32) : boolean;
+   begin {locked}
+      return l.Equals(ArrayInt32ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayInt64) : boolean;
+   begin {locked}
+      return l.Equals(ArrayInt64ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayReal32) : boolean;
+   begin {locked}
+      return l.Equals(ArrayReal32ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayReal64) : boolean;
+   begin {locked}
+      return l.Equals(ArrayReal64ToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayString) : boolean;
+   begin {locked}
+      return l.Equals(ArrayStringToArray(r))
+   end '=';
+
+   operator {public} '=' (l : Array; r : ArrayNumber) : boolean;
+   begin {locked}
+      return l.Equals(ArrayNumberToArray(r))
+   end '=';
+
+   operator {public} '=' (l : ArrayCard8; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard8ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayCard16; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard16ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayCard32; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard32ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayCard64; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard64ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayInt8; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt8ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayInt16; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt16ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayInt32; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt32ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayInt64; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt64ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayReal32; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal32ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayReal64; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal64ToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayString; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayStringToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : ArrayNumber; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayNumberToArray(l);
+      return a.Equals(r)
+   end '=';
+
+   operator {public} '#' (l, r : Array) : boolean;
+   begin {locked}
+      return ~l.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayCard8) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayCard8ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayCard16) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayCard16ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayCard32) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayCard32ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayCard64) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayCard64ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayInt8) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayInt8ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayInt16) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayInt16ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayInt32) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayInt32ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayInt64) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayInt64ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayReal32) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayReal32ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayReal64) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayReal64ToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayString) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayStringToArray(r))
+   end '#';
+
+   operator {public} '#' (l : Array; r : ArrayNumber) : boolean;
+   begin {locked}
+      return ~l.Equals(ArrayNumberToArray(r))
+   end '#';
+
+   operator {public} '#' (l : ArrayCard8; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard8ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayCard16; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard16ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayCard32; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard32ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayCard64; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard64ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayInt8; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt8ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayInt16; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt16ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayInt32; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt32ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayInt64; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt64ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayReal32; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal32ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayReal64; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal64ToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayString; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayStringToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   operator {public} '#' (l : ArrayNumber; r : Array) : boolean;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayNumberToArray(l);
+      return ~a.Equals(r)
+   end '#';
+
+   (* arithemtic operators *)
+
+   operator {public} '+' (l, r : Array) : Array;
+   begin {locked}
+      return l.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayCard8) : Array;
+   begin {locked}
+      return l.Add(ArrayCard8ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayCard16) : Array;
+   begin {locked}
+      return l.Add(ArrayCard16ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayCard32) : Array;
+   begin {locked}
+      return l.Add(ArrayCard32ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayCard64) : Array;
+   begin {locked}
+      return l.Add(ArrayCard64ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayInt8) : Array;
+   begin {locked}
+      return l.Add(ArrayInt8ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayInt16) : Array;
+   begin {locked}
+      return l.Add(ArrayInt16ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayInt32) : Array;
+   begin {locked}
+      return l.Add(ArrayInt32ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayInt64) : Array;
+   begin {locked}
+      return l.Add(ArrayInt64ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayReal32) : Array;
+   begin {locked}
+      return l.Add(ArrayReal32ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayReal64) : Array;
+   begin {locked}
+      return l.Add(ArrayReal64ToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayString) : Array;
+   begin {locked}
+      return l.Add(ArrayStringToArray(r))
+   end '+';
+
+   operator {public} '+' (l : Array; r : ArrayNumber) : Array;
+   begin {locked}
+      return l.Add(ArrayNumberToArray(r))
+   end '+';
+
+   operator {public} '+' (l : ArrayCard8; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard8ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayCard16; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard16ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayCard32; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard32ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayCard64; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard64ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayInt8; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt8ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayInt16; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt16ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayInt32; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt32ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayInt64; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt64ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayReal32; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal32ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayReal64; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal64ToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayString; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayStringToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '+' (l : ArrayNumber; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayNumberToArray(l);
+      return a.Add(r)
+   end '+';
+
+   operator {public} '-' (l, r : Array) : Array;
+   begin {locked}
+      return l.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayCard8) : Array;
+   begin {locked}
+      return l.Subtract(ArrayCard8ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayCard16) : Array;
+   begin {locked}
+      return l.Subtract(ArrayCard16ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayCard32) : Array;
+   begin {locked}
+      return l.Subtract(ArrayCard32ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayCard64) : Array;
+   begin {locked}
+      return l.Subtract(ArrayCard64ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayInt8) : Array;
+   begin {locked}
+      return l.Subtract(ArrayInt8ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayInt16) : Array;
+   begin {locked}
+      return l.Subtract(ArrayInt16ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayInt32) : Array;
+   begin {locked}
+      return l.Subtract(ArrayInt32ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayInt64) : Array;
+   begin {locked}
+      return l.Subtract(ArrayInt64ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayReal32) : Array;
+   begin {locked}
+      return l.Subtract(ArrayReal32ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayReal64) : Array;
+   begin {locked}
+      return l.Subtract(ArrayReal64ToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayString) : Array;
+   begin {locked}
+      return l.Subtract(ArrayStringToArray(r))
+   end '-';
+
+   operator {public} '-' (l : Array; r : ArrayNumber) : Array;
+   begin {locked}
+      return l.Subtract(ArrayNumberToArray(r))
+   end '-';
+
+   operator {public} '-' (l : ArrayCard8; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard8ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayCard16; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard16ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayCard32; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard32ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayCard64; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayCard64ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayInt8; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt8ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayInt16; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt16ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayInt32; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt32ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayInt64; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayInt64ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayReal32; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal32ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayReal64; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayReal64ToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayString; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayStringToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : ArrayNumber; r : Array) : Array;
+   var
+      a : Array;
+   begin {locked}
+      a := ArrayNumberToArray(l);
+      return a.Subtract(r)
+   end '-';
+
+   operator {public} '*' (l : Card8; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Card8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card16; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Card16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card32; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Card32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card64; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Card64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int8; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Int8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int16; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Int16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int32; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Int32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int64; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Int64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real32; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Real32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real64; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.Real64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : string; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(N.StringToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : N.Number; r : Array) : Array;
+   begin {locked}
+      return r.Multiply(l)
+   end '*';
+
+   operator {public} '/' (l : Array; r : Card8) : Array;
+   begin {locked}
+      return l.Divide(N.Card8ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Card16) : Array;
+   begin {locked}
+      return l.Divide(N.Card16ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Card32) : Array;
+   begin {locked}
+      return l.Divide(N.Card32ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Card64) : Array;
+   begin {locked}
+      return l.Divide(N.Card64ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Int8) : Array;
+   begin {locked}
+      return l.Divide(N.Int8ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Int16) : Array;
+   begin {locked}
+      return l.Divide(N.Int16ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Int32) : Array;
+   begin {locked}
+      return l.Divide(N.Int32ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Int64) : Array;
+   begin {locked}
+      return l.Divide(N.Int64ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Real32) : Array;
+   begin {locked}
+      return l.Divide(N.Real32ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : Real64) : Array;
+   begin {locked}
+      return l.Divide(N.Real64ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : string) : Array;
+   begin {locked}
+      return l.Divide(N.StringToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Array; r : N.Number) : Array;
+   begin {locked}
+      return l.Divide(r)
+   end '/';
+
+   (* basic array functions *)
+
+   procedure {public} OneNorm (v : Array) : N.Number;
+   var
+      i : integer;
+      x : N.Number;
+   begin {locked}
+      for i := 1 to v.Length() do
+         x := x + M.Abs(v[i])
+      end;
+      return x
+   end OneNorm;
+
+   procedure {public} TwoNorm (v : Array) : N.Number;
+   var
+      i : integer;
+      n, x : N.Number;
+   begin {locked}
+      for i := 1 to v.Length() do
+         n := v[i];
+         x := x + n * n
+      end;
+      return M.Sqrt(x)
+   end TwoNorm;
+
+   procedure {public} InfinityNorm (v : Array) : N.Number;
+   var
+      i : integer;
+      x, y : N.Number;
+   begin {locked}
+      for i := 1 to v.Length() do
+         y := M.Abs(v[i]);
+         if x < y then
+            x := y
+         end
+      end;
+      return x
+   end InfinityNorm;
+
+begin
+   deepCopy    := true;
+   shallowCopy := false;
+   zero        := 0
+end Arrays.

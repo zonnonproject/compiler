@@ -1,0 +1,24 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: ranges
+ *)
+
+module Main;
+
+var
+	a : array {math} 3 of integer;
+	r : range;
+  
+begin
+	r := -1..2 by 2;
+	do
+		a[r] := [5, 7];
+	on OutOfRange do
+		halt(1);
+	end;
+
+	halt(0);
+end Main.
+

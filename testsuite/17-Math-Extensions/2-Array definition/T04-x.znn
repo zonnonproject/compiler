@@ -1,0 +1,17 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Definition
+ * 
+ * Negative test: dynamic math array creation: unknown type.
+ *)
+
+module Main;
+
+type v = array {math} * of type_;
+
+var
+	a : v;
+
+begin	
+	halt(0);
+end Main.

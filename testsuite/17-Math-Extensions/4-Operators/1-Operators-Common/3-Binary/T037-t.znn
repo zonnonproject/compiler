@@ -1,0 +1,71 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Binary
+ * 
+ * Positive test: Binary div
+ * array + array
+ *)
+
+module Main;
+
+type vi = array {math} *,* of integer;
+type vr = array {math} *,* of real;
+type vc = array {math} *,* of cardinal;
+
+type iind = array {math} * of integer;
+type bind = array {math} * of boolean;
+
+var
+	ai1 : array {math} 2, 3 of integer;
+	ai2, ai3 : vi;
+	ar1 : array {math} 2, 3 of real;
+	ar2, ar3, ar4 : vr;
+	ac1 : array {math} 2, 3 of cardinal;
+	ac2, ac3 : vc;
+	
+	bi1, bi2 : iind;
+	bb1, bb2 : bind;
+	
+	i, j : integer;
+	
+begin	
+	
+	ai1 := [[-1, 2, -3], [4, -5, 6]];
+	ai2 := [[-23, -24, 35], [-3, 25, 45]];
+	ar1 := [[1.3, -2.1, 3.4], [-4.1, 5.2, -6.7]];
+	ar2 := [[6.1, +3.8, 2.6], [+4.1, -5.1, -3.1]];
+	ac1 := [[1, 2, 3], [4, 5, 6]];
+	ac2 := [[4, 3, 1], [8, 2, 16]];
+	
+	
+	ai3 := ai1 div ai2;
+	ac3 := ac1 div ac2;
+	
+	for i := 0 to len(ai1, 0) - 1
+	do
+		for j := 0 to len(ai1, 1) - 1
+		do
+			if ai3[i, j] # (ai1[i, j] div ai2[i, j]) 
+			then 
+				halt(0);
+			end;
+		end;
+	end;
+		
+	
+	for i := 0 to len(ai1, 0) - 1
+	do
+		for j := 0 to len(ai1, 1) - 1
+		do
+			if ac3[i, j] # (ac1[i, j] div ac2[i, j]) 
+			then 
+				halt(0);
+			end;
+		end;
+	end;
+		
+	halt(1);
+	
+end Main.
+	

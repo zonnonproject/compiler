@@ -1,0 +1,60 @@
+(* ********* Zonnon online collection ***********
+ * Hilbert
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(* THIS EXAMPLE DOES NOT WORK YET *)
+
+module Hilbert;
+import LineDrawing.Line as line;
+
+const SquareSize = 512;
+var i, x0, y0, u: integer; ch: char;
+
+procedure A(i: integer);
+begin
+   if i > 0 then 
+      D(i-1); line(4,u); A(i-1); line(6,u);
+      A(i-1); line(0,u); B(i-1);
+   end;
+end A;
+
+procedure B(i: integer);
+begin
+   if i > 0 then 
+      C(i-1); line(2,u); B(i-1); line(0,u);
+      B(i-1); line(6,u); A(i-1);
+   end;
+end B;
+
+procedure C(i: integer);
+begin
+   if i > 0 then 
+      B(i-1); line(0,u); C(i-1); line(2,u);
+      C(i-1); line(4,u); D(i-1);
+   end;
+end C;
+
+procedure D(i: integer);
+begin
+   if i > 0 then 
+      A(i-1); line(6,u); D(i-1); line(4,u);
+      D(i-1); line(2,u); C(i-1);
+   end;
+end D;
+
+begin
+   clear;
+   x0 := width div 2; y0 := height div 2;
+   u := SquareSize; i:=0;
+   repeat
+      i := i + 1;
+      u := u div 2;
+      x0 := x+ (u div 2); y0 := (u div 2);
+      Px := x0; Py := y0; A(i); Read(ch);
+   until (ch = 33X) or (i = 6);
+   clear;
+end Hilbert.

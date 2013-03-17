@@ -1,0 +1,51 @@
+(* ********* Zonnon online collection ***********
+ * Queens (Chapter 3, Example 3.4)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Queens;
+
+var i: integer; q: boolean;
+    a: array 8 of boolean;  (* 1...8 *)
+    b: array 15 of boolean; (* 2..16 *)
+    c: array 15 of boolean; (* -7..7 *)
+    x: array 8 of integer;  (* 1...8 *)
+
+procedure Try(i: integer; var q: boolean);
+ var j:integer;
+begin 
+  j:=-1;
+  repeat q := false;
+    j:= j+1;
+    if a[j] & b[i+j] & c[i-j+7] then
+       x[i] := j;
+       a[j] := false;
+       b[i+j] := false;
+       c[i-j+7] :=false;
+       if i < 7 then
+         Try(i+1,q);
+         if ~q then
+            a[j] := true;
+            b[i+j] := true;
+            c[i-j+7] := true;
+         end;
+       else 
+		 q:=true;
+       end;
+    end;
+  until q or (j = 7)
+end Try;
+
+begin
+  writeln("Example 3.4 (Queens)");
+  for i:= 0 to 7  do a[i] := true; end;
+  for i:= 0 to 14 do b[i] := true; end;
+  for i:= 0 to 14 do c[i] := true; end;
+  Try(0,q);
+  for i:=0 to 7 do write(x[i]+1:4) end;
+  writeln;
+  writeln("Type 'q' to exit");	
+end Queens.

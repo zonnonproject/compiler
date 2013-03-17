@@ -1,0 +1,31 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports x as clause
+ *
+ * Positive test: the alias in as clause is enumeration type.
+ *)
+module Main;
+	import 
+		game.Constants.A as A,
+		game.Constants as Constants;
+
+	var 
+		a : A;
+		c : Constants.Color;
+
+begin
+	a := new A;
+	c := Constants.Color.white;
+
+	halt(1);
+end Main.
+
+module {public} game.Constants;
+	type  {public}
+		Color = (red, white);
+
+	type {public, ref} A = object
+	end A;
+end Constants.
+

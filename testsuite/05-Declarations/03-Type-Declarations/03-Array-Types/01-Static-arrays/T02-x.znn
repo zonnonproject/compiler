@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.1. Static arrays
+ *
+ * Negative test: null array length.
+ *)
+module A;
+	type T = array 0 of boolean;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

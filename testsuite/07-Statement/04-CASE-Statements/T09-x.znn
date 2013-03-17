@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Negative test: not constant expression in the label.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 1;
+	j := 2;
+
+	case j of
+		  i + j : j := 3;
+		|     4 : j := 4;
+	end;
+
+	halt(0);
+end Main.

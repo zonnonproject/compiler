@@ -1,0 +1,24 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators.
+ *
+ * Positive test: boolean array elements of object A.B are used in logical operator.
+ * The object is declared before its array elements are used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b.p[0] := true;
+	b.q[1] := false;
+
+	if b.p[0] or b.q[1] 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public } 
+		p, q : array 2 of boolean;
+end B.

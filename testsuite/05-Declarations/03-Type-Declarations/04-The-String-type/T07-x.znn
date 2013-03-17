@@ -1,0 +1,12 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Negative test: assign string constant to array of char.
+ *)
+module Main;
+	var s : array 2 of char;
+begin
+	s := " ";
+end Main.

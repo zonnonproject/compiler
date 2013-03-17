@@ -1,0 +1,21 @@
+module Main;
+
+type t1 = array {sparse} * of integer;
+
+var
+	a : t1;
+	b : array {math} * of integer;
+	n : integer;
+  
+begin
+	b := [0, 1, 3];
+	
+	a := tosparse(b);
+	
+	if (a[0] = 0) & (a[1] = 1) & (a[2] = 3) & (len(a) = 3)
+		then halt(1);
+	end;
+		
+	halt(0);
+	
+end Main.

@@ -1,0 +1,35 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.6 Postulated interface type.
+ *
+ * Positive test: Postulated interface type using.
+ * The postulated interface B refines other postulated interface A.
+ * The type is declared after it is used in postulated interface.
+ *)
+module Main;
+	import A, B, C;
+
+	var x : object { A, B };
+		c : C;
+begin
+	x := c;
+	if (x.fa() = 3) & (x.fb() = 4) 
+    then halt(1) else halt(0) end;
+end Main.
+
+definition A;
+	procedure fa : integer;
+end A.
+
+definition B refines A;
+	procedure fb : integer;
+end B.
+
+object C implements B;
+	procedure { public } fa : integer implements B.fa;
+	begin return 3 end fa;
+
+	procedure { public } fb : integer implements B.fb;
+	begin return 4 end fb;
+end C.

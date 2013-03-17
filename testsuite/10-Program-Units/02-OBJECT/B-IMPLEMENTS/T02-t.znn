@@ -1,0 +1,20 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * implements clause
+ *
+ * Positive test: the definition name B.C is used in implements clause of object A.
+ * The definition B.C is used before it is declared.
+ *)
+object {public} A implements B.C;
+end A.
+
+module {public} B;
+	definition {public} C;
+	end C;
+end B.
+
+module Main;
+begin
+	halt(1);
+end Main.

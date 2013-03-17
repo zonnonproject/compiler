@@ -1,0 +1,37 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * A. Instance = self
+ *
+ * Positive test: immutable variable is used as actual variable parameter.
+ *)
+object A;
+	var { public } 
+		vi : array 1 of integer;
+
+	var { public, immutable } 
+		vk : array 1 of integer;
+
+	var { private } 
+		vj : array 1 of integer;
+
+	procedure p(var p1 : integer);
+	begin 
+		p1 := 5 
+	end p;
+
+	var { public }
+		i : integer;
+begin
+	self.p( self.vk[0] );
+	i := self.vk[0];
+end A.
+
+module Main;
+	import A;
+
+	var a : A;
+begin
+	if a.i = 5
+	then halt(1) else halt(0) end;
+end Main.

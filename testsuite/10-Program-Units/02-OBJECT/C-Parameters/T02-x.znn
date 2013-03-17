@@ -1,0 +1,22 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Negative test: wrong object perameter type.
+ *)
+object {public, ref } A.B(i : integer);
+	var { public } 
+		j : integer;
+begin
+	j := i;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b := new A.B(3.0);
+	halt(0);
+end Main.

@@ -1,0 +1,65 @@
+(** 
+ * 17. Math extensions.
+ * 
+ * Compatibility
+ * Positive test: math arrays and usual arrays are different types when they are function parameters;
+ * we can return any array
+ *)
+
+module Main;
+
+procedure {public} f (a: array * of integer; b: array * of integer): array * of integer;
+var
+	c : array 3 of integer;
+begin
+	c[0] := 6;
+	c[1] := 7;
+	c[2] := 6;
+	return c;
+end f;
+
+procedure {public} f1 (a: array {math} * of integer; b: array {math} * of integer): array * of integer;
+var
+	c : array 3 of integer;
+begin
+	c[0] := 8;
+	c[1] := 9;
+	c[2] := 8;
+	return c;
+end f1;
+
+var
+	a : array { math } 5 of integer;
+	b : array { math } 5 of integer;
+	
+	d : array 4 of integer;
+	e : array 4 of integer;
+	
+	c : array * of integer;
+	g : array {math} * of integer;
+begin	
+	a := [1, 2, 3, 4, 5];
+	b := [5, 4, 3, 2, 1];
+	
+
+	c := f1(a,b);
+	if (c[0] # 8) or (c[1] # 9) or (c[2] # 8)
+	then
+		halt(0);
+	end;
+
+	c := f(d,e);
+	if (c[0] # 6) or (c[1] # 7) or (c[2] # 6)
+	then
+		halt(0);
+	end;
+	
+	g := f(d,e);
+	if (g[0] # 6) or (g[1] # 7) or (g[2] # 6)
+	then
+		halt(0);
+	end;
+	
+	halt(1);
+	
+end Main.

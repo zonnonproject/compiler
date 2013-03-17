@@ -1,0 +1,9 @@
+module Main;
+import System.Drawing.Rectangle as Rectangle;
+
+   var {public}
+	s: Rectangle;
+begin
+	s := new Rectangle(10,10,100,100);
+	halt(1);
+end Main.

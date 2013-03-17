@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Positive test: predefined function result in the FOR circle expression.
+ *)
+module Main;
+var 
+	i, k : integer; 
+begin
+	i := 0;
+	for k := succ(i) to 5 do
+		i := i + 1 
+	end;
+
+	if i = 5 
+	then halt(1) else halt(0) end
+end Main.
+

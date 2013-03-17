@@ -1,0 +1,40 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Positive test: the instance name using:
+ * 		as procedure selector
+ * 		as variable parameter
+ * 		as value parameter
+ * 		as variable accepting function result
+ * The object A.B is declared after it is used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	b.v[0] := 4;
+	b.i := b.p(b.v[0], b.v[0]);
+
+	if b.i = 5 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public } 
+		v : array 1 of integer;
+
+	var { public } 
+		i : integer;
+
+	procedure { public } p(var p1 : integer; p2 : integer): integer;
+	begin 
+		p1 := p2 + 1;
+		return p2 + 1;
+	end p;
+end B.
+
+

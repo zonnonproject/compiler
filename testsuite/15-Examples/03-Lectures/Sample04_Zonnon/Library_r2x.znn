@@ -1,0 +1,275 @@
+(* ********* Zonnon online collection ***********
+ * Library_r2x
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Library_r2x;
+
+import 
+	System.String,
+	System.IO.File,
+	System.IO.FileStream;
+
+const 
+	Fname  = "library.txt"; 
+	Fname1 = "library1.txt"; 
+	Fname2 = "library2.txt"; 
+	maxFILES = 10;
+
+type
+	Text = array 100 of char;
+	FS = System.IO.FileStream;
+ 
+procedure ReadChar(fileStream : FS; var ch : char);
+	var b : integer;
+begin
+	b := fileStream.ReadByte();
+	ch := char(b); 
+end ReadChar;
+ 
+procedure ReadAuthor(fileStream : FS; var ch : char; var author : string);
+var 
+	i : integer; 
+	input: Text;
+	tmp : string;
+begin
+	i := 0;
+	while ch # '#' do
+		input[i] := ch;
+		ReadChar(fileStream, ch);
+		inc(i);
+	end;
+	input[i] := char(0);
+	copy(input, tmp);
+				author := tmp;
+	ReadChar(fileStream, ch);
+end ReadAuthor;
+
+procedure ReadTitle(fileStream : FS; var ch : char; var title : string);
+var 
+	i : integer;
+	input: Text;
+	tmp : string;
+begin
+	i := 0;
+	while ch # '#' do
+		input[i] := ch;
+		ReadChar(fileStream, ch);
+		inc(i)
+	end;
+	input[i] := char(0);
+	copy(input, tmp);
+							title := tmp;
+	ReadChar(fileStream, ch);
+end ReadTitle;
+
+procedure ReadVolume(fileStream : FS; var ch : char; var author, title : string);
+begin
+	ReadAuthor(fileStream, ch, author);
+	ReadTitle(fileStream, ch, title);
+
+	while (ch = char(10)) or (ch = char(13)) 
+	do ReadChar(fileStream, ch) end
+end ReadVolume;
+
+procedure PrintLibrary(fileName : string);
+var
+	fileStream : FS;
+	author, title : string;
+	ch : char;
+begin
+	fileStream := System.IO.File.OpenRead(fileName);
+	ReadChar(fileStream, ch);
+	while ch # '#' do
+		ReadVolume(fileStream, ch, author, title);
+		write(author); write(", "); writeln(title);
+	end
+end PrintLibrary;
+
+procedure Equal(text1, text2 : string) : boolean;
+var i : integer;
+	equal : boolean;
+	text1char, text2char : Text;
+begin
+	equal := true;
+	i := -1;
+	copy(text1, text1char); 	
+	copy(text2, text2char); 	
+
+	repeat
+		inc(i);
+		if text1char[i] # text2char[i] then equal := false end
+	until (text1char[i] = char(0)) or (text2char[i] = char(0)) or ~equal;
+	return equal
+end Equal;
+
+procedure LessStrings(text1, text2 : string) : boolean;
+var 
+	i : integer;
+	text1char, text2char : Text;
+begin
+	i := -1;
+	copy(text1, text1char); 	
+	copy(text2, text2char); 	
+
+	repeat
+		inc(i)
+	until (text1char[i] # text2char[i]) or (text1char[i] = char(0));
+	
+	if text1char[i] < text2char[i] 
+	then return true 
+	else return false 
+	end
+end LessStrings;		
+
+procedure Less(author1, title1, author2, title2 : string) : boolean;
+begin
+	if Equal(author1, author2) 
+	then return LessStrings(title1, title2)
+	else return LessStrings(author1, author2) 
+	end
+end Less;
+
+procedure Common(fileName1, fileName2 : string);
+var  
+	fileStream1, fileStream2 : FS;
+	ch1, ch2 : char;
+	author1, author2, title1, title2 : string;
+	isEnd : boolean;
+begin
+ 	if ~System.IO.File.Exists(fileName1) then
+		write("The file1 does not exist: ");
+		writeln(fileName1);
+		return;
+	end;
+
+ 	if ~System.IO.File.Exists(fileName2) then
+		write("The file2 does not exist: ");
+		writeln(fileName2);
+		return;
+	end;
+
+	fileStream1 := System.IO.File.OpenRead(fileName1);
+	fileStream2 := System.IO.File.OpenRead(fileName2);
+	ReadChar(fileStream1, ch1);
+	ReadChar(fileStream2, ch2);
+
+	isEnd := false;
+	ReadVolume(fileStream1, ch1, author1, title1);
+	ReadVolume(fileStream2, ch2, author2, title2);
+
+	repeat
+		while ~isEnd & (~Equal(author1, author2) or ~Equal(title1, title2)) do
+			if Less(author1, title1, author2, title2) then
+				if ch1 = '#' then isEnd := true
+				else ReadVolume(fileStream1, ch1, author1, title1) end
+			else
+				if ch2 = '#' then isEnd := true
+				else ReadVolume(fileStream2, ch2, author2, title2) end
+			end
+		end;
+		if ~isEnd then
+			write(author1); write( char(9) ); writeln(title1);
+			if ch1 = '#' then isEnd := true
+			else ReadVolume(fileStream1, ch1, author1, title1) end;
+			if ch2 = '#' then isEnd := true
+			else ReadVolume(fileStream2, ch2, author2, title2) end
+		end
+	until isEnd;   
+	writeln()
+end Common;
+
+procedure AllEqual(nofFiles : integer; author, title : array of string) : boolean;
+var 
+	i : integer;
+	equal : boolean;
+begin
+    equal := true;
+    for i := 1 to nofFiles-1 do
+        equal := equal & (Equal(author[0], author[i])) & (Equal(title[0], title[i]))
+    end;
+    return equal
+end AllEqual;
+
+procedure { public } CommonInAll(nofFiles : integer; fileNames : array of string);
+var	
+	fileStream : array maxFILES of FS;
+	ch : array maxFILES of char;
+	author, title : array maxFILES of string;
+	fileName : string;
+	i : integer;
+	isEnd : boolean;
+begin
+	for i := 0 to nofFiles-1 do
+		fileName := fileNames[i];	
+ 		if System.IO.File.Exists(fileName) then
+			fileStream[i] := System.IO.File.OpenRead(fileName);
+			ReadChar(fileStream[i], ch[i]);
+		else
+			write("The file does not exist: ");
+			writeln(fileName);
+		end;
+	end;
+
+	isEnd := false;
+	for i := 0 to nofFiles-1 do
+		ReadVolume(fileStream[i], ch[i], author[i], title[i]);
+	end;
+
+	repeat
+		while ~isEnd & ~AllEqual(nofFiles, author, title) do
+			for i := 0 to nofFiles-1 do
+				if Less(author[i], title[i], author[(i+1) mod nofFiles], title[(i+1) mod nofFiles]) then
+					if ch[i] = '#' then isEnd := true
+					else ReadVolume(fileStream[i], ch[i], author[i], title[i]) end
+				end
+			end
+		end;
+
+		if ~isEnd then
+			write(author[0]); write( char(9) ); writeln(title[0]); 
+			for i := 0 to nofFiles-1 do
+				if ch[i] = '#' then isEnd := true
+				else ReadVolume(fileStream[i], ch[i], author[i], title[i]) end
+			end
+		end
+	until isEnd 
+end CommonInAll;
+
+procedure List(fileName : string);
+begin
+ 	if System.IO.File.Exists(fileName) then
+		write("The file exists: ");	writeln(fileName);
+		PrintLibrary(fileName); 
+	else
+		write("The file does not exist: "); writeln(fileName);
+	end;
+end List;
+
+var
+	files : array 3 of string; 
+	s : string;
+	
+begin
+	files[0] := "/ZonnonUebungens/Loesung04_Zonnon/library.txt";
+	files[1] := "/ZonnonUebungens/Loesung04_Zonnon/library1.txt";
+	files[2] := "/ZonnonUebungens/Loesung04_Zonnon/library2.txt";
+
+	writeln("a)");
+	List(files[0]); writeln();
+
+	writeln("b)"); 
+	Common(files[1], files[2]); 
+	writeln();
+ 
+	writeln("c)"); 
+	CommonInAll(3, files); 
+	writeln();
+ 
+	writeln("Press the key Enter");
+	readln(s);
+	writeln("Done, bye"); 
+end Library_r2x.

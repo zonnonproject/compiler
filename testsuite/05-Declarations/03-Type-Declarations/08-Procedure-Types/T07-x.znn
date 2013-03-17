@@ -1,0 +1,27 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Negative test: wrong result type 
+ * in the procedure Sum declaration.
+ *)
+module Main;
+	type PT = procedure(var integer; integer);
+
+	(* The correct procedure declaration is:                        *)
+	(*                 procedure Sum(var j : integer; i : integer); *)
+	procedure Sum(var j : integer; i : integer) : real;
+	begin
+		j := j + i;
+	end Sum;
+
+	var k : integer;
+		pt : PT;
+begin
+	k  := 3;
+	pt := Sum; (* The assignment of incorrect declared procedure. *)
+	pt(k, 1);
+	
+	halt(0);
+end Main.

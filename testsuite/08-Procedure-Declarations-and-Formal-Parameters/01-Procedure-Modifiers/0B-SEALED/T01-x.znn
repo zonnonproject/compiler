@@ -1,0 +1,31 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * The sealed modifier
+ *
+ * Negative test: redefinition of sealed procedure P;
+ *)
+definition {public} A;
+	procedure P;
+end A.
+
+definition {public} B refines A;
+	procedure {sealed} P;
+end B.
+
+definition {public} C refines B;
+	procedure P;
+end C.
+
+implementation C;
+	procedure P;
+	begin end P; 
+end C.
+
+module Main;
+begin
+	halt(0);
+end Main.
+
+
+
+

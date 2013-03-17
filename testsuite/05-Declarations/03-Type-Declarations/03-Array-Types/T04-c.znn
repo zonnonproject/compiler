@@ -1,0 +1,20 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: the object name B is used as type name of array element.
+ * The object is declared after it is used.
+ *)
+module A;
+	type T = array 1 of B;
+
+	type B = object
+	end B;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

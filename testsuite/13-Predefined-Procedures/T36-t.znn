@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The len procedure.
+ *
+ * Positive test: 1-dimensional dynamic array length
+ *)
+module Main;
+	type CharArray = array * of char;
+
+	var a : CharArray;
+begin
+	a := new CharArray(5);
+	if len(a) = 5
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,96 @@
+(* ********* Zonnon online collection ***********
+ * SimpleGraphics
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module SimpleGraphics;
+
+import 
+	System.Math as Math, 
+
+	System.Drawing.Pen as Pen, 
+	System.Drawing.Pens as Pens, 
+	System.Drawing.Graphics as Graphics, 
+
+	XYDrawing;
+
+type longreal = real {64};
+
+const
+	PI = 3.14159265359;
+
+	black  = 0;
+	blue   = 1;
+	red    = 2;
+	green  = 3;
+	yellow = 4;
+
+var
+	P : Pen;
+	G : Graphics;
+	x, y, dir : longreal; (* Current position and direction. *)
+
+procedure SE(r : longreal) : integer; (* Make integers for drawing. *)
+begin
+	return integer(r)
+end SE;
+
+procedure {public} Go(dist : real);
+begin
+	x := x + dist * Math.Cos(dir * PI / 180);
+	y := y + dist * Math.Sin(dir * PI / 180);
+end Go;
+
+procedure {public} Line(dist : real);
+var 
+	x1, y1 : longreal;
+begin
+	x1 := x + dist * Math.Cos(dir * PI / 180);
+	y1 := y + dist * Math.Sin(dir * PI / 180);
+
+	G.DrawLine(P, SE(x), SE(y), SE(x1), SE(y1));
+
+	x := x1;
+	y := y1;
+end Line;
+
+procedure {public} Turn(angle : real);
+begin
+	dir := dir - angle;
+
+	if dir > 360 
+	then dir := dir - 360
+	elsif dir < 0 
+	then dir := dir + 360 
+	end
+end Turn;
+
+procedure {public} Color(color : integer);
+begin
+	case color of (* Which color, black is default. *)
+		  blue :   P := Pens.Blue;
+		| red  :   P := Pens.Red;
+		| green :  P := Pens.Green;
+		| yellow : P := Pens.Yellow;
+		else       P := Pens.Black;
+	end
+end Color;
+
+procedure {public} Init(x1, y1, direction : real; color : integer);
+begin
+	x := x1;
+	y := y1;
+
+	while direction > 360 do 
+		direction := direction - real(360.0)
+	end;
+
+	dir := real(direction);
+	Color(color);
+	XYDrawing.Open(700, 700, G)
+end Init;
+
+end SimpleGraphics.

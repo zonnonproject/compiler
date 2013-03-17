@@ -1,0 +1,44 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * IMPLEMENTS clause
+ *
+ * Positive test: Only set for indexer is defined
+ *)
+
+(*
+
+Important problem with [] definition
+
+*)
+
+module Main;
+	
+definition De;
+	procedure Hi; 
+end De;
+
+var ok: boolean;
+type {ref} OB = object implements De, []
+	procedure {public} Hi implements De.Hi;
+	begin
+		writeln("Hello");
+	end Hi;
+	procedure {public} Set(i, val: integer) implements [].Set;
+	begin
+		writeln("Set", i, val);
+		ok := true
+	end Set;
+end OB;
+
+var a: OB;
+	o: object{De};
+	
+begin
+        ok := false;
+	a := new OB;
+	o := a;
+	a[1]:=5;
+	o.Hi;
+	if ok then halt(1) end
+end Main.

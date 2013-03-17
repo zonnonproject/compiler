@@ -1,0 +1,25 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators.
+ *
+ * Negative test: private boolean array elements of object A.B are used in logical operator.
+ * The object is declared after its array elements are used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		r : boolean;
+begin
+	b.p[0] := true;
+	b.q[1] := false;
+
+	r := b.p[0] or b.q[1];
+	halt(0);
+end Main.
+
+object A.B;
+	var { private } 
+		p, q : array 2 of boolean;
+end B.

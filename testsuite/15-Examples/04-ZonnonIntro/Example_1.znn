@@ -1,0 +1,17 @@
+(* ********* Zonnon online collection ***********
+ * enter X, enter Y, write x+y+2
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Example_1;
+var 
+  x, y, sum: real;
+begin
+  write("Enter X: "); readln(x);
+  write("Enter Y: "); readln(y);
+  sum := x + y+2.0;
+  writeln("",x," + ",y," = ", sum);
+end Example_1.

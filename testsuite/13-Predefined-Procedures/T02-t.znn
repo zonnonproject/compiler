@@ -1,0 +1,11 @@
+(**
+ * 09.Predefined procedures.
+ * The cap procedure.
+ *
+ * Positive test: cap of 'a' and '_'.
+ *)
+module Main;
+begin
+	if (cap('a') = 'A') & (cap('_') = '_')
+	then halt(1) else halt(0) end;
+end Main.

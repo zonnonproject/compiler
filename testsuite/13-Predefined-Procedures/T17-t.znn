@@ -1,0 +1,14 @@
+(**
+ * 09.Predefined procedures.
+ * The max(T) procedure.
+ *
+ * Positive test: max value for integer type.
+ *)
+module Main;
+	var i : integer;
+begin
+	i := max( integer{8} );
+
+	if i = 127 
+	then halt(1) else halt(0) end;
+end Main.

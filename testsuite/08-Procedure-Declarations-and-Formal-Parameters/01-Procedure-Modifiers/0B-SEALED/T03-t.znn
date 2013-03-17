@@ -1,0 +1,34 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * The sealed modifier
+ *
+ * Positive test: the sealed procedure P has implementation in object D.B.
+ *)
+definition {public} A;
+	procedure {sealed} P : integer;
+end A.
+
+implementation A;
+end A.
+
+object {public} D.B implements A;
+	(* The object implements sealed procedure P. *)
+	procedure {public} P : integer implements A.P;
+	begin 
+		return 3 
+	end P; 
+end B.
+ 
+module Main;
+import D;
+
+var 
+	i : integer;
+	b : D.B;
+begin
+	i := 2;
+	i := b.P();
+
+	if i = 3 
+	then halt(1) else halt(0) end;
+end Main.

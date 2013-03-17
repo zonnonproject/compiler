@@ -1,0 +1,147 @@
+(* ********* Zonnon online collection ***********
+ * RandomHeight (* info I, serie 10, 26.1.03, rm *)
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module RandomHeight; (* info I, serie 10, 26.1.03, rm *)
+
+import System.Random;
+
+const
+	NofNODES = 10000;
+	LOGNofNODES = 13.29;
+
+type longreal = real {64};
+	
+object { public, ref } Node;
+	var { public }
+		key : longreal;
+		left, right : Node;
+end Node;
+	
+var	random : System.Random;       
+            
+(**
+ * Building up the tree. 
+ *)
+procedure insertRek(new_ : Node; var cur : Node; level : integer; var max_ : integer);
+begin
+	if cur = nil then
+		cur := new_;        				(* Inserting the new node *)
+
+ 			writeln();
+
+			if new_ = nil then writeln("new_ = nil") end;
+			if cur  = nil then writeln("cur  = nil") end;
+ 			write("1. cur.key  = "); writeln(cur.key:10);
+
+			if new_.right = cur then writeln("new_.right = cur") end;
+			if new_.left  = cur then writeln("new_.left  = cur") end;
+
+		new_.right := nil;
+			if new_ = nil then writeln("new_ = nil") end;
+			if cur  = nil then writeln("cur  = nil") end;
+ 			write("2. cur.key  = "); writeln(cur.key:10);
+
+		new_.left := nil;  
+			if new_ = nil then writeln("new_ = nil") end;
+			if cur  = nil then writeln("cur  = nil") end;
+ 			write("3. cur.key  = "); writeln(cur.key:10);
+
+			if new_ = nil then writeln("new_ = nil") end;
+			if cur  = nil then writeln("cur  = nil") end;
+
+ 			write("new_.key = "); writeln(new_.key:10);
+ 			write("cur.key  = "); writeln(cur.key:10);
+ 			write("max = "); writeln(max_:10);
+ 			write("level = "); writeln(level:10);
+			
+		if level > max_ then max_ := level; (* New longest branch found? *)
+		elsif cur.key > new_.key then      (* Climbing down the tree *)
+			insertRek(new_, cur.left, level+1, max_); 
+		else
+			insertRek(new_, cur.right, level+1, max_);
+		end;
+	end;
+end insertRek;  
+    
+procedure getNode(var freeList, temp : Node);
+begin
+	if freeList = nil then (* No more nodes to recycle. *)
+		temp := new Node();
+	else
+		temp := freeList; 
+		freeList := temp.right; (* Catch the  first node in free list. *)
+	end;
+	temp.key := 0.0;
+end getNode;
+            
+procedure buildTree(var tree, freeList : Node; var height : integer; nOfNodes : integer);
+var 
+	i : integer; 
+	temp : Node;   
+begin
+	temp := nil;
+	for i := 1 to nOfNodes do
+		getNode(freeList, temp);         
+		temp.key := random.NextDouble();
+		insertRek(temp, tree, -1, height); 
+	end; 
+end buildTree;        
+    
+(* ------------- tearing down the tree, recyling the nodes --------------- *)    
+procedure freeNodes(n : Node; var freeList : Node);
+begin
+	if n # nil then
+		freeNodes(n.left, freeList);      		(* Postorder traverse.*)
+		freeNodes(n.right, freeList);
+		n.right := freeList; n.left := nil;    	(* Put in freeList.*)
+		freeList := n;
+	end;    
+end freeNodes;
+      
+(* ------------ main procedure -------------------------------------*)      
+procedure test();
+var 
+	freeList, tree : Node; 
+	i, height, nOfTimes : integer;       
+	sum : real;
+begin
+	(* Reading user input. *)
+	writeln();
+	writeln("Please enter nOfTimes: ");
+	read(nOfTimes);
+	sum := 0.0;
+	height := 0;
+	tree := nil; 
+	freeList := nil; 
+
+	(* Initializing sum of heights. *)
+	for i := 1 to nOfTimes do
+		buildTree(tree, freeList, height, NofNODES);	(* build up the tree *)
+		sum := sum + height / nOfTimes;            		(* divide to prevent overflow in sum *)
+		height := 0; 		                 			(* initializing maximum height *)
+		freeNodes(tree,freeList);		           		(* recycle the nodes *)
+	end; 
+	 
+	(* Printing the statistics. *) 
+	write("Number of nodes inserted: ");      		
+	writeln(NofNODES:5);
+	write("Number of times: ");  
+	writeln(nOfTimes:5);
+	write("Average height: ");
+	writeln(sum);
+
+	(* Theoretical value. *)
+	write("Compared to minimal height: ");    
+	write(sum * 100 / LOGNofNODES : 5);  
+	writeln("%");
+end test;
+
+begin
+	random := new System.Random(); 
+	test();
+end RandomHeight.

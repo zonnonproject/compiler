@@ -1,0 +1,202 @@
+module {public} Main;
+
+import
+   BelCore.Log           as L,
+   BelCore.Numbers       as N,
+   BelCore.Arrays        as A,
+   BelCore.Matrices      as M,
+   BelCore.LinearAlgebra as LA;
+
+
+   procedure {private} AssignArray (var a : A.Array);
+   var
+      n : N.Number;
+      s : string;
+   begin
+      s := "";
+      a.Initialize(3);
+      writeln("Enter the elements of a 3-dimensional array.");
+      write("   a[1] = ");
+      readln(s);
+      n.Parse(s);
+      a[1] := n;
+      write("   a[2] = ");
+      readln(s);
+      n.Parse(s);
+      a[2] := n;
+      write("   a[3] = ");
+      readln(s);
+      n.Parse(s);
+      a[3] := n
+   end AssignArray;
+
+   procedure {private} PrintArray (a : A.Array);
+   var
+      n : N.Number;
+      s : string;
+   begin
+      s := "{ ";
+      n := a[1];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := a[2];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := a[3];
+      s := s + n.Typeset();
+      s := s + "}^T";
+      writeln(s)
+   end PrintArray;
+
+   procedure {private} AssignMatrix (var m : M.Matrix);
+   var
+      n : N.Number;
+      s : string;
+   begin
+      s := "";
+      m.Initialize(3,3);
+      writeln("Supply the elements to a 3x3 matrix.");
+      writeln("Enter the first row:");
+      write("   m[1,1] = ");
+      readln(s);
+      n.Parse(s);
+      m[1,1] := n;
+      write("   m[1,2] = ");
+      readln(s);
+      n.Parse(s);
+      m[1,2] := n;
+      write("   m[1,3] = ");
+      readln(s);
+      n.Parse(s);
+      m[1,3] := n;
+      writeln("Enter the second row:");
+      write("   m[2,1] = ");
+      readln(s);
+      n.Parse(s);
+      m[2,1] := n;
+      write("   m[2,2] = ");
+      readln(s);
+      n.Parse(s);
+      m[2,2] := n;
+      write("   m[2,3] = ");
+      readln(s);
+      n.Parse(s);
+      m[2,3] := n;
+      writeln("Enter the third row:");
+      write("   m[3,1] = ");
+      readln(s);
+      n.Parse(s);
+      m[3,1] := n;
+      write("   m[3,2] = ");
+      readln(s);
+      n.Parse(s);
+      m[3,2] := n;
+      write("   m[3,3] = ");
+      readln(s);
+      n.Parse(s);
+      m[3,3] := n
+   end AssignMatrix;
+
+   procedure {private} PrintMatrix (m : M.Matrix);
+   var
+      n : N.Number;
+      s : string;
+   begin
+      s := "| ";
+      n := m[1,1];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := m[1,2];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := m[1,3];
+      s := s + n.Typeset();
+      s := s + "|";
+      writeln(s);
+      s := "| ";
+      n := m[2,1];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := m[2,2];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := m[2,3];
+      s := s + n.Typeset();
+      s := s + "|";
+      writeln(s);
+      s := "| ";
+      n := m[3,1];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := m[3,2];
+      s := s + n.Typeset();
+      s := s + "  ";
+      n := m[3,3];
+      s := s + n.Typeset();
+      s := s + "|";
+      writeln(s);
+   end PrintMatrix;
+
+   procedure {private} ToString (i : integer) : string;
+   var
+      s : string;
+   begin
+      if i = 0 then
+          s := "0"
+      elsif i = 1 then
+         s := "1"
+      elsif i = 2 then
+         s := "2"
+      elsif i = 3 then
+         s := "3"
+      else
+         s := "error in output to string"
+      end;
+      return s
+   end ToString;
+
+   procedure {public} Run;
+   var
+      a, b : A.Array;
+      lu : LA.Lu;
+      m, x, y : M.Matrix;
+      n : N.Number;
+   begin
+      AssignMatrix(m);
+      writeln("The matrix assigned was:");
+      PrintMatrix(m);
+      lu.Initialize;
+      lu.Factorize(m);
+      writeln("Test to make sure passed matrix didn't change.");
+      PrintMatrix(m);
+      writeln;
+      write("The  dimension  of the matrix is ");
+      writeln(ToString(lu.Dimension()));
+      write("The    rank     of the matrix is ");
+      writeln(ToString(lu.Rank()));
+      write("The determinant of the matrix is ");
+      n := lu.Determinant();
+      writeln(n.Typeset());
+      x := lu.Inverse();
+      writeln("The inverse of the matrix is:");
+      PrintMatrix(x);
+      writeln("Test the result. The following should be the identity matrix.");
+      y := m.Dot(x);
+      PrintMatrix(y);
+      writeln;
+      writeln("Enter a matrix and an array to solve  M.x = b  for  x.");
+      writeln("Input M:");
+      AssignMatrix(m);
+      writeln("Now input b:");
+      AssignArray(b);
+      lu.Initialize;
+      lu.Factorize(m);
+      a := lu.Solve(b);
+      writeln("The solution vector x is:");
+      PrintArray(a)
+   end Run;
+
+begin
+   Run;
+   L.Close
+end Main.

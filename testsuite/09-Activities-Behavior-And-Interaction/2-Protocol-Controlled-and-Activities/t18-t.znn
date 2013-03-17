@@ -1,0 +1,44 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Protocol exception inside the activity
+ *)
+
+module {protected} Main;
+import System;
+
+var success :integer;
+
+protocol P = (
+	dialog = integer
+);
+
+activity A implements P;
+var 
+	s : string;
+begin 
+	do
+		accept s; (* Should be integer *)
+	on exception do
+		success := 1; (* Success! Protocol exception *)	
+		s := ""
+	end;
+    s := s;
+end A;
+
+var 
+	a : activity {P};
+begin
+    success := 0;
+	a := new A;
+	do
+	a( "A" ) (* sending a char *)
+	on exception do
+	end;
+   	await 5;
+	if success = 1 then
+	   halt(1) (* success *)
+    else
+	   halt(0) (* failure *)
+    end
+end Main.

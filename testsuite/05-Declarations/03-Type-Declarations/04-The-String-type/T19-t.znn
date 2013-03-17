@@ -1,0 +1,14 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: string constant and variable comparison 
+ *)
+module Main;
+var s : string;
+begin 
+	s := "ABC"; 
+	if s > "AB"
+	then halt(1) else halt(0) end;
+end Main.

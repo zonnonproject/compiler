@@ -1,0 +1,24 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ *
+ * Positive test: correct imported name of type C.
+ * The type C is declared after it is used.
+ *)
+module {public} A;
+import B;
+
+var {public}
+	X : B.C;
+end A.
+
+module {public} B;
+	type { public }
+		C = integer;
+end B.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

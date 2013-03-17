@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Negative test: private procedures call in arithmetic expression.
+ * The object is declared after its using.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		r : boolean;
+begin
+	r := (b.p1 * b.p2 = 15);
+	halt(0);
+end Main.
+
+object A.B;
+	procedure { private } p1 : integer;
+	begin 
+		return 5 
+	end p1;
+
+	procedure { private } p2 : integer;
+	begin 
+		return 3 
+	end p2;
+end B.

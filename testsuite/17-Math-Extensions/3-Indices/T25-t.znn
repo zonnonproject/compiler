@@ -1,0 +1,28 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: ranges
+ *)
+
+module Main;
+
+var
+	a, b : array {math} 3 of integer;
+	r1, r2 : range;
+	c : array * of integer;
+  
+begin
+	r1 := 0..2 by 2;
+	r2 := 1..2;
+	a := [1, 2, 3];
+	b := [5, 10, 15];
+	c := a[r1] + b[r2];
+	if (c[0] = 11) & (c[1] = 18)
+	then
+		halt(1);
+	else
+		halt(0);
+	end;
+end Main.
+

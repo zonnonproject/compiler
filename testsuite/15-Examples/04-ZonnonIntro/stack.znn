@@ -1,0 +1,46 @@
+(* ********* Zonnon online collection ***********
+ * Stack
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+
+module Stack;
+
+object {ref, public} Node;
+var {public}
+   val: integer;
+   next: Node;
+end Node;
+
+var root: Node; 
+
+procedure push(n:integer);
+var 
+   newnode: Node;
+begin
+   newnode := new Node;
+   newnode.val := n;
+   newnode.next := root;
+   root := newnode;
+end push;
+
+procedure pop:integer;
+var t: integer;
+begin
+   if root = nil then return 0; end;
+   t := root.val;
+   root := root.next;
+   return t;
+end pop;
+
+begin
+   push(3);
+   push(7);
+   push(10); 
+   writeln(pop());
+   writeln(pop());
+   writeln(pop());
+end Stack.

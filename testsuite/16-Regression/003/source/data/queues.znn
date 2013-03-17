@@ -1,0 +1,257 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates a dynamic queue (a FIFO data buffer) for data storage              *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : QueueNode   - a node for queues                              *)
+(*   var       : data        - where the data (instance of Datum) are stored  *)
+(*             : next        - a link to the next node in the data chain      *)
+(*             : prev        - a link to the previous node in the data chain  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* object      : Queue       - a first-in-first-out (FIFO) data buffer        *)
+(*    methods  : Initialize  - prepares the queue for use                     *)
+(*             : Nullify     - sets all dynamic links and memories to nil     *)
+(*             : Load        - reads a queue from file: call Configure first  *)
+(*             : Store       - writes a queue to a binary data file           *)
+(*             : Clone       - returns an empty queue                         *)
+(*             : Copy        - returns a deep copy of the queue               *)
+(*             : Configure   - specifies the data type for queue insertion    *)
+(*             : Contains    - returns the data type of data in the queue     *)
+(*             : Length      - the number of nodes in the queue               *)
+(*             : Pop         - extract the datum at the bottom of the queue   *)
+(*             : Push        - place a new datum onto the top of the queue    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+object {public, ref} BelData.QueueNode;
+   import
+      BelData.Datum;
+   var {public}
+      next, prev : QueueNode;
+      data : object{BelData.Datum};
+begin
+   data := nil;
+   next := nil;
+   prev := nil
+end QueueNode.
+
+
+object {public, ref} BelData.Queue implements BelData.Structure;
+
+   import
+      System.Int32   as Int32,
+      System.Object  as Obj,
+      BelCore.Log       as L,
+      BelData.QueueNode as N;
+
+   var {private}
+      dataClone  : object{BelData.Datum};
+      dataType   : Type;
+      head, tail : N;
+      length : integer;
+
+   procedure {public} Initialize
+      implements BelData.Object.Initialize;
+   begin
+      dataClone := nil;
+      head   := nil;
+      length := 0;
+      tail   := nil
+   end Initialize;
+
+   procedure {public} Nullify
+      implements BelData.Object.Nullify;
+   var
+      n : N;
+   begin {locked}
+      n := head;
+      while n # nil do
+         n.data.Nullify;
+         n := n.next;
+         if n # nil then
+            n.prev.next := nil;
+            n.prev := nil
+         end
+      end;
+      dataClone := nil;
+      head   := nil;
+      length := 0;
+      tail   := nil
+   end Nullify;
+
+   procedure {public} Load (br : BinaryReader)
+      implements BelData.Object.Load;
+   var
+      d : object{BelData.Datum};
+      i, j : integer;
+      o : object{BelData.Object};
+   begin {locked}
+      length := 0;
+      j := br.ReadInt32();
+      for i := 1 to j do
+         o := dataClone.Clone();
+         d := BelData.Datum(o);
+         d.Load(br);
+         Push(d)
+      end
+   end Load;
+
+   procedure {public} Store (bw : BinaryWriter)
+      implements BelData.Object.Store;
+   var
+      i : integer;
+      j : Int32;
+      n : N;
+   begin {locked}
+      j := length;
+      bw.Write(j);
+      n := tail;
+      for i := 1 to length do
+         n.data.Store(bw);
+         n := n.prev
+      end;
+      bw.Flush
+   end Store;
+
+   procedure {public} Clone () : object{BelData.Datum}
+      implements BelData.Datum.Clone;
+   var
+      d : object{BelData.Datum};
+      q : Queue;
+   begin
+      q := new Queue;
+      d := BelData.Datum(q);
+      return d
+   end Clone;
+
+   procedure {public} Copy () : object{BelData.Datum}
+      implements BelData.Datum.Copy;
+   var
+      d : object{BelData.Datum};
+      i : integer;
+      n : N;
+      q : Queue;
+   begin
+      q := new Queue;
+      if tail # nil then
+         n := tail;
+         for i := 1 to length do
+            q.Push(n.data);
+            n := n.prev
+         end
+      end;
+      d := BelData.Datum(q);
+      return d
+   end Copy;
+
+   procedure {public} Configure (clone : object{BelData.Datum})
+      implements BelData.Structure.Configure;
+   var
+      o : object{BelData.Object};
+      obj : Obj;
+   begin {locked}
+      if clone # nil then
+         Nullify;
+         o := clone.Clone();
+         dataClone := BelData.Datum(o);
+         obj := clone;
+         dataType := obj.GetType()
+      else
+         L.WarningMessage(500,415, "BelData.Queue.Configure")
+      end
+   end Configure;
+
+   procedure {public} Contains () : Type
+      implements BelData.Structure.Contains;
+   begin
+      return dataType
+   end Contains;
+
+   procedure {public} Length () : integer;
+   begin
+      return length
+   end Length;
+
+   procedure {public} Pop () : object{BelData.Datum};
+   var
+      d : object{BelData.Datum};
+      n : N;
+   begin {locked}
+      n := tail;
+      if length = 1 then
+         d := n.data;
+         n.data := nil;
+         head := nil;
+         tail := nil;
+         dec(length)
+      elsif length > 1 then
+         d := n.data;
+         n.data := nil;
+         tail := n.prev;
+         tail.next := nil;
+         n.prev := nil;
+         dec(length)
+      else
+         d := nil
+      end;
+      return d
+   end Pop;
+
+   procedure {public} Push (datum : object{BelData.Datum});
+   var
+      n : N;
+      o : object{BelData.Object};
+      obj : Obj;
+      s : string;
+      t : Type;
+   begin {locked}
+      if datum # nil then
+         if length <= 0 then
+            Configure(datum)
+         end;
+         obj := datum;
+         t := obj.GetType();
+         if dataType.Equals(t) then
+            n := new N;
+            o := datum.Copy();
+            n.data := BelData.Datum(o);
+            if length > 0 then
+               head.prev := n;
+               n.next := head
+            else
+               tail := n;
+               length := 0
+            end;
+            head := n;
+            inc(length)
+         else
+            L.WarningMessage(501,415, "BelData.Queue.Push")
+         end
+      else
+         L.WarningMessage(500,415, "BelData.Queue.Push")
+      end
+   end Push;
+
+begin
+   Initialize
+end Queue.

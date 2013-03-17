@@ -1,0 +1,12 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Negative text: long string assignment to character array variable.
+ *)
+module Main;
+	var	s : array 3 of char;
+begin
+	s := "123";
+	halt(0);
+end Main.

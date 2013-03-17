@@ -1,0 +1,193 @@
+(* ********* Zonnon online collection ***********
+ * Modul zum Parsen von Textfiles, angelehnt an das Texts.Scanner-Konstrukt aus native Oberon.
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*
+	Modul zum Parsen von Textfiles, angelehnt an das Texts.Scanner-Konstrukt aus native Oberon.
+	Angepasst fr die Aufgabe 11.2 in info1 ws 02/03.
+	Jedes geparste Wort ist als String abrufbar. Ist der String eine Zahl, wird der type
+	entsprechend gesetzt und die entsprechenden Felder im Record gefllt.
+	Integers sind auch Reals!
+
+	Der FileStream kann nicht in den ScannerRecord gebaut werden, da der Scanner sonst nicht
+	kopierbar/zurcksetzbar ist. FileStream.get_Postition und FileStream.set_Postition sind nicht
+	anwendbar, da kein longint (64bit) zur Verfgungsteht.
+*)
+module TextParser;
+
+import 
+	System.Int32,
+	System.Single,
+	System.String,
+	System.IO.File as File,
+	System.IO.FileStream as FileStream;
+
+const
+	NoType = -1;  (* classes *) 
+	String =  0;  
+	Real   =  1;  
+	Int    =  2; 
+	
+	ArrSize = 128;
+
+object {value, public} Scanner;
+	var {public} 
+		eot : boolean;
+		position : integer; 
+		filename : System.String;    
+		
+		r : real;
+		s : string;
+		i : integer;
+		type_: integer;  	   
+end Scanner; 
+
+procedure forbiddenChar(i : integer) : boolean; (* List of Chars that should not be returned *)
+begin
+    return 
+		((0  <= i) & (i <  46)) or (* 46 = "." *)
+    	(i = 47) or 
+    	((58 <= i) & (i <  65)) or          
+    	((91 <= i) & (i <= 96)) or    
+    	((122 < i) & (i < 128)) or  
+    	(i > 133) 
+end forbiddenChar;
+        
+procedure ReadWord(var buffer : array of char; fs : FileStream; var eot : boolean; var pos : integer);
+var
+	i, j : integer;
+	s : string;
+begin
+	j := 0; 
+	i := fs.ReadByte(); 
+	inc(pos);
+
+	while forbiddenChar(i) do (* jump *)   
+		i := fs.ReadByte();
+		inc(pos)
+	end; 
+
+	while (~forbiddenChar(i)) & (i # -1) do 
+		buffer[j] := char(i);
+		inc(j);
+		i := fs.ReadByte();
+		inc(pos)
+	end;
+
+	if i = -1 then eot := true end;
+	buffer[j] := char(0); (* 0X *)
+(*
+	copy(buffer, s);
+	write("word="); writeln(s);
+*)
+end ReadWord;
+
+procedure ToInt(str : System.String) : integer;
+begin
+	return System.Int32.Parse(str)
+end ToInt;
+
+procedure ToReal(str : System.String) : real;    
+begin
+	return System.Single.Parse(str)
+end ToReal;
+
+(*
+	ntig, da keine exceptions gehandelt werden knnen 
+	akzeptiert keine exponenten!
+*)
+procedure GetType(str : array of char) : integer; 
+var
+	pt, nums : boolean; (* flags *)
+	i, j, dots : integer;
+begin
+	dots := 0; j := 0;
+	i := integer(str[j]);
+	if i = 0 then return NoType end; (* empty *) 
+
+	while i # 0 do
+		if i = 46 then
+			inc(dots)
+		elsif (i < 48) or (i > 57) then
+			return String (* kein num typ *)
+		end; 
+		inc(j);
+		i := integer(str[j])
+	end;
+
+	if dots = 0 then 
+		return Int (* integer *)
+	elsif dots = 1 then 
+		return Real (* real *)
+	else 
+		return String (* zu viele punkte, nicht konveriertbar *)
+	end
+end GetType;
+
+procedure SetFileStream(filename : System.String; var fs : FileStream; pos : integer);
+var
+	i, j : integer;
+begin	
+	j := 0; 
+	fs := File.OpenRead(filename);
+
+	while j < pos do
+		i := fs.ReadByte();
+		inc(j)
+	end
+end SetFileStream;
+
+procedure {public} Scan(var s : Scanner);
+var
+	st : string;
+	fs : FileStream;
+	i, type_ : integer;
+	buffer : array ArrSize of char; 
+begin
+	SetFileStream(s.filename, fs, s.position);
+
+	for i := 0 to ArrSize-1 do buffer[i] := ' ' end;
+
+	ReadWord(buffer, fs, s.eot, s.position);
+ 
+	st := "";
+	copy(buffer, st);
+	s.s := st;
+ 
+	type_:= GetType(buffer);
+
+	if type_ = NoType then
+		writeln("No type");
+		s.type_:= type_
+	elsif type_ = Int then 
+		s.i := ToInt(s.s);
+		s.r := ToReal(s.s); 
+		s.type_:= type_
+	elsif type_ = Real then
+		s.r := ToReal(s.s);
+		s.type_:= type_
+	else 	
+		s.type_:= type_
+	end;	
+
+	fs.Close
+end Scan;
+
+procedure {public} OpenScanner(var s : Scanner; filename : System.String) : boolean;
+begin
+	if ~File.Exists(filename) then return false end;
+
+	s.s := "";
+	s.eot := false;
+	s.type_:= NoType;
+	s.position := 0;
+	s.filename := filename;
+
+	return true
+end OpenScanner; 
+ 
+end TextParser.

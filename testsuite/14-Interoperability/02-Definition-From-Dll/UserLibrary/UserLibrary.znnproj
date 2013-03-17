@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioProject>
+  <Zonnon ProjectType="Local"
+     ProductVersion="7.0.9466"
+     SchemaVersion="1.0"
+     Name="UserLibrary"
+     ProjectGuid="e437a701-9aa0-4261-b73d-b08cdb27da56"
+    >
+    <Build>
+      <Settings ApplicationIcon=""
+         AssemblyKeyContainerName=""
+         AssemblyName="UserLibrary"
+         AssemblyOriginatorKeyFile=""
+         DefaultClientScript="JScript"
+         DefaultHTMLPageLayout="Grid"
+         DefaultTargetSchema="IE50"
+         DelaySign="false"
+         OutputType="Library"
+         RootNamespace="UserLibrary"
+         StartupObject=""
+        >
+        <Config Name="Debug"
+           AllowUnsafeBlocks="False"
+           BaseAddress="285212672"
+           CheckForOverflowUnderflow="False"
+           ConfigurationOverrideFile=""
+           DefineConstants="DEBUG;TRACE"
+           DocumentationFile=""
+           DebugSymbols="True"
+           FileAlignment="4096"
+           IncrementalBuild="True"
+           Optimize="False"
+           OutputPath="bin\debug"
+           RegisterForComInterop="False"
+           RemoveIntegerChecks="false"
+           TreatWarningsAsErrors="False"
+           WarningLevel="4"
+           />
+        <Config Name="Release"
+           AllowUnsafeBlocks="false"
+           BaseAddress="285212672"
+           CheckForOverflowUnderflow="false"
+           ConfigurationOverrideFile=""
+           DefineConstants="TRACE"
+           DocumentationFile=""
+           DebugSymbols="false"
+           FileAlignment="4096"
+           IncrementalBuild="false"
+           Optimize="true"
+           OutputPath="bin\release"
+           RegisterForComInterop="false"
+           RemoveIntegerChecks="false"
+           TreatWarningsAsErrors="false"
+           WarningLevel="4"
+           />
+      </Settings>
+      <References>
+        <Reference Name="Library"
+             Project="{5E531CD9-FC76-489D-BC76-7F1AB7E0C405}"
+             Private="true"
+             />
+      </References>
+    </Build>
+    <Files>
+      <Include>
+        <File BuildAction="Compile"
+                 SubType="Code"
+                 RelPath="UserLibrary.znn"
+                 />
+      </Include>
+    </Files>
+  </Zonnon>
+</VisualStudioProject>

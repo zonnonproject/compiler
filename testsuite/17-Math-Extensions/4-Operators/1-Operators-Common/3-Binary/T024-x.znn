@@ -1,0 +1,48 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Binary
+ * 
+ * Negative test: Binary mod : illegal type
+ * array + scalar
+ *)
+
+module Main;
+
+type vi = array *,* of integer;
+type vr = array *,* of real;
+type vc = array *,* of cardinal;
+
+type iind = array {math} * of integer;
+type bind = array {math} * of boolean;
+
+var
+	ai1 : array {math} 2, 3 of integer;
+	ai2 : vi;
+	ar1 : array {math} 2, 3 of real;
+	ar2 : vr;
+	ac1 : array {math} 2, 3 of cardinal;
+	ac2 : vc;
+	
+	bi1, bi2 : iind;
+	bb1, bb2 : bind;
+	
+	ki : integer;
+	kr : real;
+	kc : cardinal;
+	
+	i, j : integer;
+	
+begin	
+	
+	ai1 := [[-1, 2, -3], [4, -5, 6]];
+	ar1 := [[1.1, -2.1, 3.1], [-4.1, 5.1, -6.1]];
+	ac1 := [[1, 2, 3], [4, 5, 6]];
+	
+	kr := 5.2;
+	ar2 := kr mod ac1;
+		
+	halt(0);
+	
+end Main.
+	

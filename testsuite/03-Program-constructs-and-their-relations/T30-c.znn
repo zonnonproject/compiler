@@ -1,0 +1,28 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: default implementation implements definition.
+ *)
+
+(* I. The definition A is declared after its default implementation A. *)
+implementation A;
+end A.
+
+definition A;
+end A.
+
+(* II. The definition B is declared before its default implementation B. *)
+definition B;
+end B.
+
+implementation B;
+end B.
+
+module Main;
+begin
+	halt(1);
+end Main.
+
+
+
+

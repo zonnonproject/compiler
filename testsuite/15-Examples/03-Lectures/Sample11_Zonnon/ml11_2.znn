@@ -1,0 +1,242 @@
+(* ********* Zonnon online collection ***********
+ * Graphic Language
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module GraphicLanguage; (* sh, 26 jan 01, mg .net *)
+
+import 
+	System.IO.Path as Path,
+	System.Reflection.Assembly as Assembly,
+
+	System.String,
+	System.Threading,
+
+	TextParser, 
+	TextParser.Scanner,
+	SimpleGraphics;
+
+const 	
+(* 
+	abstract constants to determine the kind of command, 
+	=> no object-refinement in oberon for .net  
+*)
+	COMMAND = 	0;
+	GO =		1;
+	LINE =		2;
+	TURN =		3; 
+	COLOR =	4; 
+	CALL =		5;
+
+object {public, ref} Command;
+	var {public}
+		next : Command;
+		id : integer; (* const. *)
+		
+		(* Attribute for line and go. *)
+		dist : real;
+
+		(* Attribute for turn. *)
+		angle : real;
+
+		(* Attribute for Color. *)
+		color : integer;
+
+		(* Attribute for Call. *)
+		callee : System.String;
+		scale : real;
+end Command;
+
+object {public, ref} Program;
+	var {public}
+		next : Program;
+		first, last : Command;
+		name : System.String;
+end Program;
+
+var 
+	exname : System.String;
+	firstprog, lastprog : Program;
+
+procedure GetReal(var s : TextParser.Scanner) : real;
+var 
+	r : real;
+begin
+	r := s.r;
+
+	if s.type_ = TextParser.Int then 
+		r := real(s.i) 
+	end;
+
+	return r
+end GetReal;
+
+procedure CreateProgram() : Program;
+var 
+	p : Program;
+begin
+	p := new Program();
+	p.next := nil; 
+	p.first := nil; 
+	p.last := nil;
+	return p
+end CreateProgram;
+
+procedure AddCommandToProgram(p : Program; c : Command);
+begin
+	c.next := nil;
+
+	if p.first = nil then 
+		p.first := c
+	else 
+		p.last.next := c
+	end;
+
+	p.last := c
+end AddCommandToProgram;
+
+procedure ReadCommand(var s : TextParser.Scanner) : Command;
+var
+	olds : TextParser.Scanner;
+	c : Command;
+begin
+	olds := s; (* When it is not a command, we want to set the scanner back. *)
+	TextParser.Scan(s); (* s.class must be Texts.Name *)
+	
+	if s.eot then
+		c := nil;
+	elsif s.s = "go" then
+		c := new Command();
+		c.id := GO;
+		TextParser.Scan(s); (* Must be TextParser.Int or TextParser.Real. *)
+		c.dist := s.r
+	elsif s.s = "line" then
+		c := new Command();
+		c.id := LINE;
+		TextParser.Scan(s);
+		c.dist := s.r
+	elsif s.s = "turn" then
+		c := new Command();
+		c.id := TURN;
+		TextParser.Scan(s);
+		c.angle := s.r
+	elsif s.s = "color" then
+		c := new Command();
+		c.id := COLOR;
+		TextParser.Scan(s);
+		c.color := s.i
+	elsif s.s = "call" then
+		c := new Command();
+		c.id := CALL;
+		TextParser.Scan(s);
+		c.callee := s.s;
+		write("call: "); writeln(c.callee); 
+		TextParser.Scan(s);
+		c.scale := s.r;
+		write("scale: "); writeln(c.scale)
+	else
+		s := olds; (* Restore scanner. *)
+		writeln("restored");
+		c := nil (* Was not a command. *)
+	end;
+	
+	if c # nil then c.next := nil end;
+
+	return c
+end ReadCommand;
+
+procedure ReadDeclaration(var s : TextParser.Scanner) : Program;
+var 
+	p : Program;
+	c : Command;
+begin
+	p := CreateProgram();
+	TextParser.Scan(s); (* Type must be TextParser.String when using a syntactically correct file. *)
+	p.name := s.s;
+
+	repeat
+		c := ReadCommand(s);
+		if c # nil then AddCommandToProgram(p, c) end (* chain commands *)
+	until c = nil;
+
+	return p
+end ReadDeclaration;
+
+procedure ReadGraphic(var s : TextParser.Scanner);
+var 
+	p : Program;
+begin
+	firstprog := ReadDeclaration(s); (* Save because of the EBNF enforcing at least one command. *)
+	lastprog := firstprog;
+
+	while ~s.eot do 
+		p := ReadDeclaration(s);
+		lastprog.next := p; lastprog := p (* chain programs *)
+	end
+end ReadGraphic;
+
+procedure { public } Execute(var decl : System.String; scale : real);
+var 
+	p : Program;
+	c : Command;
+begin
+	p := firstprog;
+	
+	while (p # nil) & (p.name # decl) do
+		p := p.next
+	end;
+
+	if p # nil then
+		c := p.first;
+
+		while c # nil do
+			if c.id = GO then 
+				SimpleGraphics.Go(scale * c.dist)
+			elsif c.id = LINE then 
+				SimpleGraphics.Line(scale * c.dist);
+			elsif c.id = TURN then 
+				SimpleGraphics.Turn(c.angle)
+			elsif c.id = COLOR then 
+				SimpleGraphics.Color(c.color)
+			elsif c.id = CALL then 
+				Execute(c.callee, c.scale * scale)
+			end;
+			c := c.next
+		end
+	else
+		write("declaration not found: "); writeln(decl)
+	end
+end Execute;
+
+procedure {public} ReadFile : boolean;
+var 
+	s : TextParser.Scanner;
+	asm : Assembly;
+	loc, dir, fileName : string;
+begin
+	asm := Assembly.GetExecutingAssembly();
+	loc := asm.Location;
+	dir := Path.GetDirectoryName(loc);
+	fileName := Path.Combine(dir, "info.txt");
+
+	if ~TextParser.OpenScanner(s, fileName) then 
+		writeln("The file is not found: ", fileName);
+		return false 
+	end;
+
+ 	ReadGraphic(s);
+	return true	
+end ReadFile;
+
+begin 
+	if ~ReadFile() then return end;
+
+	SimpleGraphics.Init(20.0, 300.0, 180.0, 0); 
+	System.Threading.Thread.Sleep(500);
+	exname := "info";
+
+	Execute(exname, 1.0);
+end GraphicLanguage.

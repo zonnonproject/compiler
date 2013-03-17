@@ -1,0 +1,250 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The MATH modules provide advanced math functions and operations for Zonnon *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Provides Neville-Aitken polynomial interpolation schemes of order N.       *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The x's are the control or independent variables:                          *)
+(*     x1 < x2 < ... < xN                                                     *)
+(* The y's are the response or dependent variables, which can be              *)
+(*    numbers:   y1      = y(x1),      ..., yN      = y(xN)                   *)
+(*    arrays:    y1[i]   = y[i](x1),   ..., yN[i]   = y[i](xN)                *)
+(*    matrices:  y1[i,j] = y[i,j](x1), ..., yN[i,j] = y[i,j](xN)              *)
+(* For any x in [x1, xN], there are the following interpolation procedures:   *)
+(*    Poly<N>       returns y(x)                                              *)
+(*    PolyArray<N>  returns y_i(x)                                            *)
+(*    PolyMatrix<N> returns y_ij(x)                                           *)
+(* each with an accuracy of O(N-1).                                           *)
+(* Interpolation routines are available for N = 2, 3, 4, and 5.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelMath.Interpolations;
+
+   import
+      BelCore.Log      as L,
+      BelCore.Numbers  as N,
+      BelCore.Arrays   as A,
+      BelCore.Matrices as M;
+
+   procedure {public} Poly2
+      (x, x1, x2, y1, y2 : N.Number) : N.Number;
+   var
+      y12 : N.Number;
+   begin
+      if x2 > x1 then
+         if (x < x1) or (x > x2) then
+            L.WarningMessage(81,-1, "BelMath.Interpolations.Poly2")
+         end
+      else
+         if (x < x2) or (x > x1) then
+            L.WarningMessage(81,-1, "BelMath.Interpolations.Poly2")
+         end
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      return y12
+   end Poly2;
+
+   procedure {public} PolyArray2
+      (x, x1, x2 : N.Number; y1, y2 : A.Array) : A.Array;
+   var
+      y12 : A.Array;
+   begin
+      if (x < x1) or (x > x2) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyArray2")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      return y12
+   end PolyArray2;
+
+   procedure {public} PolyMatrix2
+      (x, x1, x2 : N.Number; y1, y2 : M.Matrix) : M.Matrix;
+   var
+      y12 : M.Matrix;
+   begin
+      if (x < x1) or (x > x2) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyMatrix2")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      return y12
+   end PolyMatrix2;
+
+   procedure {public} Poly3
+      (x, x1, x2, x3, y1, y2, y3 : N.Number) : N.Number;
+   var
+      y12, y23, y123 : N.Number;
+   begin
+      if (x < x1) or (x > x3) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.Poly3")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      return y123
+   end Poly3;
+
+   procedure {public} PolyArray3
+      (x, x1, x2, x3 : N.Number; y1, y2, y3 : A.Array) : A.Array;
+   var
+      y12, y23, y123 : A.Array;
+   begin
+      if (x < x1) or (x > x3) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyArray3")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      return y123
+   end PolyArray3;
+
+   procedure {public} PolyMatrix3
+      (x, x1, x2, x3 : N.Number; y1, y2, y3 : M.Matrix) : M.Matrix;
+   var
+      y12, y23, y123 : M.Matrix;
+   begin
+      if (x < x1) or (x > x3) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyMatrix3")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      return y123
+   end PolyMatrix3;
+
+   procedure {public} Poly4
+      (x, x1, x2, x3, x4, y1, y2, y3, y4 : N.Number) : N.Number;
+   var
+      y12, y23, y34, y123, y234, y1234 : N.Number;
+   begin
+      if (x < x1) or (x > x4) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.Poly4")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y34 := ((x - x4)*y3 - (x - x3)*y4)/(x3 - x4);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      y234 := ((x - x4)*y23 - (x - x2)*y34)/(x2 - x4);
+      y1234 := ((x - x4)*y123 - (x - x1)*y234)/(x1 - x4);
+      return y1234
+   end Poly4;
+
+   procedure {public} PolyArray4
+      (x, x1, x2, x3, x4 : N.Number; y1, y2, y3, y4 : A.Array) : A.Array;
+   var
+      y12, y23, y34, y123, y234, y1234 : A.Array;
+   begin
+      if (x < x1) or (x > x4) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyArray4")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y34 := ((x - x4)*y3 - (x - x3)*y4)/(x3 - x4);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      y234 := ((x - x4)*y23 - (x - x2)*y34)/(x2 - x4);
+      y1234 := ((x - x4)*y123 - (x - x1)*y234)/(x1 - x4);
+      return y1234
+   end PolyArray4;
+
+   procedure {public} PolyMatrix4
+      (x, x1, x2, x3, x4 : N.Number; y1, y2, y3, y4 : M.Matrix) : M.Matrix;
+   var
+      y12, y23, y34, y123, y234, y1234 : M.Matrix;
+   begin
+      if (x < x1) or (x > x4) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyMatrix4")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y34 := ((x - x4)*y3 - (x - x3)*y4)/(x3 - x4);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      y234 := ((x - x4)*y23 - (x - x2)*y34)/(x2 - x4);
+      y1234 := ((x - x4)*y123 - (x - x1)*y234)/(x1 - x4);
+      return y1234
+   end PolyMatrix4;
+
+   procedure {public} Poly5
+      (x, x1, x2, x3, x4, x5, y1, y2, y3, y4, y5 : N.Number) : N.Number;
+   var
+      y12, y23, y34, y45, y123, y234, y345, y1234, y2345, y12345 : N.Number;
+   begin
+      if (x < x1) or (x > x5) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.Poly5")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y34 := ((x - x4)*y3 - (x - x3)*y4)/(x3 - x4);
+      y45 := ((x - x5)*y4 - (x - x4)*y5)/(x4 - x5);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      y234 := ((x - x4)*y23 - (x - x2)*y34)/(x2 - x4);
+      y345 := ((x - x5)*y34 - (x - x3)*y45)/(x3 - x5);
+      y1234 := ((x - x4)*y123 - (x - x1)*y234)/(x1 - x4);
+      y2345 := ((x - x5)*y234 - (x - x2)*y345)/(x2 - x5);
+      y12345 := ((x - x5)*y1234 - (x - x1)*y2345)/(x1 - x5);
+      return y12345
+   end Poly5;
+
+   procedure {public} PolyArray5 (x, x1, x2, x3, x4, x5 : N.Number;
+      y1, y2, y3, y4, y5 : A.Array) : A.Array;
+   var
+      y12, y23, y34, y45, y123, y234, y345, y1234, y2345, y12345 : A.Array;
+   begin
+      if (x < x1) or (x > x5) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyArray5")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y34 := ((x - x4)*y3 - (x - x3)*y4)/(x3 - x4);
+      y45 := ((x - x5)*y4 - (x - x4)*y5)/(x4 - x5);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      y234 := ((x - x4)*y23 - (x - x2)*y34)/(x2 - x4);
+      y345 := ((x - x5)*y34 - (x - x3)*y45)/(x3 - x5);
+      y1234 := ((x - x4)*y123 - (x - x1)*y234)/(x1 - x4);
+      y2345 := ((x - x5)*y234 - (x - x2)*y345)/(x2 - x5);
+      y12345 := ((x - x5)*y1234 - (x - x1)*y2345)/(x1 - x5);
+      return y12345
+   end PolyArray5;
+
+   procedure {public} PolyMatrix5 (x, x1, x2, x3, x4, x5 : N.Number;
+      y1, y2, y3, y4, y5 : M.Matrix) : M.Matrix;
+   var
+      y12, y23, y34, y45, y123, y234, y345, y1234, y2345, y12345 : M.Matrix;
+   begin
+      if (x < x1) or (x > x5) then
+         L.WarningMessage(81,-1, "BelMath.Interpolations.PolyMatrix5")
+      end;
+      y12 := ((x - x2)*y1 - (x - x1)*y2)/(x1 - x2);
+      y23 := ((x - x3)*y2 - (x - x2)*y3)/(x2 - x3);
+      y34 := ((x - x4)*y3 - (x - x3)*y4)/(x3 - x4);
+      y45 := ((x - x5)*y4 - (x - x4)*y5)/(x4 - x5);
+      y123 := ((x - x3)*y12 - (x - x1)*y23)/(x1 - x3);
+      y234 := ((x - x4)*y23 - (x - x2)*y34)/(x2 - x4);
+      y345 := ((x - x5)*y34 - (x - x3)*y45)/(x3 - x5);
+      y1234 := ((x - x4)*y123 - (x - x1)*y234)/(x1 - x4);
+      y2345 := ((x - x5)*y234 - (x - x2)*y345)/(x2 - x5);
+      y12345 := ((x - x5)*y1234 - (x - x1)*y2345)/(x1 - x5);
+      return y12345
+   end PolyMatrix5;
+
+begin
+end Interpolations.

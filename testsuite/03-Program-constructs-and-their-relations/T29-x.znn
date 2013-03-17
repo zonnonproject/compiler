@@ -1,0 +1,26 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: default implementation implements module.
+ *)
+
+(* I. Module A is declared after its default implementation A. *)
+implementation A;
+end A.
+
+module A;
+end A.
+
+(* II. Module A is declared before its default implementation A. *)
+module B;
+end B.
+
+implementation B;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+
+

@@ -1,0 +1,11 @@
+(* 
+	4. Language symbols and identifiers.
+	4.2 Identifiers
+	Negative test: the minus symbol - in identifier l-e-t-t-e-r.
+*)
+module Main;
+var l-e-t-t-e-r : char;
+	
+begin
+	halt(0);
+end Main.

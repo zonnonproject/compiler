@@ -1,0 +1,38 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: Overloading
+ *)
+
+module Main;
+import System.Double as Double,
+	   System.Int32 as Int32;
+
+type {public} Number = object
+var {public} val: Double;
+end Number;
+
+operator {public} ":=" (var res: Number; val: Int32);
+begin
+	res.val := Double(val);
+end ":=";
+
+operator {public} ":=" (var res: Number; val: boolean);
+begin
+	
+end ":=";
+
+operator {public} ":=" (var res: Number; val: Double);
+begin
+	res.val := val;
+end ":=";
+
+var n: Number;
+
+begin
+	n := 30;
+	writeln(n.val);
+	n := 35.0;
+	writeln(n.val);
+	halt(1)
+end Main.

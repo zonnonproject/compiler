@@ -1,0 +1,6 @@
+module mainModule;
+var
+    a: real;
+begin
+    a:=0;
+end mainModule.

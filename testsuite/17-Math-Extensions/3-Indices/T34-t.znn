@@ -1,0 +1,31 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: ranges
+ *)
+
+module Main;
+
+var
+	a : array {math} 5 of integer;
+	b : real;
+	c : array {math} * of real;
+	r1, r2 : range;
+  
+begin
+	r1 := 1..4 by 2;
+	r2 := 2..3;
+	c := [-1., -1., -1., -1.];
+	a := [1, 2, 3, 4, 5];
+	b := 2.0;
+
+	c[r2] := a[r1] * b;	
+
+	if (c[0] = -1.0) & (c[1] = -1.0) & (c[2] = 4.0) & (c[3] = 8.0)
+	then
+		halt(1);
+	else
+		halt(0);
+	end;
+end Main.

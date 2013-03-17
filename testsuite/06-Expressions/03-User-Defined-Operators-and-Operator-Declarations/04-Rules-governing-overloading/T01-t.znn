@@ -1,0 +1,72 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.4. 
+ *
+ * Positive test: overloaded operator and indexer all together
+ *)
+
+
+module Main;
+
+definition De;
+	procedure Hi; 
+end De;
+var globalOK: integer;
+type {value} OA = object
+var {public} val:integer;
+begin
+ writeln("this should be called");
+ globalOK :=597;
+end OA;
+
+type {value} OB = object implements De, []
+    var o: OA;
+	procedure {public} Hi implements De.Hi;
+	begin
+		writeln("Hello");
+	end Hi;
+	
+	procedure {public} Get(i: integer):OA implements [].Get;
+	begin
+		return o;
+	end Get;
+	
+	procedure {public} Set(i:integer; val: OA) implements [].Set;
+	begin
+	    writeln("set is called");
+	    o:= val;
+		writeln("Set", i, o.val);
+	end Set;
+	
+end OB;
+
+var a: OB;
+    o: object{De};
+    oa: OA;
+
+operator "+"(a,b: OA):OA;
+begin
+	writeln("plus is called");
+	return a;
+end "+";
+
+operator ":="(var a:OA; b: OA);
+begin
+	writeln("OA assignment is called");
+	a.val := b.val+2;
+end ":=";
+operator ":="(var a:OA; b: integer);
+begin
+	writeln("integer assignment is called");
+	a.val := b;
+end ":=";
+
+begin
+    a[2] := 5;
+    writeln("-------");
+	oa := a[1] + oa;
+	writeln("-------");
+	writeln("C: ", oa.val);
+	if (oa.val=9)&(globalOK=597) then halt(1) else halt(0) end
+end Main.

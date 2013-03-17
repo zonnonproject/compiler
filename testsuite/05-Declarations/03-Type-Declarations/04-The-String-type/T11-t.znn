@@ -1,0 +1,19 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: compare string constant with element of System.String.
+ * The string has zero length.
+ *)
+module Main;
+	import System.String as String;
+
+	var sv : array 2 of String;
+begin
+	sv[0] := "A";
+
+	if sv[0] = "A"
+	then halt(1) else halt(0) end;
+end Main.
+

@@ -1,0 +1,36 @@
+module Main; 
+import UserLibrary, Library;  
+var a,b,c: UserLibrary.GroupOfPoints;
+begin
+  a := new UserLibrary.GroupOfPoints;
+  b := new UserLibrary.GroupOfPoints;
+  c := new UserLibrary.GroupOfPoints;
+  a.p.x := 1;
+  a.p.y := 2;
+  a.p.z := 3;
+  b.p.x := 4;
+  b.p.y := 5;
+  b.p.z := 6;
+  a.x.x := 10;
+  a.x.y := 100;
+  a.y.x := 5;
+  a.y.y := 50;
+  b.x.x := 15;
+  b.x.y := 150;
+  b.y.x := 20;
+  b.y.y := 200;
+  
+  write("A: "); a.print; writeln;
+  write("B: "); b.print; writeln;
+  c := a + b;
+  write("A+B: "); c.print; writeln; 
+  c.x := a.x - b.x ; 
+  write("A-B: "); c.print; writeln;
+  write("A=B: "); write(a=b); writeln;
+  write("A#B: "); write(a#b); writeln;
+  a := b;
+  write("A:=B: A= "); a.print; writeln;
+  writeln("Hello World!");
+
+  halt(1)
+end Main.

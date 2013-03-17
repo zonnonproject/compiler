@@ -1,0 +1,14 @@
+(** 
+ * 11.Program Units.
+ * 11.3. Definition
+ *
+ * Positive test: the definition type A is used in the definition declaration.
+ *)
+definition {public} A;
+	procedure P : object{A};
+end A.
+
+module Main;
+begin 
+	halt(1);
+end Main.

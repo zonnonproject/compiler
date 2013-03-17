@@ -1,0 +1,24 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * implements clause
+ *
+ * Negative test: wrong qualified name in implements clause.
+ *
+ * The variable name B.C is used in implements caluse of object A.
+ * The variable B.C is declared _before_ it is used.
+ *
+ * Correct diagnostic must be output for wrong name B.C!
+ *)
+module {public} B;
+	var { public } 
+		C : integer;
+end B.
+
+object {public} A implements B.C;
+end A.
+
+module Main;
+begin
+    halt(0);
+end Main.

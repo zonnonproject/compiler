@@ -1,0 +1,571 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Ccm was written to model in-plane biaxial experiments run in my laboratory *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Defines a physical vector field, 2x1 array of scalars, v = {v1, v2}^T      *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The row indexer goes from 1..2, not from 0..1 as in Zonnon and C           *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : Vector        - an 2x1 array of reals with SI units          *)
+(*                             - it has no component normal to the plane      *)
+(*    methods  : Initialize;   - creates the internal vector array            *)
+(*             : Nullify       - set internal array to nil                    *)
+(*             : Clone         - returns an initialized vector                *)
+(*             : Copy          - returns a deep copy of the vector            *)
+(*             : Load          - retrieves the vector from a binary file      *)
+(*             : Store         - writes the vector to a binary file           *)
+(*             : Typeset       - convert the vector to a string output        *)
+(*             : Get           - implements [].Get, returns a scalar          *)
+(*             : Set           - implements [].Set, assigns a scalar          *)
+(*             : GetUnits      - returns the units part of a vector field     *)
+(*             : SetUnits      - assigns the units part of a vector field     *)
+(*             : GetArray      - retrieves the internal array, less its units *)
+(*             : SetArray      - assigns the internal array, less its units   *)
+(*             : IsDimensionless - boolean check for dimensionality           *)
+(*             : Equals        - checks two vectors for equality              *)
+(*    (# overwrite the internal vector with the arithmetic result #)          *)
+(*             : Neg           - negates all elements of the vector           *)
+(*             : IncBy         - increments the vector by the vector argument *)
+(*             : DecBy         - decrements the vector by the vector argument *)
+(*             : MulBy         - multiplies the vector by a scalar argument   *)
+(*             : DivBy         - divides the vector by a scalar argument      *)
+(*             : ScaBy         - multiplies the vector by a number            *)
+(*    (# return new objects of type Vector with the arithmetic result #)      *)
+(*             : Negative      - returns the negative of the vector           *)
+(*             : Add           - returns the sum of two vectors               *)
+(*             : Subtract      - returns the difference between two vectors   *)
+(*             : Multiply      - returns the product of a vector and a scalar *)
+(*             : Divide        - returns the ratio of a vector to a scalar    *)
+(*             : Scale         - returns the product of a vector and a real   *)
+(*    (# some basic functions for vectors #)                                  *)
+(*             : Dot           - returns the dot product between two vectors  *)
+(* Operators   : -             - uniary  operator                             *)
+(*             : :=            - assignment                                   *)
+(*             : = | #         - logical operators                            *)
+(*             : + | - | * | / - binary  operators                            *)
+(* Functions   : Norm          - returns the Euclidean norm of a vector       *)
+(*             : UnitVector    - scales a vector so that its norm equals 1    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCcm.Vectors2;
+
+   import
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      System.Byte   as Card8,   (* core type of  cardinal{8}  *)
+      System.UInt16 as Card16,  (* core type of  cardinal{16} *)
+      System.UInt32 as Card32,  (* core type of  cardinal{32} *)
+      System.UInt64 as Card64,  (* core type of  cardinal{64} *)
+      System.SByte  as Int8,    (* core type of  integer{8}   *)
+      System.Int16  as Int16,   (* core type of  integer{16}  *)
+      System.Int32  as Int32,   (* core type of  integer{32}  *)
+      System.Int64  as Int64,   (* core type of  integer{64}  *)
+      System.Single as Real32,  (* core type of  real{32}     *)
+      System.Double as Real64,  (* core type of  real{64}     *)
+      BelCore.Arrays  as A,
+      BelCore.Log     as L,
+      BelCore.Math    as M,
+      BelCore.Numbers as N,
+      BelCcm.Scalars  as S,
+      BelCcm.Units    as U;
+
+   var {private}
+      zero, one : N.Number;
+
+   type {public, value} Vector = object implements []
+
+      var {private}
+         u : U.Si;
+         v : A.Array;
+
+      procedure {public} Initialize;
+      begin {locked}
+         u.Initialize;
+         v.Initialize(2)
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin {locked}
+         u.Nullify;
+         v.Nullify
+      end Nullify;
+
+      procedure {public} Clone () : Vector;
+      var
+         vec : Vector;
+      begin
+         vec.u := u.Clone();
+         vec.v := v.Clone();
+         return vec
+      end Clone;
+
+      procedure {public} Copy () : Vector;
+      var
+         vec : Vector;
+      begin
+         vec.u := u.Copy();
+         vec.v := v.Copy(A.deepCopy);
+         return vec
+      end Copy;
+
+      procedure {public} Load (br : BinaryReader);
+      begin {locked}
+         u.Load(br);
+         v.Load(br)
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      begin {locked}
+         u.Store(bw);
+         v.Store(bw)
+      end Store;
+
+      procedure {public} Typeset () : string;
+      var
+         i : integer;
+         r : N.Number;
+         s : string;
+      begin {locked}
+         r := v[1];
+         s := "{" + r.ToString(7);
+         for i := len(s) to 18 do
+            s := s + " "
+         end;
+         r := v[2];
+         s := s + r.ToString(7);
+         for i := len(s) to 33 do
+            s := s + " "
+         end;
+         s := s + "}^T ";
+         s := s + u.Typeset();
+         return s
+      end Typeset;
+
+      procedure {public} Get (row : integer) : S.Scalar implements [].Get;
+      var
+         s : S.Scalar;
+      begin
+         s.Set(v.Get(row));
+         s.SetUnits(u);
+         return s
+      end Get;
+
+      procedure {public} Set (row : integer; s : S.Scalar) implements [].Set;
+      begin {locked}
+         if u = s.GetUnits() then
+            v.Set(row, s.Get())
+         else
+            L.WarningMessage(200,415, "BelCcm.Vectors2.Vector.Set")
+         end
+      end Set;
+
+      procedure {public} GetUnits () : U.Si;
+      begin
+         return u
+      end GetUnits;
+
+      procedure {public} SetUnits (si : U.Si);
+      begin {locked}
+         u := si
+      end SetUnits;
+
+      procedure {public} GetArray () : A.Array;
+      var
+         a : A.Array;
+      begin
+         a.SetArray(v.GetArray(A.shallowCopy), A.shallowCopy);
+         return a
+      end GetArray;
+
+      procedure {public} SetArray (a : A.Array);
+      begin {locked}
+         if a.Length() = 2 then
+            v.SetArray(a.GetArray(A.shallowCopy), A.deepCopy)
+         else
+            L.WarningMessage(210,205, "BelCcm.Vectors2.Vector.SetArray")
+         end
+      end SetArray;
+
+      procedure {public} IsDimensionless () : boolean;
+      begin
+         return u.IsDimensionless()
+      end IsDimensionless;
+
+      procedure {public} Equals (vr : Vector) : boolean;
+      begin
+         return (u.Equals(vr.u) & v.Equals(vr.v))
+      end Equals;
+
+      procedure {public} Neg;
+      begin {locked}
+         v.Neg
+      end Neg;
+
+      procedure {public} IncBy (vr : Vector);
+      begin {locked}
+         if u.Equals(vr.u) then
+            v.IncBy(vr.v)
+         else
+            L.WarningMessage(201,415, "BelCcm.Vectors2.Vector.IncBy")
+         end
+      end IncBy;
+
+      procedure {public} DecBy (vr : Vector);
+      begin {locked}
+         if u.Equals(vr.u) then
+            v.DecBy(vr.v)
+         else
+            L.WarningMessage(201,415, "BelCcm.Vectors2.Vector.DecBy")
+         end
+      end DecBy;
+
+      procedure {public} MulBy (s : S.Scalar);
+      begin {locked}
+         u.IncBy(s.GetUnits());
+         v.MulBy(s.Get())
+      end MulBy;
+
+      procedure {public} DivBy (s : S.Scalar);
+      begin {locked}
+         u.DecBy(s.GetUnits());
+         v.DivBy(s.Get())
+      end DivBy;
+
+      procedure {public} ScaBy (r : N.Number);
+      begin {locked}
+         v.MulBy(r)
+      end ScaBy;
+
+      procedure {public} Negative () : Vector;
+      var
+         vec : Vector;
+      begin
+         vec.u := u;
+         vec.v := v.Negative();
+         return vec
+      end Negative;
+
+      procedure {public} Add (vr : Vector) : Vector;
+      var
+         vec : Vector;
+      begin
+         if u.Equals(vr.u) then
+            vec.u := u;
+            vec.v := v.Add(vr.v)
+         else
+            L.WarningMessage(201,205, "BelCcm.Vectors2.Vector.Add")
+         end;
+         return vec
+      end Add;
+
+      procedure {public} Subtract (vr : Vector) : Vector;
+      var
+         vec : Vector;
+      begin
+         if u.Equals(vr.u) then
+            vec.u := u;
+            vec.v := v.Subtract(vr.v)
+         else
+            L.WarningMessage(201,205, "BelCcm.Vectors2.Vector.Subtract")
+         end;
+         return vec
+      end Subtract;
+
+      procedure {public} Multiply (s : S.Scalar) : Vector;
+      var
+         vec : Vector;
+      begin
+         vec.u := u.Add(s.GetUnits());
+         vec.v := v.Multiply(s.Get());
+         return vec
+      end Multiply;
+
+      procedure {public} Divide (s : S.Scalar) : Vector;
+      var
+         vec : Vector;
+      begin
+         vec.u := u.Subtract(s.GetUnits());
+         vec.v := v.Divide(s.Get());
+         return vec
+      end Divide;
+
+      procedure {public} Scale (r : N.Number) : Vector;
+      var
+         vec : Vector;
+      begin
+         vec.u := u;
+         vec.v := v.Multiply(r);
+         return vec
+      end Scale;
+
+      procedure {public} Dot (vr : Vector) : S.Scalar;
+      var
+         y : S.Scalar;
+      begin
+         y.Set(v.Dot(vr.v));
+         y.SetUnits(u.Add(vr.u));
+         return y
+      end Dot;
+
+   begin
+      Initialize
+   end Vector;
+
+
+   (* OVERLOADED OPERATORS *)
+
+   operator {public} ':=' (var l : Vector; r : Vector);
+   begin {locked}
+      l.SetUnits(r.GetUnits());
+      l.SetArray(r.GetArray())
+   end ':=';
+
+   (* places wrappers around the associated vector methods *)
+
+   operator {public} '-' (v : Vector) : Vector;
+   begin {locked}
+      return v.Negative()
+   end '-';
+
+   (* logic operators *)
+
+   operator {public} '=' (l, r : Vector) : boolean;
+   begin {locked}
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '#' (l, r : Vector) : boolean;
+   begin {locked}
+      return ~l.Equals(r)
+   end '#';
+
+   (* arithemtic operators *)
+
+   operator {public} '+' (l, r : Vector) : Vector;
+   begin {locked}
+      return l.Add(r)
+   end '+';
+
+   operator {public} '-' (l, r : Vector) : Vector;
+   begin {locked}
+      return l.Subtract(r)
+   end '-';
+
+   operator {public} '*' (l : S.Scalar; r : Vector) : Vector;
+   begin {locked}
+      return r.Multiply(l)
+   end '*';
+
+   operator {public} '*' (l : N.Number; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(l)
+   end '*';
+
+   operator {public} '*' (l : Card8; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Card8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card16; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Card16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card32; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Card32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card64; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Card64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int8; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Int8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int16; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Int16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int32; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Int32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int64; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Int64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real32; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Real32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real64; r : Vector) : Vector;
+   begin {locked}
+      return r.Scale(N.Real64ToNumber(l))
+   end '*';
+
+   operator {public} '/' (l : Vector; r : S.Scalar) : Vector;
+   begin {locked}
+      return l.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : N.Number) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(r);
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Card8) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card8ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Card16) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card16ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Card32) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Card64) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Int8) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int8ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Int16) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int16ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Int32) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Int64) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Real32) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Real32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Vector; r : Real64) : Vector;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Real64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   (* vector functions *)
+
+   (* this is the vector or Euclidean norm *)
+   procedure {public} Norm (v : Vector) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      y.Set(A.TwoNorm(v.GetArray()));
+      y.SetUnits(v.GetUnits());
+      return y
+   end Norm;
+
+   (* unit vectors are dimensionless vectors with a norm of 1 *)
+   procedure {public} UnitVector (v : Vector) : Vector;
+   var
+      i : integer;
+      mag, re : N.Number;
+      norm, s, s0 : S.Scalar;
+      uv : Vector;
+   begin
+      norm := Norm(v);
+      mag := norm.Get();
+      if mag > zero then
+         uv := v.Divide(norm);
+         s0.Set(zero);
+         for i := 1 to 2 do
+            (* set all effective zeros to zero *)
+            s := uv[i];
+            re := s.Get();
+            if M.Abs(re) < N.Epsilon then
+               uv[i] := s0
+            end
+         end
+      else
+         L.WarningMessage(220,205, "BelCcm.Vectors2.UnitVector")
+      end;
+      return uv
+   end UnitVector;
+
+begin
+   zero := 0.0E+0;
+   one  := 1.0E+0
+end Vectors2.

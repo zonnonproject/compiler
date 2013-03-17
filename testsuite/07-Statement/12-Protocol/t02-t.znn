@@ -1,0 +1,53 @@
+module {protected} Main;
+
+protocol P = (
+	ADD, GET, TOTAL, QUIT, OK,
+	dialog = { ADD string ?OK | GET integer ?string | TOTAL ?integer } QUIT
+);
+
+const max = 100;
+var top: integer;
+    data: array max of string;
+    
+activity A implements P;
+var kw: P; s: string; i: integer;
+begin 
+  writeln("Service Initiated");
+  loop
+	accept kw;
+	case kw of
+	  P.ADD:
+	    accept s; 
+	    data[top] := s; 
+	    top := top + 1;
+	    return P.OK;
+	| P.GET:
+		accept i; return data[i];
+	| P.TOTAL:
+		return top;
+	| P.QUIT:
+		exit
+	else
+	end
+  end;
+  writeln("Service Stopped");
+end A;
+
+var p: A; i, total: integer; name: string; kw: P;
+begin
+	do
+		p := new A;
+		kw := p( P.ADD, "Max" );
+		kw := p( P.ADD, "Fabienne" );
+		kw := p( P.ADD, "Nina" );
+		total := p( P.TOTAL );	
+		for i:= 0 to total - 1 do
+			name := p( P.GET, i );
+			writeln( name );
+		end;
+		p(P.QUIT);
+	on ProtocolMismatch do
+		halt(0);	
+	end;	
+	halt(1);
+end Main.

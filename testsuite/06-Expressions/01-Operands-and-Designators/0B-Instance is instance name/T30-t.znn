@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Positive test: reading to immutable array element.
+ * The object A.B is declared after it is used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	if b.vk[0] = 5 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public } 
+		vi : array 1 of integer;
+
+	var { public, immutable } 
+		vk : array 1 of integer;
+
+	var { private } 
+		vj : array 1 of integer;
+begin 
+	vk[0] := 5;
+end B.

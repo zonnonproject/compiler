@@ -1,0 +1,16 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Positive test: plus -
+ *)
+module Main;
+	var i : integer;
+begin
+	i := 1;
+	i := +i;
+
+	if i = 1
+	then halt(1) else halt(0) end;
+end Main.

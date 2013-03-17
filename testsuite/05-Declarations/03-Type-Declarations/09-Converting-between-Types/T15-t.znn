@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: casting from enumerable to integer.
+ *)
+module Main;
+type 
+	E = ( zero, one, two );
+
+var 
+	e : E;
+	i : integer;
+begin
+	e := E.zero;
+	i := integer(e); 
+
+	if i = 0 
+	then halt(1) else halt(0) end;
+end Main.

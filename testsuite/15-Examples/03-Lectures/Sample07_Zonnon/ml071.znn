@@ -1,0 +1,107 @@
+(* ********* Zonnon online collection ***********
+ * MST
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module MST; (* Philipp Kramer *)
+
+import System.Random;
+
+const
+	NVertex = 32;                      (* Number of nodes. *)
+	NEGraph = NVertex * NVertex div 2; (* Number of edges. *)
+	NETree  = NVertex-1;
+	Empty   = 2147483647; (* max(integer); *)
+	
+object { public } Edge;
+	var { public } 
+		node0, node1, weight : integer;
+end Edge;
+
+var
+	Graph  : array NEGraph of Edge;
+	GetSet : array NVertex of integer;
+	rg : System.Random;
+
+procedure InitGraph;
+	var i, t : integer;
+begin
+	t := NEGraph - NETree;
+	rg := new System.Random();
+	
+	for i := 0 to NEGraph-1 do
+		Graph[i] := new Edge();
+	end;
+	
+	Graph[0].weight := 0; (* First edge. *)
+	Graph[0].node0  := 0;
+	Graph[0].node1  := 2;
+	
+	for i := 1 to t-1 do (* Random graph. *)
+		Graph[i].weight := Graph[i-1].weight + integer(rg.NextDouble() * 3);
+		Graph[i].node0  := integer(rg.NextDouble() * NVertex);
+		Graph[i].node1  := integer(rg.NextDouble() * NVertex)
+	end;
+		
+	for i := t to NEGraph-1 do (* Make sure graph is connected. *)
+		Graph[i].weight := Graph[i-1].weight;
+		Graph[i].node0  := i-t;
+		Graph[i].node1  := i+1-t
+	end
+end InitGraph;
+	
+procedure { public } Find;
+var 
+	edge,
+	treeSize,
+	i, j,
+	set0,
+	set1 : integer;
+begin
+	for i := 0 to NVertex-1 do (* Initialize node to set mapping and sets. *)
+		GetSet[i] := i;
+	end;
+		
+	edge := 0;
+	treeSize := 0;
+	while treeSize < NETree do (* Until we have all edges for the tree. *)
+		i := Graph[edge].node0;
+		set0 := GetSet[i]; (* Get the number of the corresponding set. *)
+
+		i := Graph[edge].node1;
+		set1 := GetSet[Graph[edge].node1]; (* Get the number of the corresponding set. *)
+
+		(* Take edge only if its endpoints are not part of the same tree. *)
+		if set0 # set1 then
+			for i := 0 to NVertex-1 do (* Adjust all mappings to set1. *)
+				if GetSet[i] = set1 then GetSet[i] := set0 end
+			end;
+				
+			inc(treeSize);
+				
+ 			i := Graph[edge].node0;
+			write(i:4); write(" ":1);
+
+ 			i := Graph[edge].node1;
+			write(i:4); write(" ":1);
+
+ 			i := Graph[edge].weight;
+			writeln(i:4) 
+		else
+			Graph[edge].weight := Empty (* Remove edge. *)
+		end;
+			
+		inc(edge)
+	end
+end Find;
+	
+begin
+	InitGraph();
+	Find();
+
+	writeln("Done, bye"); 
+	readln;
+end MST.

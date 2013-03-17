@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.1. Identifier Declarations and Scope Rules.
+ *
+ * Negative test: two procedures have the same name f.
+ * This is not correct in Zonnon language.
+ *
+ *)
+module Main;
+	procedure f(x : integer) : integer;
+	begin
+	end f;
+
+	procedure f(x, y : integer) : integer;
+	begin
+	end f;
+begin
+	halt(0);
+end Main.

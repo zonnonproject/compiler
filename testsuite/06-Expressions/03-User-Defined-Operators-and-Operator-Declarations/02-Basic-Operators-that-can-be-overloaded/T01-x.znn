@@ -1,0 +1,21 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.2. Basic operators that can be overloaded.
+ *
+ * Negative test: wrong parameters count for overloaded basic operator.
+ * The basic unary operator has one parameter.
+ *)
+module Main;
+	object Point;
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator "~" (p1, p2 : Point) : Point;
+	begin return p1 end "~";
+begin
+	halt(0);
+end Main.

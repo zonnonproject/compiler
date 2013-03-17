@@ -1,0 +1,30 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Passing one integer argument 
+ *)
+
+module {protected} Main;
+import System;
+
+var i : integer;
+
+activity A;
+begin
+	accept i;
+end A;
+
+var a : A;
+begin
+	a := new A;
+
+	a( integer(100) );	
+
+       	await 5;
+
+	if i = 100 then
+	  halt(1)  (* success *)
+	else
+	  halt(0)  (* fail *)
+        end
+end Main.

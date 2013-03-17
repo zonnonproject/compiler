@@ -1,0 +1,27 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.3. New operator declaration.
+ * Assignment operator.
+ *
+ * Negative test: assignment operator must have two parameters.
+ *)
+module Main;
+	object Point;
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator ":=" (p : Point);
+	begin 
+		p.x := 1;
+		p.y := 1;
+	end ":=";
+
+	var p : Point;
+begin
+	p :=;
+	halt(0);
+end Main.

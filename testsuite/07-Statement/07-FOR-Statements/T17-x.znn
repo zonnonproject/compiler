@@ -1,0 +1,22 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Negative test: conditions are missing
+ *)
+
+module Main;
+var x: real;
+      i: integer;
+begin
+ 
+ 
+for i :=  to  do 
+  writeln("i=", i);
+end;
+ 
+for x := to do
+   writeln("x=", x);
+end;
+ readln;
+end Main.

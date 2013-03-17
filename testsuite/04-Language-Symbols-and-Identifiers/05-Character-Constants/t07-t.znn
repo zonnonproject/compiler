@@ -1,0 +1,18 @@
+(** 
+ * 4. Language symbols and identifiers. 
+ * 4.5. Character Constants
+ *
+ * Positive test: compare character variable and constant.
+ *)
+
+module Main;
+
+var ch:char;
+    i:integer;
+begin 
+  ch := 31X;
+  writeln(ch);
+  i := 39H;
+  writeln( char(i) );
+  halt(1)
+end Main.

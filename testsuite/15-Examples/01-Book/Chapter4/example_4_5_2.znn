@@ -1,0 +1,171 @@
+(* ********* Zonnon online collection ***********
+ * AVL (Chapter 4, Example 4.5.2)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module AVL;
+object {ref, public} Object;
+	var {public}
+	   key, bal: integer;
+	   L, R: Object;
+end Object;
+
+var root: Object; 
+
+procedure insert(var p: Object; x: integer; var h: boolean);
+  var p1, p2: Object;  (*~h*)
+begin
+  if p = nil then
+    p := new Object; h := true; p.key := x; p.L := nil; p.R := nil; p.bal := 0;
+  elsif x < p.key then
+    insert(p.L, x, h);
+    if h then  (*left branch has grown*)
+      if p.bal = 1 then p.bal := 0; h := false;
+      elsif p.bal = 0 then p.bal := -1;
+      else (*p.bal = -1, rebalance*) p1 := p.L;
+           if p1.bal = -1 then  (*single LL rotation*)
+             p.L := p1.R; p1.R := p; p.bal := 0; p := p1;
+           else (*double LR rotation*) p2 := p1.R;
+             p1.R := p2.L; p2.L := p1; p.L := p2.R; p2.R := p;
+             if p2.bal = -1 then p.bal := 1; else p.bal := 0; end ;
+             if p2.bal = +1 then p1.bal := -1; else p1.bal := 0; end ;
+             p := p2;
+           end ;
+           p.bal := 0; h := false;
+      end
+    end
+  elsif x > p.key then
+    insert(p.R, x, h);
+    if h then  (*right branch has grown*)
+      if p.bal = -1 then p.bal := 0; h := false;
+      elsif p.bal = 0 then p.bal := 1;
+      else (*p.bal = 1, rebalance*) p1 := p.R;
+           if p1.bal = 1 then  (*single RR rotation*)
+             p.R := p1.L; p1.L:= p; p.bal := 0; p := p1;
+           else (*double RL rotation*) p2 := p1.L;
+             p1.L := p2.R; p2.R := p1; p.R := p2.L; p2.L := p;
+             if p2.bal = +1 then p.bal := -1 else p.bal := 0 end ;
+             if p2.bal = -1 then p1.bal := 1 else p1.bal := 0 end ;
+             p := p2;
+           end ;
+           p.bal := 0; h := false;
+      end
+    end
+  end
+end insert;
+
+
+procedure balanceL(var p: Object; var h: boolean);
+  var p1, p2: Object; b1, b2: integer;
+begin (*h; left branch has shrunk*)
+  if p.bal = -1 then p.bal := 0
+  elsif p.bal = 0 then p.bal := 1; h := false
+  else (*p.bal = 1, rebalance*) p1 := p.R; b1 := p1.bal;
+       if b1 >= 0 then  (*single RR rotation*)
+         p.R := p1.L; p1.L := p;
+         if b1 = 0 then p.bal := 1; p.bal := -1; h := false
+           else p.bal := 0; p.bal := 0
+         end ;
+         p := p1
+       else  (*double RL rotation*)
+         p2 := p1.L; b2 := p2.bal;
+         p1.L := p2.R; p2.R := p1; p.R := p2.L; p2.L := p;
+         if b2 = +1 then p.bal := -1 else p.bal := 0 end ;
+         if b2 = -1 then p1.bal := 1 else p1.bal := 0 end ;
+         p := p2; p2.bal := 0
+       end
+  end
+end balanceL;
+
+procedure balanceR(var p: Object; var h: boolean);
+  var p1, p2: Object; b1, b2: integer;
+begin (*h; right branch has shrunk*)
+  if p.bal = 1 then p.bal := 0
+  elsif p.bal = 0 then p.bal := -1; h := false
+  else (*p.bal = -1, rebalance*) p1 := p.L; b1 := p1.bal;
+       if b1 <= 0 then  (*single LL rotation*)
+         p.L := p1.R; p1.R := p;
+         if b1 = 0 then p.bal := -1; p1.bal := 1; h := false
+           else p.bal := 0; p1.bal := 0
+         end ;
+         p := p1
+       else  (*double LR rotation*)
+         p2 := p1.R; b2 := p2.bal;
+         p1.R := p2.L; p2.L := p1; p.L := p2.R; p2.R := p;
+         if b2 = -1 then p.bal := 1 else p.bal := 0 end ;
+         if b2 = +1 then p1.bal := -1 else p1.bal := 0 end ;
+         p := p2; p2.bal := 0
+       end
+  end
+end balanceR;
+
+
+
+procedure descend(var r: Object; q: Object; var h: boolean);
+ begin (*~h*)
+   if r.R # nil then
+     descend(r.R, q, h);
+     if h then balanceR(r, h) end
+   else q.key := r.key; r := r.L; h := true
+   end
+end descend;
+  
+procedure delete(var p: Object; x: integer; var h: boolean);
+begin (*~h*)
+  if p # nil then
+    if x < p.key then
+      delete(p.L, x, h);
+      if h then balanceL(p, h) end
+    elsif x > p.key then
+      delete(p.R, x, h);
+      if h then balanceR(p, h) end
+    else (*delete p^*)
+      if p.R = nil then p := p.L; h := true
+      elsif p.L = nil then p := p.R; h := true
+      else descend(p.L, p, h);
+        if h then balanceL(p, h) end
+      end
+    end
+  else (*x not in tree*) h := false
+  end
+end delete;
+
+procedure show(p: Object; n: integer);
+	var i: integer;
+begin
+	if p # nil then
+		show(p.R, n+1); i := 0;
+		while i < n do write(" "); inc(i) end ;
+		writeln(p.key);
+		show(p.L, n+1)
+	end
+end show;
+
+procedure Insert;
+	var h: boolean; s:integer;
+begin 
+        readln(s);
+	while s # 0 do
+		h := false; insert(root, s, h); readln(s);
+	end ;
+	show(root, 0); writeln;
+end Insert;
+
+procedure Delete;
+	var h: boolean; s:integer;
+begin   readln(s);
+	while s # 0 do
+		h := true; delete(root, s, h); readln(s);
+	end ;
+	show(root, 0); writeln;
+end Delete;
+
+procedure Reset;
+begin root := nil
+end Reset;
+
+begin  Reset;
+end AVL. 

@@ -1,0 +1,14 @@
+(** 
+ * 6. Expression.
+ * 6.4. Converting
+ *
+ * Negative test: Types 'real{32}' and 'real{64}' are not assignment compatible	
+ * 
+ *)
+
+module Main;
+
+var a: real{32}; b: real{64};
+begin
+	a:=b;
+end Main.

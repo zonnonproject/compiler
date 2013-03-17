@@ -1,0 +1,51 @@
+module {public} Main;
+
+   (* Tests the module Math.Distributions *)
+
+   import
+      BelCore.Log           as L,
+      BelCore.Numbers       as N,
+      BelMath.Distributions as D;
+
+   procedure {public} Run;
+   var
+      n : N.Number;
+   begin
+      writeln("Various chi-squared percentage points:");
+      writeln("   In 5 degrees of freedom:");
+      n := D.ChiSquared(D.Certainty.sixty, 5);
+      writeln("      @ 60%   confidence: " + n.Typeset());
+      n := D.ChiSquared(D.Certainty.eighty, 5);
+      writeln("      @ 80%   confidence: " + n.Typeset());
+      n := D.ChiSquared(D.Certainty.ninety, 5);
+      writeln("      @ 90%   confidence: " + n.Typeset());
+      n := D.ChiSquared(D.Certainty.ninetyFive, 5);
+      writeln("      @ 95%   confidence: " + n.Typeset());
+      n := D.ChiSquared(D.Certainty.ninetySevenPointFive, 5);
+      writeln("      @ 97.5% confidence: " + n.Typeset());
+      n := D.ChiSquared(D.Certainty.ninetyNine, 5);
+      writeln("      @ 99%   confidence: " + n.Typeset());
+      n := D.ChiSquared(D.Certainty.ninetyNinePointFive, 5);
+      writeln("      @ 99.5% confidence: " + n.Typeset());
+      writeln("Various student-T percentage points:");
+      writeln("   In 5 degrees of freedom:");
+      n := D.StudentT(D.Certainty.sixty, 5);
+      writeln("      @ 60%   confidence: " + n.Typeset());
+      n := D.StudentT(D.Certainty.eighty, 5);
+      writeln("      @ 80%   confidence: " + n.Typeset());
+      n := D.StudentT(D.Certainty.ninety, 5);
+      writeln("      @ 90%   confidence: " + n.Typeset());
+      n := D.StudentT(D.Certainty.ninetyFive, 5);
+      writeln("      @ 95%   confidence: " + n.Typeset());
+      n := D.StudentT(D.Certainty.ninetySevenPointFive, 5);
+      writeln("      @ 97.5% confidence: " + n.Typeset());
+      n := D.StudentT(D.Certainty.ninetyNine, 5);
+      writeln("      @ 99%   confidence: " + n.Typeset());
+      n := D.StudentT(D.Certainty.ninetyNinePointFive, 5);
+      writeln("      @ 99.5% confidence: " + n.Typeset());
+   end Run;
+
+begin
+   Run;
+   L.Close
+end Main.

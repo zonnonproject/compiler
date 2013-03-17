@@ -1,0 +1,33 @@
+(** 
+ * 17. Math extensions.
+ * 
+ * Compatibility with overloaded operators for array
+ * Negative test: it's forbidden to overloaded operators where argument(s) is of math array type
+ *)
+
+module Main;
+
+operator {public} '-'(a: array {math} * of integer): array * of integer;
+var
+	c : array 3 of integer;
+begin
+	c[0] := 2;
+	c[1] := 3;
+	c[2] := 2;
+	return c;
+end '+';
+
+var
+	a : array { math } 5 of integer;
+	b : array { math } 5 of integer;
+	
+	d : array 4 of integer;
+	e : array 4 of integer;
+	
+	c : array * of integer;
+	g : array {math} * of integer;
+begin	
+
+	halt(0);
+	
+end Main.

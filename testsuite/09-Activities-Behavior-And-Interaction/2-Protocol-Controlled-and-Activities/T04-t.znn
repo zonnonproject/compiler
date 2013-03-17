@@ -1,0 +1,29 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Passing and passing back string argument
+ *)
+
+module {protected} Main;
+
+activity A;
+var 
+	s : string;
+begin
+	accept s;
+	return s + " world!"
+end A;
+
+var 
+	a : A;
+	s : string;
+begin
+	a := new A;
+	s := a("Hello");	
+
+	if s = "Hello world!" then
+		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end
+end Main.

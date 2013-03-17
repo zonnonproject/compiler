@@ -1,0 +1,40 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.2 Properties
+ *
+ * Positive test: procedure call for property value.
+ *)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if (b.a.year = 2001) & (b.age.P() = 5)
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, value} B implements A;
+	import C;
+
+	var {public}
+		a : C;
+
+	procedure {get, public} age() : C implements A.age;
+	begin return a end age;
+end B.
+
+definition {public} A;
+	import C;
+
+	var age : C;
+end A.
+
+object {public, value} C;
+	var {public}
+		year, month, day : integer;
+
+	procedure {public} P : integer;
+	begin return 5 end P; 
+begin
+	year := 2001;
+end C.

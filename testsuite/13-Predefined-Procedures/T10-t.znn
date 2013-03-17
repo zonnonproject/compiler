@@ -1,0 +1,11 @@
+(**
+ * 09.Predefined procedures.
+ * The chr procedure.
+ *
+ * Positive test: get the order number for letter A and digit 1
+ *)
+module Main;
+begin
+	if (integer('A') = 65) & (integer('1') = 49)
+	then halt(1) else halt(0) end;
+end Main.

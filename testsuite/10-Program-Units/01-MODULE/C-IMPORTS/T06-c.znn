@@ -1,0 +1,22 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports clause
+ *
+ * Positive test: the module A uses namespace B.C in imports clause.
+ * The elements of B.C namspace are declared after they are used.
+ *)
+module A;
+	import B.C;
+end A.
+
+module B.C.E;
+end E.
+
+definition B.C.D;
+end D.
+
+module Main;
+begin
+    halt(1);
+end Main.

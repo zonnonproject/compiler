@@ -1,0 +1,16 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ *
+ * Positive test: < operator.
+ *)
+module Main;
+	var x, y : integer;
+begin
+	x := 1;
+	y := 2;
+
+	if y < x 
+	then halt(0) else halt(1) end;
+end Main.

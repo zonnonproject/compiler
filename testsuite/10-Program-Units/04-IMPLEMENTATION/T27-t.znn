@@ -1,0 +1,38 @@
+(** 
+ * 11.Program Units.
+ * 13.4. implementation
+ *
+ * Positive test: procedure in implementation implemnts definition
+ * 
+ *)
+
+module MLBase;
+
+ definition {public} LearningMachine;
+  procedure LearnVectorN;          
+ end LearningMachine;
+
+ implementation LearningMachine;     
+  procedure {public} LearnVectorN;   
+  begin
+  end LearnVectorN;
+  end LearningMachine;
+
+end MLBase.
+
+module Main;
+import  
+ MLBase;   
+ 
+type {public, ref} Classifier = object implements MLBase.LearningMachine
+ begin  
+ end Classifier;
+  
+var
+ classifier: Classifier;
+  
+begin
+  classifier := new Classifier;
+  writeln("ok");
+  halt(1)
+end Main.

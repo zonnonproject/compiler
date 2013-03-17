@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Negative test: the predefined procedure inc 
+ * is assigned to variable with procedure type.
+ *)
+module Main;
+	type PT = procedure(integer) : integer;
+
+	var pt : PT;
+		k : integer;
+begin
+	pt := inc;
+	k := pt(k, 1);
+	
+	halt(0);
+end Main.

@@ -1,0 +1,27 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: procedure type with variable parameter.
+ *)
+module Main;
+	type PT = procedure(var integer; integer);
+
+	(* The procedure makes sum of i and j and puts the result to j. *)
+	procedure Sum(var j : integer; i : integer);
+	begin
+		j := j + i;
+	end Sum;
+
+	var k : integer;
+		pt : PT;
+begin
+	k  := 3;
+	pt := Sum;
+	pt(k, 1);
+	
+	(* Check result of the iteration. *)
+	if k = 4 
+	then halt(1) else halt(0) end;
+end Main.

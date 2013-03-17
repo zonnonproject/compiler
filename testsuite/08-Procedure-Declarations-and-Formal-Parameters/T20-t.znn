@@ -1,0 +1,28 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: the local procedure declaration and call.
+ *)
+module Main;
+	procedure P : boolean;
+		procedure Nested(var i : integer) : integer;
+		begin
+			i := i + 1;
+			return i;
+		end Nested;
+
+		var n, k : integer;
+	begin
+		k := 4;
+		n := Nested(k);
+		
+		if (k = 5) & (n = 5)
+		then return true else return false end;
+	end P;
+begin
+	if P 
+	then halt(1) else halt(0) end;
+end Main.
+
+
+

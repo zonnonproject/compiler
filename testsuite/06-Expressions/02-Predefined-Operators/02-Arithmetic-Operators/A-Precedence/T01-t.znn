@@ -1,0 +1,23 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ * D. Precedence of arithmetic operators.
+ *
+ * Positive test: 
+ *)
+module Main;
+	var a, b, c, d, e, f, v : integer;
+begin
+	a := 1;
+	b := 2;
+	c := 3;
+	d := 8;
+	e := 2;
+	f := 6;
+
+	v := a + b * c - d mod e + f;
+
+	if v = 13 
+	then halt(1) else halt(0) end;
+end Main.

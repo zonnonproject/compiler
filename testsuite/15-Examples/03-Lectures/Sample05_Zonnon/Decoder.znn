@@ -1,0 +1,64 @@
+(* ********* Zonnon online collection ***********
+ * Decoder
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Decoder;
+
+procedure ToInt(x : array of char) : integer;
+var 
+	result, i, digit : integer;
+	ch : char;
+begin
+    result := 0;
+    i := 0;
+    while x[i] # 0X do
+		if (x[i] < '0') or (x[i] > '9') then return -1 end;
+		digit := integer(x[i]) - integer('0');
+		if result > (2147483647 - digit) div 10 then return -1 end;
+		(* result * 10 + digit <= 2147483647 (max of integer) *)
+		result := result * 10 + digit;
+		(* result <= max *)
+		inc(i);
+    end;
+    return result;
+end ToInt;
+
+procedure Test;
+var 
+	n : integer;
+	answer, ns : string;
+	na : array 10 of char;
+	ch : char;
+begin
+	repeat
+		writeln("Please enter the number to convert:");
+   		readln(ns);
+
+		for n := 0 to 9 do na[n] := char(0) end;
+
+   		copy(ns, na);
+   		n := ToInt(na);
+
+   		if n < 0
+		then writeln("number too big or negative!")
+		else write("Digit= ":8); writeln(n)
+   		end;
+
+   		writeln("Do you want to verify another number? y for yes, n for no.");
+   		readln(answer);
+
+   		while ~((answer = 'y') or (answer = 'n')) do
+   			writeln("Please answer me with y or n");
+	   		readln(answer);
+   		end;
+	until answer = 'n';
+end Test;
+
+begin
+	Test();
+	writeln("exercise done, bye");
+end Decoder.

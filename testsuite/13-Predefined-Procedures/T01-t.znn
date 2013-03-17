@@ -1,0 +1,11 @@
+(**
+ * 09.Predefined procedures.
+ * The abs procedure.
+ *
+ * Positive test: abs of negative and positive integers.
+ *)
+module Main;
+begin
+	if (abs(1) = 1) & (abs(0) = 0) & (abs(-1) = 1)
+	then halt(1) else halt(0) end;
+end Main.

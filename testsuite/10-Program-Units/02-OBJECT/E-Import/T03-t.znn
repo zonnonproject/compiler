@@ -1,0 +1,50 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * 11.2.E Import
+ *
+ * Positive test: 
+ *)
+
+object N;
+import System.Random as Random;
+var d:Random;
+begin
+ d := new Random;
+end N.
+
+definition n.A;
+
+end A.
+
+definition n.B;
+
+end B.
+
+definition m.k.B;
+
+end B.
+
+object n.O implements n.A;
+import n.B as B, System.Random as Random;
+var b:object{B};
+	r:Random;
+begin
+	r := new Random;
+end O.
+
+module Main;
+import n.A, n.B, m.k.B as C, System.Random as Random;
+var r:Random;
+
+type U = object implements n.A
+var b:object{n.B, C};
+	r2: Random;
+begin
+	r2 := new Random;
+end U;
+
+begin
+	r := new Random;
+	halt(1)
+end Main.

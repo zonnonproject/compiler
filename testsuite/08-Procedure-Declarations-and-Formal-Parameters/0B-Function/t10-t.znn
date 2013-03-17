@@ -1,0 +1,17 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: return type with width
+ *)
+
+module Main;
+
+procedure Test : integer{64};
+begin
+	return 1000;
+end Test;
+
+begin
+	writeln(Test);
+        halt(1)
+end Main.

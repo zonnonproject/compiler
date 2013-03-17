@@ -1,0 +1,24 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * is operator.
+ *
+ * Positive test: is operator is used to check the variable with postulated interface.
+ *)
+definition Piece;
+end Piece.
+
+object { ref } Pawn implements Piece;
+end Pawn.
+
+module Main;
+	import Piece, Pawn;
+
+	var piece : object { Piece };
+begin
+	piece := new Pawn;
+
+	if piece is Pawn
+	then halt(1) else halt(0) end;
+end Main.

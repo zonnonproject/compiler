@@ -1,0 +1,13 @@
+(** 
+ * 5. Declarations.
+ * 5.2. Constant Declarations.
+ *
+ * Positive test on constant expression.
+ * set type constant value was used.
+ *
+ *)
+module Main;
+	const fullSet = { min(set) .. max(set) };
+begin
+	halt(1);
+end Main.

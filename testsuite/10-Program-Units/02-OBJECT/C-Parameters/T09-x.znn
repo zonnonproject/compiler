@@ -1,0 +1,21 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Negative test: the wrong object parameter type.
+ * The type C.D is not declared in module C.
+ * The module C is declared before it is used.
+ *)
+module {public} C;
+	(* The type D is not declared in module C!!! *)
+end C.
+
+object {public, ref} A.B(p1 : C.D; p2 : C.D);
+begin
+end B.
+
+module Main;
+begin
+	halt(0); 
+end Main.

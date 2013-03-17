@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * A-boolean
+ *
+ * Negative test: assignment integer type value to boolean variable.
+ *)
+module Main;
+var 
+	b : boolean;
+begin
+	b := 1;
+	halt(0);
+end Main.

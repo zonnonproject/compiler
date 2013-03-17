@@ -1,0 +1,29 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: array from objects;
+ *)
+object A;
+end A.
+
+module Main;
+	import A;
+
+	type AnyElements = array * of object;
+
+operator "=" (left: A; right: A): boolean;
+begin
+  return true;
+end "=";
+
+	var ae : AnyElements;
+        a  : A;
+begin
+	ae := new AnyElements(10);
+	ae[1] := a;
+
+	if A(ae[1]) = a 
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,16 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Negative test: for statement has real control variable.
+ *)
+module Main;
+	var	s, r : real;
+begin
+	s := 1.0;
+	for r := 1.0 to 3.5 by 0.5 do;
+		s := r;
+	end;
+
+	halt(0);
+end Main.

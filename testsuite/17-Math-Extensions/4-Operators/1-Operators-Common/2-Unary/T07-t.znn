@@ -1,0 +1,30 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Unary
+ * 
+ * Positive test: Unary minus:
+ * -cardinal => integer{64}
+ *)
+
+module Main;
+
+type v = array {math} *,* of integer{64};
+
+var
+	ac2 : v;
+	ac1 : array {math} 2, 3 of cardinal;
+	
+begin	
+
+	ac1 := [[1, 2, 3], [4, 5, 6]];
+	ac2 := -ac1;
+	
+	if (ac2[0, 0] # -1) or (ac2[0, 1] # -2) or (ac2[0, 2] # -3) or (ac2[1, 0] # -4) or (ac2[1, 1] # -5) or (ac2[1, 2] # -6)
+	then
+		halt(0);
+	end;
+	
+	halt(1);
+
+end Main.

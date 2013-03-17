@@ -1,0 +1,30 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * IMPLEMENTS clause
+ *
+ * Positive test: the OBJECT A uses public variable from definition B. 
+ *)
+
+definition {public} B;
+	var { public } 
+		i : integer;
+end B.
+
+object {public,ref} A implements B;
+begin 
+	i := 1;
+end A.
+
+module Main;
+import A;
+
+var 
+	a : A;
+
+begin
+        a := new A;
+	if a.i = 1
+	then halt(1) else halt(0) end;
+end Main.
+

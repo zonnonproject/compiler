@@ -1,0 +1,28 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Positive test: 5 * 2 with procedures results.
+ * The object is declared after its using.
+ *)
+object A.B;
+	procedure { public } p1 : integer;
+	begin 
+		return 5 
+	end p1;
+
+	procedure { public } p2 : integer;
+	begin 
+		return 3 
+	end p2;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	if b.p1 * b.p2 = 15 
+	then halt(1) else halt(0) end;
+end Main.

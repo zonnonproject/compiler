@@ -1,0 +1,12 @@
+(** 
+ * 5. Declarations.
+ * 5.2. Constant Declarations.
+ *
+ * Positive test: wrong limits of full set constant.
+ *
+ *)
+module Main;
+	const fullSet = { max(set) .. min(set) };
+begin
+	halt(1);
+end Main.

@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * A. Instance = self
+ *
+ * Positive test: immutable array element reading and writing.
+ *)
+object A;
+	var { public } 
+		vi : array 1 of integer;
+
+	var { public, immutable } 
+		vk : array 1 of integer;
+
+	var { private } 
+		vj : array 1 of integer;
+begin
+	self.vk[0] := 1;
+	self.vk[0] := self.vk[0] + 1;
+end A.
+
+module Main;
+	import A;
+
+	var a : A;
+begin	
+	if a.vk[0] = 2 
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,25 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: 2-dimensional semi-dynamic array as procedure result.
+ *)
+module Main;
+	type Matrix = array *, * of real;
+
+	procedure P(n : integer);
+		var x : Matrix;
+	begin
+		x := new Matrix(n, n);
+		x[1, 1] := 3.14;
+		
+		if x[1, 1] = 3.14 
+		then halt(1) else halt(0) end;
+	end P;
+
+	var n : integer;
+begin
+	n := 5;
+	P(n);
+end Main.

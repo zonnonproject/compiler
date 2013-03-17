@@ -1,0 +1,41 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.3. New operator declaration.
+ *
+ * Positive test: operators importing.
+ *)
+module geometry;
+	type {public} Point = object
+		var {public} x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator {public} "+" (p1, p2 : Point) : Point;
+		var pr : Point;
+	begin 
+		pr.x := p1.x + p2.x;
+		pr.y := p1.y + p2.y;
+
+		return pr; 
+	end "+";
+end geometry.
+
+module Main;
+	import geometry;
+
+	var p1, p2, p3 : geometry.Point;
+begin
+	p2.x := 2;
+	p2.y := 2;
+
+	p3.x := 3;
+	p3.y := 3;
+
+	p1 := p2 + p3;
+
+	if (p1.x = 5) & (p1.y = 5) 
+	then halt(1) else halt(0) end;
+end Main.

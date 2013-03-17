@@ -1,0 +1,26 @@
+(** 
+ * 7. Statement 
+ * 7.10. Block statement and exception handling.
+ *
+ * Positive test: UnmatchedCase exception.
+ *)
+module Main;
+	var exc : boolean;
+		i, j : integer;
+begin
+	i := 2;
+	exc := false;
+
+	do
+		case i of 
+			3 : j := 2;
+		(* else clause absent! *)
+		end;
+
+	on UnmatchedCase do 
+		exc := true;
+	end;
+		
+	if exc 
+	then halt(1) else halt(0) end;
+end Main.

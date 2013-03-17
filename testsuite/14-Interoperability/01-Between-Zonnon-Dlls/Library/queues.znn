@@ -1,0 +1,164 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates a dynamic queue (a FIFO data buffer) for temporary data storage    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* object      : Queue       - a first-in-first-out (FIFO) data buffer        *)
+(*    methods  : Initialize  - prepares the queue for use                     *)
+(*             : Finalize    - deletes the queue's data structure & its data  *)
+(*             : Load        - reads a queue from file: call Contain first    *)
+(*             : Store       - writes a queue to a binary data file           *)
+(*             : Contain     - specifies the data type to be read from file   *)
+(*             : Length      - the number of nodes in the queue               *)
+(*             : Pop         - extract the node at the bottom of the queue    *)
+(*             : Push        - place a new node onto the top of the queue     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* To read a queue from a binary file one must perform the following steps:   *)
+(*    i)   create a new instance of a queue where the data are to be imported *)
+(*            <name of new queue> := new Data.Queue;                          *)
+(*    ii)  specify what type the data are to be read from the file by calling *)
+(*            <name of new queue>.Contain(<clone of data type to be read>);   *)
+(*    iii) read the data from file                                            *)
+(*            <name of new queue>.Load(<reader to the binary file>);          *)
+(* As such, a queue can only hold one data type all its Data.BufferNode.data  *)
+(* because the clone supplied in Contain is used to read each instance in     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+
+object {public, ref} Data.Queue implements Data.Structure;
+
+   import
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      System.Int32    as Int32,
+      Data.BufferNode as N,
+      Data.Object,
+      Data.Datum as Datum;
+      
+   var {private}
+      clone : object{Data.Datum};
+      head, tail : N;
+      length : integer;
+
+   procedure {public} Initialize
+      implements Data.Structure.Initialize;
+   begin
+      clone := nil;
+      head := nil;
+      length := 0;
+      tail := nil
+   end Initialize;
+
+   procedure {private} Finalize implements  object.Finalize;
+   var
+      n : N;
+   begin {locked}
+      n := head;
+      while n # nil do
+         n := n.next
+      end;
+      clone := nil;
+      head := nil;
+      length := 0;
+      tail := nil
+   end Finalize;
+
+   procedure {public} Load (br : BinaryReader)
+      implements Data.Structure.Load;
+   var
+      i, j : integer;
+      o : object{Data.Object};
+   begin {locked}
+      j := br.ReadInt32();
+      for i := 1 to j do
+         o := clone.Clone();
+         o.Load(br);
+         Push(Data.Datum(o));
+      end
+   end Load;
+
+   procedure {public} Store (bw : BinaryWriter)
+      implements Data.Structure.Store;
+   var
+      i : integer;
+      j : Int32;
+      n : N;
+   begin {locked}
+      j := length;
+      bw.Write(j);
+      n := tail;
+      for i := 1 to length do
+         n.data.Store(bw);
+         n := n.prev
+      end
+   end Store;
+
+   procedure {public} ContainerFor (clone : object{Data.Datum})
+      implements Data.Structure.ContainerFor;
+   begin {locked}
+      if clone = nil then
+
+      end;
+      self.clone := clone
+   end ContainerFor;
+
+   procedure {public} Length () : integer;
+   begin
+      return length
+   end Length;
+
+   procedure {public} Pop () : object{Data.Datum};
+   var
+      d : object{Data.Datum};
+      n : N;
+   begin {locked}
+      n := tail;
+      if length = 1 then
+         d := n.data;
+         head := nil;
+         tail := nil;
+         n.data := nil;
+         dec(length)
+      elsif length > 1 then
+         d := n.data;
+         tail := n.prev;
+         tail.next := nil;
+         n.data := nil;
+         n.prev := nil;
+         dec(length)
+      else
+         d := nil
+      end;
+      return d
+   end Pop;
+
+   procedure {public} Push (d : object{Data.Datum});
+   var
+      c : object{Data.Datum};
+      n : N;
+      o : object{Data.Object};
+   begin {locked}
+      if d # nil then
+         n := new N;
+         o := d.Copy();
+         c := Data.Datum(o);
+         n.data := c;
+         if length > 0 then
+            head.prev := n;
+            n.next := head
+         else
+            tail := n
+         end;
+         head := n;
+         inc(length)
+      end
+   end Push;
+
+begin
+   Initialize;
+end Queue.
+

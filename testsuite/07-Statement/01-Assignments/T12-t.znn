@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Positive text: nil assignment to procedure type variable.
+ *)
+module Main;
+	type PT = procedure (integer) : integer;
+
+	procedure p(i : real) : integer;
+	begin 
+		return 3 
+	end p;
+
+	var	pv : PT; 
+begin
+	pv := nil;
+	halt(1);
+end Main.

@@ -1,0 +1,19 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Definition
+ * 
+ * Positive test: static math array creation.
+ *)
+
+module Main;
+var
+	a : array {math} 3, 4 of integer;
+begin
+	a[1, 3] := 5;
+	if a[1, 3] = 5 
+	then 
+		halt(1);
+	else
+		halt(0);
+        end;
+end Main.

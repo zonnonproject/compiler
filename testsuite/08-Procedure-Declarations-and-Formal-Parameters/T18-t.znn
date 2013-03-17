@@ -1,0 +1,32 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: object as procedure parameter and result.
+ * The object B.C is declared in namespace before the procedure P declaration.
+ *)
+module A;
+	import B;
+
+	procedure { public } P(var p1 : B.C; p2 : B.C) : B.C;
+	begin
+		p1.i := p2.i + 1;
+		return p1;
+	end P;
+end A.
+
+object B.C;
+	var { public } 
+		i : integer;
+end C.
+
+module Main;
+	import A, B;
+
+	var b1, b2, b3 : B.C;
+begin
+	b3.i := 4;
+	b1 := A.P(b2, b3);
+
+	if (b1.i = 5) & (b2.i = 5) 
+	then halt(1) else halt(0) end;
+end Main.

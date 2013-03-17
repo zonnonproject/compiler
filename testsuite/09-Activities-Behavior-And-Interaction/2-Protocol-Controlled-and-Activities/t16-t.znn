@@ -1,0 +1,32 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Reference by the protocol name from a procedure
+ *)
+
+module {protected} Main;
+
+protocol P = (
+	dialog = integer
+);
+
+activity A implements P;
+var 
+	i : integer;
+begin 
+	accept unused;
+end A;
+
+procedure R;
+var 
+	a : activity {P};
+begin 
+	a := new A;
+	a( integer(10) );
+end R;
+
+
+begin
+	R;
+	halt(1);
+end Main.

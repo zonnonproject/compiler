@@ -1,0 +1,733 @@
+module {public} Main;
+
+import
+   System.Convert             as Convert,
+	System.Double              as Double,
+	System.IO.BinaryReader     as BinaryReader,
+	System.IO.BinaryWriter     as BinaryWriter,
+   System.IO.Path             as Path,
+	System.IO.StreamReader     as StreamReader,
+	System.IO.StreamWriter     as StreamWriter,
+   System.Reflection.Assembly as Assembly,
+	System.Single              as Single,
+   BelCore.Log                as L,
+   BelCore.Numbers            as N,
+   BelCore.DataFiles          as DF,
+   BelCore.TextFiles          as TF;
+
+var {private}
+   asm : Assembly;
+   dir, file, loc, path : string;
+
+procedure {public} GetSet;
+var
+	d : Double;
+	f : Single;
+	s : string;
+	x, y : N.Number;
+begin
+   s := "";
+	writeln("Test the Get and Set methods.");
+	writeln;
+	(* assign parameters to two reals *)
+	writeln("Enter a real number with no more than 7 digits.");
+	readln(s);
+	f := Single.Parse(s);
+	x.Set(Convert.ToDouble(f));
+	writeln("Enter a real number with more than 8 digits.");
+	readln(s);
+	d := Double.Parse(s);
+	y.Set(d);
+	(* retrieve the values held by the reals *)
+	d := x.Get();
+	s := "The real held by the first number:  " + d.ToString("E15");
+	writeln(s);
+	d := y.Get();
+	s := "The real held by the second number: " + d.ToString("E15");
+	writeln(s)
+end GetSet;
+
+procedure {public} StringIO;
+var
+   d : Double;
+	i : integer;
+	s, t : string;
+	x, y, z : N.Number;
+begin
+	s := "List the real-valued constants:";
+	writeln(s);
+	writeln;
+	x := N.Epsilon;
+	s := "machine epsilon          = " + x.Typeset();
+	writeln(s);
+	x := N.MaximumPositiveNumber;
+	s := "largest positive number  = " + x.Typeset();
+	writeln(s);
+	x := N.MinimumPositiveNumber;
+	s := "smallest positive number = " + x.Typeset();
+	writeln(s);
+	x := N.PositiveInfinity;
+	s := "positive infinity        = " + x.Typeset();
+	writeln(s);
+	x := N.NegativeInfinity;
+	s := "negative infinity        = " + x.Typeset();
+	writeln(s);
+	x := N.NaN;
+	s := "not-a-number             = " + x.Typeset();
+	writeln(s);
+   writeln;
+	writeln("Test machine epsilon to make sure that: 1 + epsilon > 1.");
+	x := N.Epsilon;
+	y.Parse("1.0");
+	t := "   " + y.Typeset() + "+ ";
+	t := t + x.Typeset();
+	z := y + x;
+	if z.GreaterThan(y) then
+		s := t + "> " + y.Typeset()
+	else
+		s := t + "<= " + y.Typeset()
+	end;
+	writeln(s);
+	writeln;
+   writeln("Test machine epsilon to make sure that: 1 + epsilon/2 = 1.");
+   x := N.Epsilon / 2;
+   y.Parse("1.0");
+   t := "   " + y.Typeset() + "+ ";
+   t := t + x.Typeset();
+   z := y + x;
+   if z.Equals(y) then
+      s := t + "= " + y.Typeset()
+   else
+      s := t + "# " + y.Typeset()
+   end;
+   writeln(s);
+   writeln;
+	write("Enter a real number for parsing:    ");
+	readln(s);
+	x.Parse(s);
+	s := "the number entered was: " + x.Typeset();
+	writeln(s)
+end StringIO;
+
+procedure {public} Store;
+var
+	bw : BinaryWriter;
+	f, s : string;
+	i : integer;
+	sw : StreamWriter;
+	x : N.Number;
+begin
+   s := "";
+	f := "testNumbers";
+	bw := DF.OpenWriter(f);
+	sw := TF.OpenWriter(f);
+	(* use the Store procedure to write some data *)
+	writeln("Enter two numbers to store to binary and text files.");
+	for i := 1 to 2 do
+		readln(s);
+		sw.WriteLine(s);
+		x.Parse(s);
+		x.Store(bw);
+      s := "   the ";
+      if i = 1 then
+         s := s + "first "
+      else
+         s := s + "second"
+      end;
+		s := s + " number stored to these files was: " + x.Typeset();
+		writeln(s)
+	end;
+	DF.CloseWriter(bw);
+	TF.CloseWriter(sw)
+end Store;
+
+procedure Load;
+var
+	br : BinaryReader;
+	f, s : string;
+	i : integer;
+	sr : StreamReader;
+	x : N.Number;
+begin
+	f := "testNumbers";
+	br := DF.OpenReader(f);
+	sr := TF.OpenReader(f);
+	(* read in the data *)
+	for i := 1 to 2 do
+		x.Load(br);
+		s := "   the ";
+      if i = 1 then
+         s := s + "first "
+      else
+         s := s + "second"
+      end;
+      s := s + " number read from the binary file was: " + x.Typeset();
+		writeln(s);
+		s := sr.ReadLine();
+		x.Parse(s);
+      s := "   the ";
+      if i = 1 then
+         s := s + "first "
+      else
+         s := s + "second"
+      end;
+      s := s + " number read from the  text  file was: " + x.Typeset();
+		writeln(s)
+	end;
+	DF.CloseReader(br);
+	TF.CloseReader(sr)
+end Load;
+
+procedure {public} Boolean;
+var
+	s : string;
+	x, y : N.Number;
+begin
+   s := "";
+	writeln("Test the boolean functions.");
+	writeln;
+	writeln("Enter the number for the left-hand side.");
+	readln(s);
+	x.Parse(s);
+	writeln("Enter the number for the right-hand side.");
+	readln(s);
+	y.Parse(s);
+	s := "" + x.Typeset() + "=  ";
+	s := s + y.Typeset() + "is ";
+	if x.Equals(y) then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+   s := "" + x.Typeset() + "#  ";
+   s := s + y.Typeset() + "is ";
+   if x.NotEqual(y) then
+      s := s + "true"
+   else
+      s := s + "false"
+   end;
+   writeln(s);
+	s := "" + x.Typeset() + "<  ";
+	s := s + y.Typeset() + "is ";
+	if x.LessThan(y) then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+   writeln(s);
+   s := "" + x.Typeset() + "<= ";
+   s := s + y.Typeset() + "is ";
+   if x.LessThanOrEqual(y) then
+      s := s + "true"
+   else
+      s := s + "false"
+   end;
+	writeln(s);
+	s := "" + x.Typeset() + ">  ";
+	s := s + y.Typeset() + "is ";
+	if x.GreaterThan(y) then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+   writeln(s);
+   s := "" + x.Typeset() + ">= ";
+   s := s + y.Typeset() + "is ";
+   if x.GreaterThanOrEqual(y) then
+      s := s + "true"
+   else
+      s := s + "false"
+   end;
+	writeln(s)
+end Boolean;
+
+procedure {public} Arithmetic;
+var
+	s : string;
+	x, y, z : N.Number;
+begin
+   s := "";
+	writeln("Test the methods for arithmetic.");
+	writeln;
+	writeln("Verify the unary arithmetic methods:");
+   writeln("   Enter a negative number.");
+	readln(s);
+	x.Parse(s);
+	y := x.Magnitude();
+	s := "| " + x.Typeset() + "|  = ";
+	s := s + y.Typeset();
+	writeln(s);
+   s := "-( " + x.Typeset() + ") = ";
+   z := x.Negative();
+   s := s + z.Typeset();
+   writeln(s);
+   writeln("Verify the binary arithmetic methods:");
+	writeln("   Enter a number for the left-hand side.");
+	readln(s);
+	x.Parse(s);
+	writeln("   Enter a number for the right-hand side.");
+	readln(s);
+   y.Parse(s);
+	s := "" + x.Typeset();
+	s := s + "+  " + y.Typeset();
+	z := x.Add(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + x.Typeset();
+	s := s + "-  " + y.Typeset();
+	z := x.Subtract(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + x.Typeset();
+	s := s + "*  " + y.Typeset();
+	z := x.Multiply(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + x.Typeset();
+	s := s + "/  " + y.Typeset();
+	z := x.Divide(y);
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + x.Typeset();
+	s := s + "** " + y.Typeset();
+	z := x.Power(y);
+	s := s + "= " + z.Typeset();
+	writeln(s)
+end Arithmetic;
+
+procedure {public} Operators;
+var
+	d : Double;
+	f : Single;
+	l, r, z : N.Number;
+	s : string;
+begin
+   s := "";
+	writeln("Test the unary overloaded operator.");
+	writeln;
+	writeln("Enter a number.");
+	readln(s);
+	r.Parse(s);
+	s := "-( " + r.Typeset() + ") = ";
+	l := -r;
+	s := s + l.Typeset();
+	writeln(s);
+	writeln("Test the overloaded arithmetic operators.");
+	writeln;
+	writeln("Enter a number for the left-hand side.");
+	readln(s);
+	l.Parse(s);
+	writeln("Enter a number for the right-hand side.");
+	readln(s);
+	r.Parse(s);
+	writeln("Test the boolean operators.");
+	s := "" + l.Typeset() + "= ";
+	s := s + r.Typeset() + " is ";
+	if l = r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "# ";
+	s := s + r.Typeset() + " is ";
+	if l # r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "< ";
+	s := s + r.Typeset() + " is ";
+	if l < r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "<= ";
+	s := s + r.Typeset() + "is ";
+	if l <= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "> ";
+	s := s + r.Typeset() + " is ";
+	if l > r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + ">= ";
+	s := s + r.Typeset() + "is ";
+	if l >= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	writeln("Test the binary arithemtic operators.");
+	s := "" + l.Typeset();
+	s := s + "+ " + r.Typeset();
+	z := l + r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "- " + r.Typeset();
+	z := l - r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "* " + r.Typeset();
+	z := l * r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "/ " + r.Typeset();
+	z := l / r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "** " + r.Typeset();
+	z := l ** r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	writeln;
+	writeln("Now enter a number with 7 or fewer digits");
+	readln(s);
+	f := Single.Parse(s);
+	writeln("Test the boolean operators.");
+	s := "" + f.ToString() + " = ";
+	s := s + r.Typeset() + " is ";
+	if f = r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "= ";
+	s := s + f.ToString() + "  is ";
+	if l = f then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + f.ToString() + " # ";
+	s := s + r.Typeset() + " is ";
+	if f # r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "# ";
+	s := s + f.ToString() + "  is ";
+	if l # f then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + f.ToString() + " < ";
+	s := s + r.Typeset() + " is ";
+	if f < r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "< ";
+	s := s + f.ToString() + "  is ";
+	if l < f then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + f.ToString() + " <= ";
+	s := s + r.Typeset() + "is ";
+	if f <= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "<= ";
+	s := s + f.ToString() + " is ";
+	if l <= f then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + f.ToString() + " > ";
+	s := s + r.Typeset() + " is ";
+	if f > r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "> ";
+	s := s + f.ToString() + "  is ";
+	if l > f then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + f.ToString() + " >= ";
+	s := s + r.Typeset() + "is ";
+	if f >= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + ">= ";
+	s := s + f.ToString() + " is ";
+	if l >= f then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	writeln("Test the binary arithemtic operators.");
+	s := "" + f.ToString();
+	s := s + " + " + r.Typeset();
+	z := f + r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "+ " + f.ToString();
+	z := l + f;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + f.ToString();
+	s := s + " - " + r.Typeset();
+	z := f - r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "- " + f.ToString();
+	z := l - f;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + f.ToString();
+	s := s + " * " + r.Typeset();
+	z := f * r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "* " + f.ToString();
+	z := l * f;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + f.ToString();
+	s := s + " / " + r.Typeset();
+	z := f / r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "/ " + f.ToString();
+	z := l / f;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + f.ToString();
+	s := s + " ** " + r.Typeset();
+	z := f ** r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "** " + f.ToString();
+	z := l ** f;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	writeln;
+	writeln("And finally, enter a number with 8 or more digits");
+	readln(s);
+	d := Double.Parse(s);
+	writeln("Test the boolean operators.");
+	s := "" + d.ToString() + " = ";
+	s := s + r.Typeset() + " is ";
+	if d = r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "= ";
+	s := s + d.ToString() + "  is ";
+	if l = d then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + d.ToString() + " # ";
+	s := s + r.Typeset() + " is ";
+	if d # r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "# ";
+	s := s + d.ToString() + "  is ";
+	if l # d then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + d.ToString() + " < ";
+	s := s + r.Typeset() + " is ";
+	if d < r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "< ";
+	s := s + d.ToString() + "  is ";
+	if l < d then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + d.ToString() + " <= ";
+	s := s + r.Typeset() + "is ";
+	if d <= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "<= ";
+	s := s + d.ToString() + " is ";
+	if l <= d then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + d.ToString() + " > ";
+	s := s + r.Typeset() + " is ";
+	if d > r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + "> ";
+	s := s + d.ToString() + "  is ";
+	if l > d then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + d.ToString() + " >= ";
+	s := s + r.Typeset() + "is ";
+	if d >= r then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	s := "" + l.Typeset() + ">= ";
+	s := s + d.ToString() + " is ";
+	if l >= d then
+		s := s + "true"
+	else
+		s := s + "false"
+	end;
+	writeln(s);
+	writeln("Test the binary arithemtic operators.");
+	s := "" + d.ToString();
+	s := s + " + " + r.Typeset();
+	z := d + r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "+ " + d.ToString();
+	z := l + d;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + d.ToString();
+	s := s + " - " + r.Typeset();
+	z := d - r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "- " + d.ToString();
+	z := l - d;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + d.ToString();
+	s := s + " * " + r.Typeset();
+	z := d * r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "* " + d.ToString();
+	z := l * d;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + d.ToString();
+	s := s + " / " + r.Typeset();
+	z := d / r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "/ " + d.ToString();
+	z := l / d;
+	s := s + " = " + z.Typeset();
+	writeln(s);
+	s := "" + d.ToString();
+	s := s + " ** " + r.Typeset();
+	z := d ** r;
+	s := s + "= " + z.Typeset();
+	writeln(s);
+	s := "" + l.Typeset();
+	s := s + "** " + d.ToString();
+	z := l ** d;
+	s := s + " = " + z.Typeset();
+	writeln(s)
+end Operators;
+
+begin
+	GetSet;
+	writeln;
+	StringIO;
+	writeln;
+   Store;
+   writeln;
+   writeln("Data have been stored in the files");
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   file := Path.Combine(dir, "testNumbers.dat");
+   writeln(file + " and");
+   file := Path.Combine(dir, "testNumbers.txt");
+   writeln(file + ".");
+	writeln;
+	Load;
+	writeln;
+	Boolean;
+	writeln;
+	Arithmetic;
+	writeln;
+	Operators;
+	writeln;
+	writeln("Press 'Enter' to quit.");
+   readln;
+	L.Close
+end Main.

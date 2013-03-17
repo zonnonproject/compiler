@@ -1,0 +1,29 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: 2-dimensional semi-dynamic array.
+ * The index of array element is out of first dimension limits.
+ *)
+module Main;
+	procedure P(n : integer);
+		type Matrix = array *,* of real;
+		var x : Matrix;
+	begin
+		x := new Matrix(n, n);
+		x[5,0] := 3.14;
+	end P;
+
+	var n : integer;
+begin
+	n := 5;
+
+	do
+		P(n);
+	on OutOfRange do
+		halt(1)
+	end;
+
+	halt(0);
+end Main.

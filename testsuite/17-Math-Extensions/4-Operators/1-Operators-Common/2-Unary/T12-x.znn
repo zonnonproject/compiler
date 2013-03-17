@@ -1,0 +1,23 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Unary
+ * 
+ * Negative test: inversion
+ * incorrect base type
+ *)
+
+module Main;
+
+type v = array {math} *,* of integer;
+
+var
+	ab1 : array {math} 2, 3 of integer;
+	ab2 : v;
+	
+begin	
+	
+	ab1 := ~ab2;	
+	halt(0);
+	
+end Main.

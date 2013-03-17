@@ -1,0 +1,21 @@
+(* ********* Zonnon online collection ***********
+ * write enumeration as integer
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Example_2;
+type 
+  Figure = (Star, Rectangle, Circle, Ellipse);
+  
+var 
+	a, b: real;
+	x, y: integer;
+	myfigure: Figure;
+	align: (Top, Bottum, Left, Right);
+begin
+  align := align.Right;
+  writeln(integer(align));
+end Example_2.

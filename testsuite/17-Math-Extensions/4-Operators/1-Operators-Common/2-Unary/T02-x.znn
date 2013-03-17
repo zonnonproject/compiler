@@ -1,0 +1,20 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Unary
+ * 
+ * Negative test: Unary plus:
+ * array is not math
+ *)
+
+module Main;
+
+var
+	ai1, ai2 : array 2, 3 of integer;
+	
+begin	
+
+	ai2 := +ai1;
+	halt(0);
+	
+end Main.

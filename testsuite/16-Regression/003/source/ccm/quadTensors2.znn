@@ -1,0 +1,1049 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Ccm was written to model in-plane biaxial experiments run in my laboratory *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Defines a fourth-order tensor in 2-space; specifically a 2x2x2x2 array     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The four indexers go from 1..2, not from 0..1 as in Zonnon and C           *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Because in-plane tensor fields have non-zero components                    *)
+(*       | T11  T12   0  |                                                    *)
+(*   T = | T21  T22   0  |                                                    *)
+(*       |  0    0    0  |                                                    *)
+(* and are represented internally via the array                               *)
+(*   T = {T11, T12, T21, T22}^T                                               *)
+(* fourth-order tensors are therefore represented internally via the matrix   *)
+(*       | Q1111  Q1112  Q1121  Q1122 |                                       *)
+(*       | Q1211  Q1212  Q1221  Q1222 |                                       *)
+(*   Q = | Q2111  Q2112  Q2121  Q2122 |                                       *)
+(*       | Q2211  Q2212  Q2221  Q2222 |                                       *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Constant    : I    - tensor   I_{ij} I_{kl}                                *)
+(*                      a = I : a                                             *)
+(*             : IBar - tensor   I_{jk} I_{il}                                *)
+(*                      a^T = IBar : a                                        *)
+(*             : S    - tensor   (I_{ik} I_{jl} + I_{jk} I_{il})/2            *)
+(*                      (a + a^T)/2 = S : a                                   *)
+(*             : W    - tensor   (I_{ik} I_{jl} - I_{jk} I_{il})/2            *)
+(*                      (a - a^T)/2 = W : a                                   *)
+(*             : One  - tensor   I_{ij} I_{kl}                                *)
+(*             : P    - tensor   I_{ij} I_{kl} - I_{ij} I_{kl}/3              *)
+(*                      deviatoricPart(a) = P : a  where  P = I - One/3       *)
+(* Object      : Tensor        - a 2x2x2x2 array of scalars                   *)
+(*    methods  : Initialize;   - creates & initialize the internal matrix     *)
+(*             : Nullify       - sets the internal matrix to nil              *)
+(*             : Clone         - returns an initialized tensor                *)
+(*             : Copy          - returns a deep copy of the tensor            *)
+(*             : Load          - retrieves the tensor from a binary file      *)
+(*             : Store         - writes the tensor to a binary file           *)
+(*             : Typeset       - convert specified row in tensor into string  *)
+(*             : Get           - implements [].Get, returns a scalar          *)
+(*             : Set           - implements [].Set, assigns a scalar          *)
+(*             : GetUnits      - returns the units part of a tensor field     *)
+(*             : SetUnits      - assigns the units part of a tensor field     *)
+(*             : GetMatrix     - retrieves the full matrix less its units     *)
+(*             : SetMatrix     - assigns a full matrix less its units         *)
+(*             : IsDimensionless - boolean check for dimensionality           *)
+(*             : Equals        - checks two tensors for equality              *)
+(*    (# overwrite the internal matrix with the arithmetic result #)          *)
+(*             : Neg           - negates all elements of the tensor           *)
+(*             : IncBy         - increments the tensor by the tensor argument *)
+(*             : DecBy         - decrements the tensor by the tensor argument *)
+(*             : MulBy         - multiplies the tensor by a scalar argument   *)
+(*             : DivBy         - divides the tensor by a scalar argument      *)
+(*             : ScaBy         - multiplies the tensor by a real argument     *)
+(*    (# return new objects of type Tensor with the arithmetic result #)      *)
+(*             : Negative      - returns the negative of the tensor           *)
+(*             : Add           - returns the sum of two tensors               *)
+(*             : Subtract      - returns the difference between two tensors   *)
+(*             : Multiply      - returns the product of a tensor and a scalar *)
+(*             : Divide        - returns the ratio of a tensor to a scalar    *)
+(*             : Scale         - returns the product of a tensor and a real   *)
+(*    (# some basic functions for tensors #)                                  *)
+(*             : Dot           - returns T_{ijkl} = L_{ijmn} R_{mnkl}         *)
+(*             : DotTranspose  - returns T_{ijkl} = L_{ijmn} R_{klmn}         *)
+(*             : TransposeDot  - returns T_{ijkl} = L_{mnij} R_{mnkl}         *)
+(*             : Contract           - returns T_{ij} = L_{ijkl} R_{kl}        *)
+(*             : TransposeContract  - returns T_{ij} = L_{klij} R_{kl}        *)
+(* Operators   : -             - uniary  operator                             *)
+(*             : :=            - assignment                                   *)
+(*             : = | #         - logical operators                            *)
+(*             : + | - | * | / - binary  operators                            *)
+(* Functions   : Norm            - returns the Frobenius norm                 *)
+(*             : TensorProduct   - returns T_{ijkl} = L_{ij} R_{kl}           *)
+(*             : SymTensorProduct - returns T_{ijkl}                          *)
+(*                                     = (L_{ij} R_{kl} + R_{ij} L_{kl})/2    *)
+(*             : ODotProduct     - returns T_{ijkl}                           *)
+(*                                     = (L_{ik} R_{jl} + L_{jk} R_{il})/2    *)
+(*             : SymODotProduct  - returns T_{ijkl}                           *)
+(*                                     = (L_{ik} R_{jl} + L_{jk} R_{il}       *)
+(*                                      + R_{ik} L_{jl} + R_{jk} L_{il}/4     *)
+(*             : Transpose       - returns T_{klij}                           *)
+(*             : Inverse         - returns the tensor inverse, if it exists   *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+
+module {public} BelCcm.QuadTensors2;
+
+   import
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      System.Byte   as Card8,   (* core type of  cardinal{8}  *)
+      System.UInt16 as Card16,  (* core type of  cardinal{16} *)
+      System.UInt32 as Card32,  (* core type of  cardinal{32} *)
+      System.UInt64 as Card64,  (* core type of  cardinal{64} *)
+      System.SByte  as Int8,    (* core type of  integer{8}   *)
+      System.Int16  as Int16,   (* core type of  integer{16}  *)
+      System.Int32  as Int32,   (* core type of  integer{32}  *)
+      System.Int64  as Int64,   (* core type of  integer{64}  *)
+      System.Single as Real32,  (* core type of  real{32}     *)
+      System.Double as Real64,  (* core type of  real{64}     *)
+      BelCore.Arrays        as A,
+      BelCore.Log           as L,
+      BelCore.LinearAlgebra as LA,
+      BelCore.Math          as Fn,
+      BelCore.Matrices      as M,
+      BelCore.Numbers       as N,
+      BelCcm.Scalars        as Sc,
+      BelCcm.Tensors2       as T,
+      BelCcm.Units          as U;
+
+   var {private}
+      zero, one, two, three, four : N.Number;
+      oneScalar, twoScalar, threeScalar : Sc.Scalar;
+
+   var {public, immutable}
+      I, IBar, S, W, One, P : Tensor;
+
+   type {private}
+      CharArray = array * of char;
+
+   type {public, value} Tensor = object implements []
+
+      var {private}
+         m : M.Matrix;
+         u : U.Si;
+
+      procedure {public} Initialize;
+      begin {locked}
+         m.Initialize(4,4);
+         u.Initialize
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin {locked}
+         m.Nullify;
+         u.Nullify
+      end Nullify;
+
+      procedure {public} Clone () : Tensor;
+      var
+         t : Tensor;
+      begin
+         t.m := m.Clone();
+         t.u := u.Clone();
+         return t
+      end Clone;
+
+      procedure {public} Copy () : Tensor;
+      var
+         t : Tensor;
+      begin
+         t.m := m.Copy(M.deepCopy);
+         t.u := u;
+         return t
+      end Copy;
+
+      procedure {public} Load (br : BinaryReader);
+      begin {locked}
+         u.Load(br);
+         m.Load(br)
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      begin {locked}
+         u.Store(bw);
+         m.Store(bw)
+      end Store;
+
+      procedure {public} Typeset (row : integer) : string;
+      var
+         i : integer;
+         r : N.Number;
+         s : string;
+      begin {locked}
+         if row = 1 then
+            r := m[1,1];
+            s := "/" + r.ToString(7);
+            for i := len(s) to 18 do
+               s := s + " "
+            end;
+            r := m[1,2];
+            s := s + r.ToString(7);
+            for i := len(s) to 35 do
+               s := s + " "
+            end;
+            r := m[1,3];
+            s := s + r.ToString(7);
+            for i := len(s) to 52 do
+               s := s + " "
+            end;
+            r := m[1,4];
+            s := s + r.ToString(7);
+            for i := len(s) to 67 do
+               s := s + " "
+            end;
+            s := s + "\ "
+         elsif (row = 2) or (row = 3) then
+            r := m[row,1];
+            s := "|" + r.ToString(7);
+            for i := len(s) to 18 do
+               s := s + " "
+            end;
+            r := m[row,2];
+            s := s + r.ToString(7);
+            for i := len(s) to 35 do
+               s := s + " "
+            end;
+            r := m[row,3];
+            s := s + r.ToString(7);
+            for i := len(s) to 52 do
+               s := s + " "
+            end;
+            r := m[row,4];
+            s := s + r.ToString(7);
+            for i := len(s) to 67 do
+               s := s + " "
+            end;
+            s := s + "| "
+         elsif row = 4 then
+            r := m[4,1];
+            s := "\" + r.ToString(7);
+            for i := len(s) to 18 do
+               s := s + " "
+            end;
+            r := m[4,2];
+            s := s + r.ToString(7);
+            for i := len(s) to 35 do
+               s := s + " "
+            end;
+            r := m[4,3];
+            s := s + r.ToString(7);
+            for i := len(s) to 52 do
+               s := s + " "
+            end;
+            r := m[4,4];
+            s := s + r.ToString(7);
+            for i := len(s) to 67 do
+               s := s + " "
+            end;
+            s := s + "/ ";
+            s := s + u.Typeset()
+         else
+            L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Typeset");
+            s := ""
+         end;
+         return s
+      end Typeset;
+
+      procedure {public} Get (i, j, k, l : integer) : Sc.Scalar
+         implements [].Get;
+      var
+         s : Sc.Scalar;
+      begin
+         s.SetUnits(u);
+         if i = 1 then
+            if j = 1 then
+               if k = 1 then
+                  if l = 1 then
+                     s.Set(m.Get(1,1))
+                  elsif l = 2 then
+                     s.Set(m.Get(1,2))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               elsif k = 2 then
+                  if l = 1 then
+                     s.Set(m.Get(1,3))
+                  elsif l = 2 then
+                     s.Set(m.Get(1,4))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               else
+                  L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+               end
+            elsif j = 2 then
+               if k = 1 then
+                  if l = 1 then
+                     s.Set(m.Get(2,1))
+                  elsif l = 2 then
+                     s.Set(m.Get(2,2))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               elsif k = 2 then
+                  if l = 1 then
+                     s.Set(m.Get(2,3))
+                  elsif l = 2 then
+                     s.Set(m.Get(2,4))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               else
+                  L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+               end
+            else
+               L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+            end
+         elsif i = 2 then
+            if j = 1 then
+               if k = 1 then
+                  if l = 1 then
+                     s.Set(m.Get(3,1))
+                  elsif l = 2 then
+                     s.Set(m.Get(3,2))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               elsif k = 2 then
+                  if l = 1 then
+                     s.Set(m.Get(3,3))
+                  elsif l = 2 then
+                     s.Set(m.Get(3,4))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               else
+                  L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+               end
+            elsif j = 2 then
+               if k = 1 then
+                  if l = 1 then
+                     s.Set(m.Get(4,1))
+                  elsif l = 2 then
+                     s.Set(m.Get(4,2))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               elsif k = 2 then
+                  if l = 1 then
+                     s.Set(m.Get(4,3))
+                  elsif l = 2 then
+                     s.Set(m.Get(4,4))
+                  else
+                     L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+                  end
+               else
+                  L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+               end
+            else
+               L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+            end
+         else
+            L.WarningMessage(310,425, "BelCcm.QuadTensors2.Tensor.Get")
+         end;
+         return s
+      end Get;
+
+      procedure {public} Set (i, j, k, l : integer; s : Sc.Scalar)
+         implements [].Set;
+      begin {locked}
+         if u.Equals(s.GetUnits()) then
+            if i = 1 then
+               if j = 1 then
+                  if k = 1 then
+                     if l = 1 then
+                        m.Set(1,1, s.Get())
+                     elsif l = 2 then
+                        m.Set(1,2, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  elsif k = 2 then
+                     if l = 1 then
+                        m.Set(1,3, s.Get())
+                     elsif l = 2 then
+                        m.Set(1,4, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  else
+                     L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                  end
+               elsif j = 2 then
+                  if k = 1 then
+                     if l = 1 then
+                        m.Set(2,1, s.Get())
+                     elsif l = 2 then
+                        m.Set(2,2, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  elsif k = 2 then
+                     if l = 1 then
+                        m.Set(2,3, s.Get())
+                     elsif l = 2 then
+                        m.Set(2,4, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  else
+                     L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                  end
+               else
+                  L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+               end
+            elsif i = 2 then
+               if j = 1 then
+                  if k = 1 then
+                     if l = 1 then
+                        m.Set(3,1, s.Get())
+                     elsif l = 2 then
+                        m.Set(3,2, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  elsif k = 2 then
+                     if l = 1 then
+                        m.Set(3,3, s.Get())
+                     elsif l = 2 then
+                        m.Set(3,4, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  else
+                     L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                  end
+               elsif j = 2 then
+                  if k = 1 then
+                     if l = 1 then
+                        m.Set(4,1, s.Get())
+                     elsif l = 2 then
+                        m.Set(4,2, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  elsif k = 2 then
+                     if l = 1 then
+                        m.Set(4,3, s.Get())
+                     elsif l = 2 then
+                        m.Set(4,4, s.Get())
+                     else
+                        L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                     end
+                  else
+                     L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+                  end
+               else
+                  L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+               end
+            else
+               L.WarningMessage(310,415, "BelCcm.QuadTensors2.Tensor.Set")
+            end
+         else
+            L.WarningMessage(42, 19, "BelCcm.QuadTensors2.Tensor.Set")
+         end
+      end Set;
+
+      procedure {public} GetUnits () : U.Si;
+      begin
+         return u
+      end GetUnits;
+
+      procedure {public} SetUnits (si : U.Si);
+      begin {locked}
+         u := si
+      end SetUnits;
+
+      procedure {public} GetMatrix () : M.Matrix;
+      var
+         mtx : M.Matrix;
+      begin
+         mtx.SetMatrix(m.GetMatrix(M.shallowCopy), M.shallowCopy);
+         return mtx
+      end GetMatrix;
+
+      procedure {public} SetMatrix (mtx : M.Matrix);
+      begin {locked}
+         if (mtx.Rows() = 4) & (mtx.Columns() = 4) then
+            m.SetMatrix(mtx.GetMatrix(M.shallowCopy), M.deepCopy)
+         else
+            L.WarningMessage(310,305, "BelCcm.QuadTensors2.Tensor.SetMatrix")
+         end
+      end SetMatrix;
+
+      procedure {public} IsDimensionless () : boolean;
+      begin
+         return u.IsDimensionless()
+      end IsDimensionless;
+
+      procedure {public} Equals (t : Tensor) : boolean;
+      begin
+         return (u.Equals(t.u) & m.Equals(t.m))
+      end Equals;
+
+      procedure {public} Neg;
+      begin {locked}
+         m.Neg
+      end Neg;
+
+      procedure {public} IncBy (t : Tensor);
+      begin {locked}
+         if u.Equals(t.u) then
+            m.IncBy(t.m)
+         else
+            L.WarningMessage(301,415, "BelCcm.QuadTensors2.Tensor.IncBy")
+         end
+      end IncBy;
+
+      procedure {public} DecBy (t : Tensor);
+      begin {locked}
+         if u.Equals(t.u) then
+            m.DecBy(t.m)
+         else
+            L.WarningMessage(301,415, "BelCcm.QuadTensors2.Tensor.DecBy")
+         end
+      end DecBy;
+
+      procedure {public} MulBy (s : Sc.Scalar);
+      begin {locked}
+         u.IncBy(s.GetUnits());
+         m.MulBy(s.Get())
+      end MulBy;
+
+      procedure {public} DivBy (s : Sc.Scalar);
+      begin {locked}
+         u.DecBy(s.GetUnits());
+         m.DivBy(s.Get())
+      end DivBy;
+
+      procedure {public} ScaBy (r : N.Number);
+      begin {locked}
+         m.MulBy(r)
+      end ScaBy;
+
+      procedure {public} Negative () : Tensor;
+      var
+         t : Tensor;
+      begin
+         t.u := u;
+         t.m := m.Negative();
+         return t
+      end Negative;
+
+      procedure {public} Add (t : Tensor) : Tensor;
+      var
+         ten : Tensor;
+      begin
+         if u.Equals(t.u) then
+            ten.u := u;
+            ten.m := m.Add(t.m)
+         else
+            L.WarningMessage(301,305, "BelCcm.QuadTensors2.Tensor.Add")
+         end;
+         return ten
+      end Add;
+
+      procedure {public} Subtract (t : Tensor) : Tensor;
+      var
+         ten : Tensor;
+      begin
+         if u.Equals(t.u) then
+            ten.u := u;
+            ten.m := m.Subtract(t.m)
+         else
+            L.WarningMessage(301,305, "BelCcm.QuadTensors2.Tensor.Subtract")
+         end;
+         return ten
+      end Subtract;
+
+      procedure {public} Multiply (s : Sc.Scalar) : Tensor;
+      var
+         t : Tensor;
+      begin
+         t.u := u.Add(s.GetUnits());
+         t.m := m.Multiply(s.Get());
+         return t
+      end Multiply;
+
+      procedure {public} Divide (s : Sc.Scalar) : Tensor;
+      var
+         t : Tensor;
+      begin
+         t.u := u.Subtract(s.GetUnits());
+         t.m := m.Divide(s.Get());
+         return t
+      end Divide;
+
+      procedure {public} Scale (r : N.Number) : Tensor;
+      var
+         t : Tensor;
+      begin
+         t.u := u;
+         t.m := m.Multiply(r);
+         return t
+      end Scale;
+
+      (* L.Dot(R) returns  T_{ijkl} = L_{ijmn} R_{mnkl} *)
+      procedure {public} Dot (t : Tensor) : Tensor;
+      var
+         ten : Tensor;
+      begin
+         ten.u := u.Add(t.u);
+         ten.m := m.Dot(t.m);
+         return ten
+      end Dot;
+
+      (* L.DotTranspose(R) returns  T_{ijkl} = L_{ijmn} R_{klmn} *)
+      procedure {public} DotTranspose (t : Tensor) : Tensor;
+      var
+         ten : Tensor;
+      begin
+         ten.u := u.Add(t.u);
+         ten.m := m.DotTranspose(t.m);
+         return ten
+      end DotTranspose;
+
+      (* L.TransposeDot(R) returns  T_{ijkl} = L_{mnij} R_{mnkl} *)
+      procedure {public} TransposeDot (t : Tensor) : Tensor;
+      var
+         ten : Tensor;
+      begin
+         ten.u := u.Add(t.u);
+         ten.m := m.TransposeDot(t.m);
+         return ten
+      end TransposeDot;
+
+      (* L.Contract(R) returns  T_{ij} = L_{ijkl} R_{kl} *)
+      procedure {public} Contract (t : T.Tensor) : T.Tensor;
+      var
+         ten : T.Tensor;
+      begin
+         ten.SetUnits(u.Add(t.GetUnits()));
+         ten.SetArray(m.Contract(t.GetArray()));
+         return ten
+      end Contract;
+
+      (* L.TransposeContract(R) returns  T_{ij} = L_{klij} R_{kl} *)
+      procedure {public} TransposeContract (t : T.Tensor) : T.Tensor;
+      var
+         ten : T.Tensor;
+      begin
+         ten.SetUnits(u.Add(t.GetUnits()));
+         ten.SetArray(m.TransposeContract(t.GetArray()));
+         return ten
+      end TransposeContract;
+
+   begin
+      Initialize
+   end Tensor;
+
+
+   (* OVERLOADED OPERATORS *)
+
+   operator {public} ':=' (var l : Tensor; r : Tensor);
+   begin {locked}
+      l.SetUnits(r.GetUnits());
+      l.SetMatrix(r.GetMatrix())
+   end ':=';
+
+   (* places wrappers around the associated tensor methods *)
+
+   operator {public} '-' (t : Tensor) : Tensor;
+   begin {locked}
+      return t.Negative()
+   end '-';
+
+   (* logic operators *)
+
+   operator {public} '=' (l, r : Tensor) : boolean;
+   begin {locked}
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '#' (l, r : Tensor) : boolean;
+   begin {locked}
+      return ~l.Equals(r)
+   end '#';
+
+   (* arithemtic operators *)
+
+   operator {public} '+' (l, r : Tensor) : Tensor;
+   begin {locked}
+      return l.Add(r)
+   end '+';
+
+   operator {public} '-' (l, r : Tensor) : Tensor;
+   begin {locked}
+      return l.Subtract(r)
+   end '-';
+
+   operator {public} '*' (l : Sc.Scalar; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Multiply(l)
+   end '*';
+
+   operator {public} '*' (l : N.Number; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(l)
+   end '*';
+
+   operator {public} '*' (l : Card8; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Card8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card16; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Card16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card32; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Card32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Card64; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Card64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int8; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Int8ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int16; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Int16ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int32; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Int32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Int64; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Int64ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real32; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Real32ToNumber(l))
+   end '*';
+
+   operator {public} '*' (l : Real64; r : Tensor) : Tensor;
+   begin {locked}
+      return r.Scale(N.Real64ToNumber(l))
+   end '*';
+
+   operator {public} '/' (l : Tensor; r : Sc.Scalar) : Tensor;
+   begin {locked}
+      return l.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : N.Number) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(r);
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Card8) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card8ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Card16) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card16ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Card32) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Card64) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Card64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Int8) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int8ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Int16) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int16ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Int32) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Int64) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Int64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Real32) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Real32ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   operator {public} '/' (l : Tensor; r : Real64) : Tensor;
+   var
+      x : N.Number;
+   begin {locked}
+      x := one.Divide(N.Real64ToNumber(r));
+      return l.Scale(x)
+   end '/';
+
+   (* tensor functions and procedures *)
+
+   procedure {public} Norm (t : Tensor) : Sc.Scalar;
+   var
+      s : Sc.Scalar;
+   begin
+      s.Set(M.FrobeniusNorm(t.GetMatrix()));
+      s.SetUnits(t.GetUnits());
+      return s
+   end Norm;
+
+   (* TensorProduct(LR) returns  T_{ijkl} = L_{ij} R_{kl} *)
+   procedure {public} TensorProduct (l, r : T.Tensor) : Tensor;
+   var
+      al, ar : A.Array;
+      i, j : integer;
+      m : M.Matrix;
+      t : Tensor;
+      ul, ur : U.Si;
+   begin
+      ul := l.GetUnits();
+      ur := r.GetUnits();
+      t.SetUnits(ul+ur);
+      al := l.GetArray();
+      ar := r.GetArray();
+      m.Initialize(4,4);
+      for i := 1 to 4 do
+         for j := 1 to 4 do
+            m[i,j] := al[i]*ar[j]
+         end
+      end;
+      t.SetMatrix(m);
+      return t
+   end TensorProduct;
+
+   (* SymTensorProduct(LR) returns                *)
+   (* T_{ijkl} = (L_{ij}R_{kl} + R_{ij}L_{kl})/2  *)
+   procedure {public} SymTensorProduct (l, r : T.Tensor) : Tensor;
+   var
+      al, ar : A.Array;
+      i, j : integer;
+      m : M.Matrix;
+      t : Tensor;
+      ul, ur : U.Si;
+   begin
+      ul := l.GetUnits();
+      ur := r.GetUnits();
+      t.SetUnits(ul+ur);
+      al := l.GetArray();
+      ar := r.GetArray();
+      m.Initialize(4,4);
+      for i := 1 to 4 do
+         m[i,i] := al[i]*ar[i];
+         for j := i+1 to 4 do
+            m[i,j] := (al[i]*ar[j] + ar[i]*al[j])/two;
+            m[j,i] := m[i,j]
+         end
+      end;
+      t.SetMatrix(m);
+      return t
+   end SymTensorProduct;
+
+   (* ODotProduct(LR) returns  T_{ijkl} = (L_{ik}R_{jl} + L_{jk}R_{il})/2 *)
+   procedure {public} ODotProduct (l, r : T.Tensor) : Tensor;
+   var
+      al, ar : A.Array;
+      m : M.Matrix;
+      t : Tensor;
+      ul, ur : U.Si;
+   begin
+      ul := l.GetUnits();
+      ur := r.GetUnits();
+      t.SetUnits(ul+ur);
+      al := l.GetArray();
+      ar := r.GetArray();
+      m.Initialize(4,4);
+      m[1,1] := al[1]*ar[1];
+      m[1,2] := al[1]*ar[2];
+      m[1,3] := al[2]*ar[1];
+      m[1,4] := al[2]*ar[2];
+      m[2,1] := (al[1]*ar[3] + al[3]*ar[1])/two;
+      m[2,2] := (al[1]*ar[4] + al[3]*ar[2])/two;
+      m[2,3] := (al[2]*ar[3] + al[4]*ar[1])/two;
+      m[2,4] := (al[2]*ar[4] + al[4]*ar[2])/two;
+      m[3,1] := (al[3]*ar[1] + al[1]*ar[3])/two;
+      m[3,2] := (al[3]*ar[2] + al[1]*ar[4])/two;
+      m[3,3] := (al[4]*ar[1] + al[2]*ar[3])/two;
+      m[3,4] := (al[4]*ar[2] + al[2]*ar[4])/two;
+      m[4,1] := al[3]*ar[3];
+      m[4,2] := al[3]*ar[4];
+      m[4,3] := al[4]*ar[3];
+      m[4,4] := al[4]*ar[4];
+      t.SetMatrix(m);
+      return t
+   end ODotProduct;
+
+   (* SymODotProduct(LR) returns  T_{ijkl} = (L_{ik}R_{jl} + L_{jk}R_{il}   *)
+   (*                                      + R_{ik}L_{jl} + R_{jk}L_{il})/4 *)
+   procedure {public} SymODotProduct (l, r : T.Tensor) : Tensor;
+   var
+      al, ar : A.Array;
+      m : M.Matrix;
+      t : Tensor;
+      ul, ur : U.Si;
+   begin
+      ul := l.GetUnits();
+      ur := r.GetUnits();
+      t.SetUnits(ul+ur);
+      al := l.GetArray();
+      ar := r.GetArray();
+      m.Initialize(4,4);
+      m[1,1] := al[1]*ar[1];
+      m[1,2] := al[1]*ar[2]/two + (al[1]*ar[3] + al[3]*ar[1])/four;
+      m[1,3] := al[2]*ar[1]/two + (al[3]*ar[1] + al[1]*ar[3])/four;
+      m[1,4] := (al[2]*ar[2] + al[3]*ar[3])/two;
+      m[2,1] := m[1,2];
+      m[2,2] := (al[1]*ar[4] + al[3]*ar[2])/two;
+      m[2,3] := (al[2]*ar[3] + al[4]*ar[1] + al[3]*ar[2] + al[1]*ar[4])/four;
+      m[2,4] := (al[2]*ar[4] + al[4]*ar[2])/four + al[3]*ar[4]/two;
+      m[3,1] := m[1,3];
+      m[3,2] := m[2,3];
+      m[3,3] := (al[4]*ar[1] + al[2]*ar[3])/two;
+      m[3,4] := (al[4]*ar[2] + al[2]*ar[4])/four + al[4]*ar[3]/two;
+      m[4,1] := m[1,4];
+      m[4,2] := m[2,4];
+      m[4,3] := m[3,4];
+      m[4,4] := al[4]*ar[4];
+      t.SetMatrix(m);
+      return t
+   end SymODotProduct;
+
+   procedure {public} Transpose (t : Tensor) : Tensor;
+   var
+      i, j : integer;
+      m, tm : M.Matrix;
+      tt : Tensor;
+   begin
+      tt.SetUnits(t.GetUnits());
+      m := t.GetMatrix();
+      tm.Initialize(4,4);
+      for i := 1 to 4 do
+         for j := 1 to 4 do
+            tm[j,i] := m[i,j]
+         end
+      end;
+      tt.SetMatrix(tm);
+      return tt
+   end Transpose;
+
+   procedure {public} Inverse (t : Tensor) : Tensor;
+   var
+      inv, mtx : M.Matrix;
+      lu  : LA.Lu;
+      ten : Tensor;
+      si  : U.Si;
+   begin
+      ten.SetUnits(si.Subtract(t.GetUnits()));
+      mtx := t.GetMatrix();
+      lu.Factorize(mtx);
+      inv := lu.Inverse();
+      LA.RefineInverse(mtx, inv);
+      ten.SetMatrix(inv);
+      return ten
+   end Inverse;
+
+begin
+   zero  := 0.0E+0;
+   one   := 1.0E+0;
+   two   := 2.0E+0;
+   three := 3.0E+0;
+   four  := 4.0E+0;
+   oneScalar.Set(one);
+   twoScalar.Set(two);
+   threeScalar.Set(three);
+   I[1,1,1,1]    := oneScalar;
+   I[1,2,1,2]    := oneScalar;
+   I[2,1,2,1]    := oneScalar;
+   I[2,2,2,2]    := oneScalar;
+   IBar[1,1,1,1] := oneScalar;
+   IBar[1,2,2,1] := oneScalar;
+   IBar[2,1,1,2] := oneScalar;
+   IBar[2,2,2,2] := oneScalar;
+   One[1,1,1,1]  := oneScalar;
+   One[1,1,2,2]  := oneScalar;
+   One[2,2,1,1]  := oneScalar;
+   One[2,2,2,2]  := oneScalar;
+   S := I + IBar;
+   S.DivBy(twoScalar);
+   W := I - IBar;
+   W.DivBy(twoScalar);
+   P := One.Divide(threeScalar);
+   P := I - P
+end QuadTensors2.

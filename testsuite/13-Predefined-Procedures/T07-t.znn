@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The len procedure.
+ *
+ * Positive test: 2-dimensional dynamic array length
+ *)
+module Main;
+	type A = array *,* of integer;
+	var a : A;
+begin
+	a := new A(5,4);
+
+	if (len(a, 0) = 5) & (len(a, 1) = 4)
+	then halt(1) else halt(0) end;
+end Main.

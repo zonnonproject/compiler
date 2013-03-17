@@ -1,0 +1,34 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.6 Postulated interface type.
+ *
+ * Positive test: Postulated interface type using.
+ * The type is declared before it is used in postulated interface.
+ *)
+definition A;
+	procedure fa : integer;
+end A.
+
+definition B;
+	procedure fb : integer;
+end B.
+
+object C implements A, B;
+	procedure { public } fa : integer implements A.fa;
+	begin return 3 end fa;
+
+	procedure { public } fb : integer implements B.fb;
+	begin return 4 end fb;
+end C.
+
+module Main;
+	import A, B, C;
+
+	var x : object { A, B };
+		c : C;
+begin
+    x := c;
+	if (x.fa() = 3) & (x.fb() = 4) 
+	then halt(1) else halt(0) end;
+end Main.

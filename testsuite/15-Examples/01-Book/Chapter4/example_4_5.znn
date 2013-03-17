@@ -1,0 +1,100 @@
+(* ********* Zonnon online collection ***********
+ * CrossRef (Chapter 4, Example 4.5)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module CrossRef;
+        const
+	        WordLen = 20;
+	type mystring = array WordLen of char;
+
+	object	{ref, public} Item;
+                var { public }
+                        lno: integer;
+			next: Item;
+		end Item;
+
+	object {ref, public} Word;
+	         var { public } 
+                        key:  string;
+			list: Item;
+			left, right: Word;
+		end Word;
+
+
+	procedure Tabulate(w: Word);
+		var m: integer; item: Item;
+	begin
+		if w # nil then
+			Tabulate(w.left);
+			write(w.key); item := w.list; m := 0;
+			repeat
+				if m = 8 then writeln; write("      "); m := 0; end;
+				inc(m); write(item.lno: 6); item := item.next;
+			until item = nil;
+			writeln;
+			Tabulate(w.right);
+		end;
+	end Tabulate;
+
+	procedure search(var w: Word; var a: string; ln: integer);
+		var q: Item;
+	begin
+		if w = nil then (* word not in tree; new entry, insert *)
+			w := new Word; q := new Item; q.lno := ln;
+			w.key := a; w.list := q; w.left := nil; w.right := nil;
+		elsif w.key < a then 
+			search(w.right, a, ln);
+		elsif w.key > a then 
+			search(w.left, a, ln);
+		else (*old entry*) q:= new Item; q.lno := ln; q.next := w.list; w.list := q;
+		end;
+	end search;
+
+	procedure Scan(pos: integer; var root: Word);
+		(*scan input text and build tree*)
+		var line, k, i: integer; ch: char;
+			buffer: mystring; s,t:string; reading: boolean;
+ 	begin line := 0;
+        for k:=0 to WordLen-1 do buffer[k] := 0X;
+		write(0: 6, " |"); readln(s);
+		while s # "" do (* *-stop *)
+			inc(line); write(line:6, " |");
+			reading:=false;
+			for i:=0 to len(s)-1 do
+			  ch:=s[i];
+			  if (cap(ch) >= "A") & (cap(ch) <= "Z") then
+			        if ~reading then (*word*) k :=0; reading := true; end;
+				buffer[k] := ch; k:=k+1; 
+			  end;
+			  if ((cap(ch) < "A") or (cap(ch) > "Z") ) or (i=len(s)-1) then
+			    	if reading then 
+			    	        t:="";
+ 					copy(buffer, t);
+ 					search(root, t, line-1); 
+ 					reading := false;
+ 					for k:=0 to WordLen-1 do buffer[k] := 0X; end;
+				end;
+			  end;
+			end;
+			readln(s);
+		end;
+		writeln; writeln;
+	end Scan;
+
+	procedure Make;
+		var root: Word;
+	begin 	root := nil; 
+		Scan(0, root); Tabulate(root);
+	end Make;
+
+begin 
+  writeln("Example 4.5 (CrossRef)");   
+  writeln("Trype any text (empty line to finish typing):");   
+  Make;
+  writeln("Type CrossRef.Make to start again or 'q' to quit.");
+end CrossRef.
+

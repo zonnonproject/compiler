@@ -1,0 +1,15 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports x as clause
+ *
+ * Positive test: the short name C in as clause and imported name are same.
+ *)
+module Main;
+	import C as C;
+begin
+	halt(1);
+end Main.
+
+object C;
+end C.

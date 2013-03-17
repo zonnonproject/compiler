@@ -1,0 +1,20 @@
+module Main;
+
+type t1 = array {sparse} * of integer;
+
+var
+	a, b : t1;
+
+  	i : array {math} 5 of integer;
+	s : array {math} 5 of integer{16};
+  
+begin
+	i := [4, 1, 0, 7, 2];
+	s := [-1, -2, 20, -4, 10];	
+	b := new t1(i, s, 8, 5);
+
+	a := !b;
+		
+	halt(0);
+	
+end Main.

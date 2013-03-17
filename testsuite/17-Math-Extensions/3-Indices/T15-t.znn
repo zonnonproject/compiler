@@ -1,0 +1,32 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: boolean vector indexing:
+ * incompatible sizes
+ *)
+
+module Main;
+
+type v = array {math} * of boolean;
+
+var
+	b : v;
+	a : array {math} 5 of real;
+begin	
+	b := [false, true, true, false, true];
+	do
+		a[b] := [-1., -2.];
+	on IncompatibleSizes do
+		halt(1);
+	end;
+
+	do
+		a[b] := [-1., -2., -3., -4.];
+	on IncompatibleSizes do
+		halt(1);
+	end;
+
+
+	halt(0);
+end Main.

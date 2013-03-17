@@ -1,0 +1,30 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ * Variable has definition type.
+ *
+ * Positive test: the variable x has InterfaceType with the definitions B.C and D.
+ * The definition B.C and definition D are used before they are declared.
+ *)
+object A;
+	import B.C, D, E.F;
+
+	var	x : object { B.C, D, E.F };
+end A.
+
+module B;
+	definition C;
+	end C;
+end B.
+
+definition D;
+end D.
+
+definition E.F;
+end F.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

@@ -1,0 +1,42 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Conversions
+ *)
+module Main;
+protocol P = (
+	START_TEXT, MODIFIER1, MODIFIER2, END_TEXT, OK,
+	P = START_TEXT { (string | MODIFIER1 | MODIFIER2) ?OK} END_TEXT
+);
+
+
+procedure processCmd( cmd: P );
+begin
+
+end processCmd;
+
+procedure addTextLine( s: string );
+begin
+	writeln(s);
+end addTextLine;
+
+
+activity A implements P;
+var request: object;
+begin 
+	repeat
+		accept request;
+		if request is  P then
+			processCmd( P( request ) )
+		else (* It is a string *)
+			addTextLine( string( request ) )
+		end
+	until (request is P) & (P(request) = P.END_TEXT);
+end A;
+
+var a: activity{P};
+begin
+	a := new A;
+	a("Hello world");
+	halt(1)
+end Main.

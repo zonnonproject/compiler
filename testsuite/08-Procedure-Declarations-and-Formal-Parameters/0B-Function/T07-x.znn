@@ -1,0 +1,16 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the function call returns incompitible type.
+ *)
+module Main;
+	procedure A(i : integer) : integer;
+	begin
+		return i + 1;
+	end A;
+
+	var r : real;
+begin
+	r := A(1);
+	halt(0);
+end Main.

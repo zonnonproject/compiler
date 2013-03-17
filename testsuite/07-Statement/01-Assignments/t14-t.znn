@@ -1,0 +1,14 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Positive text: nil assignment to procedure type variable.
+ *)
+
+module {public} Main;
+   var r : real;
+begin
+    r := 1.2;
+    writeln("r = " + string(r));
+    halt(1)
+end Main.

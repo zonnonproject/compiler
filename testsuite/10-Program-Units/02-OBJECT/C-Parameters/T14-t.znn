@@ -1,0 +1,40 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Positive test: the object D is nested into namespace C.
+ *
+ * The object A.B used D as type of parameters.
+ * The object C.D is declared before it is used.
+ *)
+object {public} C.D;
+	var {public} 
+		j : integer;
+end D.
+
+object {public, ref} A.B(p1 : C.D; p2 : C.D);
+import C, Main;
+var {public}
+	i : integer;
+begin
+	i := p1.j + p2.j;
+	Main.sum := i;
+end B.
+
+module Main;
+	import A.B as B, C.D as D;
+	var {public}
+	   sum: integer;
+	var 
+		d1, d2 : D;
+		b : B;
+begin
+	d1.j := 1;
+	d2.j := 4;
+	b := new B(d1, d2);
+	writeln(sum);
+	writeln(b.i);
+	if b.i = 5 
+	then halt(1) else halt(0) end; 
+end Main.

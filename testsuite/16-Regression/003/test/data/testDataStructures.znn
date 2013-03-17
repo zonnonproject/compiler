@@ -1,0 +1,710 @@
+object {public, ref} Info implements BelData.Datum;
+   import
+      BelData.Object,
+      BelData.Datum,
+      System.Int32           as Int32,
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter;
+
+   var {public}
+      i : integer;
+
+   procedure {public} Initialize implements BelData.Object.Initialize;
+   begin
+      i := 0
+   end Initialize;
+
+   procedure {public} Nullify implements BelData.Object.Nullify;
+   begin
+      (* there are no dynamic data structures to set to nil *)
+   end Nullify;
+
+   procedure {public} Load (br : BinaryReader) implements BelData.Object.Load;
+   var
+      int : Int32;
+   begin
+      int := br.ReadInt32();
+      i := int
+   end Load;
+
+   procedure {public} Store (bw : BinaryWriter) implements BelData.Object.Store;
+   var
+      int : Int32;
+   begin
+      int := i;
+      bw.Write(int)
+   end Store;
+
+   procedure {public} Clone () : object{BelData.Object}
+      implements BelData.Datum.Clone;
+   var
+      info : Info;
+      o : object{BelData.Object};
+   begin
+      info := new Info;
+      o := info;
+      return o
+   end Clone;
+
+   procedure {public} Copy () : object{BelData.Object}
+      implements BelData.Datum.Copy;
+   var
+      info : Info;
+      o : object{BelData.Object};
+   begin
+      info := new Info;
+      info.i := i;
+      o := info;
+      return o
+   end Copy;
+
+begin
+   Initialize
+end Info.
+
+
+module Main;
+
+   import
+      System.Int32    as I,
+      BelCore.Log     as Log,
+      BelData.Object,
+      BelData.Datum,
+      BelData.Keys    as K,
+      BelData.List    as L,
+      BelData.Queue   as Q,
+      BelData.Stack   as S,
+      BelData.Tree    as T,
+      Info;
+
+   procedure {public} Queue;
+   var
+      d : object{BelData.Datum};
+      int : I;
+      n, n1, n2, n3 : Info;
+      queue : Q;
+      s : string;
+   begin
+      queue := new Q;
+      n1 := new Info;
+      n1.i := 200;
+      queue.Push(n1);
+      n2 := new Info;
+      n2.i := 300;
+      queue.Push(n2);
+      n3 := new Info;
+      n3.i := 400;
+      queue.Push(n3);
+      s := "The length of the queue is: ";
+      write(s);
+      int := queue.Length();
+      writeln(int.ToString());
+      d := queue.Pop();
+      n := Info(d);
+      s := "The first node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      d := queue.Pop();
+      n := Info(d);
+      s := "The second node popped was: ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      d := queue.Pop();
+      n := Info(d);
+      s := "The third node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      writeln
+   end Queue;
+
+   procedure {public} Stack;
+   var
+      d : object{BelData.Datum};
+      int : I;
+      n, n1, n2, n3 : Info;
+      s : string;
+      stack : S;
+   begin
+      stack := new S;
+      n1 := new Info;
+      n1.i := 200;
+      stack.Push(n1);
+      n2 := new Info;
+      n2.i := 300;
+      stack.Push(n2);
+      n3 := new Info;
+      n3.i := 400;
+      stack.Push(n3);
+      s := "The length of the stack is: ";
+      write(s);
+      int := stack.Length();
+      writeln(int.ToString());
+      d := stack.Pop();
+      n := Info(d);
+      s := "The first node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      d := stack.Pop();
+      n := Info(d);
+      s := "The second node popped was: ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      d := stack.Pop();
+      n := Info(d);
+      s := "The third node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      writeln
+   end Stack;
+
+   procedure {private} PrintList(l : L);
+   var
+      d : object{BelData.Datum};
+      i : I;
+      info : Info;
+      k : K.Key;
+      moved : boolean;
+   begin
+      if l # nil then
+         moved := false;
+         l.Home;
+         writeln("list output = node's (key, integer datum)");
+         repeat
+            d := l.GetData();
+            info := Info(d);
+            i := info.i;
+            k := l.GetKey();
+            writeln("(", k.Typeset(), ", ", i.ToString(), ")");
+            l.Next(moved)
+         until ~moved
+      else
+         writeln("A 'nil' list was sent to print out.")
+      end
+   end PrintList;
+
+   procedure {public} List;
+   var
+      int : I;
+      k1, k2, k3, k4, k5 : K.Key;
+      list : L;
+      n1, n2, n3, n4, n5 : Info;
+      okay : boolean;
+   begin
+      okay := false;
+      list := new L;
+      n1 := new Info;
+      n1.i := 77;
+      k1 := 25;
+      list.Insert(n1, k1, okay);
+      n2 := new Info;
+      n2.i := 48;
+      k2 := 56;
+      list.Insert(n2, k2, okay);
+      n3 := new Info;
+      n3.i := -3;
+      k3 := 1;
+      list.Insert(n3, k3, okay);
+      n4 := new Info;
+      n4.i := 100;
+      k4 := 69;
+      list.Insert(n4, k4, okay);
+      n5 := new Info;
+      n5.i := 12;
+      k5 := 91;
+      list.Insert(n5, k5, okay);
+      write("The length of the list is: ");
+      int := list.Length();
+      writeln(int.ToString());
+      PrintList(list);
+      writeln;
+      writeln("Removing the node with key ", k4.Typeset(), " leads to:");
+      list.Delete(k4, okay);
+      PrintList(list);
+      writeln;
+      writeln("Removing the node with key ", k1.Typeset(), " leads to:");
+      list.Delete(k1, okay);
+      PrintList(list);
+      writeln;
+      writeln("Removing the node with key ", k5.Typeset(), " leads to:");
+      list.Delete(k5, okay);
+      PrintList(list);
+      writeln
+   end List;
+
+   procedure {private} PrintTree (t : T);
+   var
+     d : object{BelData.Datum};
+     i : I;
+     k11,
+     k21, k22,
+     k31, k32, k33, k34,
+     k41, k42, k43, k44, k45, k46, k47, k48,
+     s, s4, s12, s28 : string;
+     moved : boolean;
+     n : Info;
+   begin
+      moved := false;
+      s4 := "    ";
+      s12 := "            ";
+      s28 := "                            ";
+      t.Home;
+      (* get the first row *)
+      if t.Entries() > 0 then
+         d := t.GetData();
+         n := Info(d);
+         i := n.i;
+         k11 := i.ToString()
+      else
+         k11 := " - "
+      end;
+      (* get the second row *)
+      t.Home;
+      t.Left(moved);
+      if moved then
+         d := t.GetData();
+         n := Info(d);
+         i := n.i;
+         k21 := i.ToString()
+      else
+         k21 := " - "
+      end;
+      t.Home;
+      t.Right(moved);
+      if moved then
+         d := t.GetData();
+         n := Info(d);
+         i := n.i;
+         k22 := i.ToString()
+      else
+         k22 := " - "
+      end;
+      (* get the third row *)
+      t.Home;
+      t.Left(moved);
+      if moved then
+         t.Left(moved);
+         if moved then
+            d := t.GetData();
+            n := Info(d);
+            i := n.i;
+            k31 := i.ToString()
+         else
+            k31 := " - "
+         end
+      else
+         k31 := " - "
+      end;
+      t.Home;
+      t.Left(moved);
+      if moved then
+         t.Right(moved);
+         if moved then
+            d := t.GetData();
+            n := Info(d);
+            i := n.i;
+            k32 := i.ToString()
+         else
+            k32 := " - "
+         end
+      else
+         k32 := " - "
+      end;
+      t.Home;
+      t.Right(moved);
+      if moved then
+         t.Left(moved);
+         if moved then
+            d := t.GetData();
+            n := Info(d);
+            i := n.i;
+            k33 := i.ToString()
+         else
+            k33 := " - "
+         end
+      else
+         k33 := " - "
+      end;
+      t.Home;
+      t.Right(moved);
+      if moved then
+         t.Right(moved);
+         if moved then
+            d := t.GetData();
+            n := Info(d);
+            i := n.i;
+            k34 := i.ToString()
+         else
+            k34 := " - "
+         end
+      else
+         k34 := " - "
+      end;
+      (* get the fourth row *)
+      t.Home;
+      t.Left(moved);
+      if moved then
+         t.Left(moved);
+         if moved then
+            t.Left(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k41 := i.ToString()
+            else
+               k41 := " - "
+            end
+         else
+            k41 := " - "
+         end
+      else
+         k41 := " - "
+      end;
+      t.Home;
+      t.Left(moved);
+      if moved then
+         t.Left(moved);
+         if moved then
+            t.Right(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k42 := i.ToString()
+            else
+               k42 := " - "
+            end
+         else
+            k42 := " - "
+         end
+      else
+         k42 := " - "
+      end;
+      t.Home;
+      t.Left(moved);
+      if moved then
+         t.Right(moved);
+         if moved then
+            t.Left(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k43 := i.ToString()
+            else
+               k43 := " - "
+            end
+         else
+            k43 := " - "
+         end
+      else
+         k43 := " - "
+      end;
+      t.Home;
+      t.Left(moved);
+      if moved then
+         t.Right(moved);
+         if moved then
+            t.Right(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k44 := i.ToString()
+            else
+               k44 := " - "
+            end
+         else
+            k44 := " - "
+         end
+      else
+         k44 := " - "
+      end;
+      t.Home;
+      t.Right(moved);
+      if moved then
+         t.Left(moved);
+         if moved then
+            t.Left(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k45 := i.ToString()
+            else
+               k45 := " - "
+            end
+         else
+            k45 := " - "
+         end
+      else
+         k45 := " - "
+      end;
+      t.Home;
+      t.Right(moved);
+      if moved then
+         t.Left(moved);
+         if moved then
+            t.Right(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k46 := i.ToString()
+            else
+               k46 := " - "
+            end
+         else
+            k46 := " - "
+         end
+      else
+         k46 := " - "
+      end;
+      t.Home;
+      t.Right(moved);
+      if moved then
+         t.Right(moved);
+         if moved then
+            t.Left(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k47 := i.ToString()
+            else
+               k47 := " - "
+            end
+         else
+            k47 := " - "
+         end
+      else
+         k47 := " - "
+      end;
+      t.Home;
+      t.Right(moved);
+      if moved then
+         t.Right(moved);
+         if moved then
+            t.Right(moved);
+            if moved then
+               d := t.GetData();
+               n := Info(d);
+               i := n.i;
+               k48 := i.ToString()
+            else
+               k48 := " - "
+            end
+         else
+            k48 := " - "
+         end
+      else
+         k48 := " - "
+      end;
+      writeln(s28, k11);
+      writeln(s12, k21, s28, k22);
+      writeln(s4, k31, s12, k32, s12, k33, s12, k34);
+      writeln(k41, s4, k42, s4, k43, s4, k44, s4, k45, s4, k46, s4, k47, s4, k48)
+   end PrintTree;
+
+   procedure {public} Tree;
+   var
+      i : I;
+      k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12, k13, k14, k15 : K.Key;
+      n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15 : Info;
+      success : boolean;
+      t : T;
+   begin
+      success := false;
+      k1 := 1;
+      k2 := 2;
+      k3 := 3;
+      k4 := 4;
+      k5 := 5;
+      k6 := 6;
+      k7 := 7;
+      k8 := 8;
+      k9 := 9;
+      k10 := 10;
+      k11 := 11;
+      k12 := 12;
+      k13 := 13;
+      k14 := 14;
+      k15 := 15;
+      (* here the key and datum have the same values *)
+      (* this is not necessary, but suffices here    *)
+      n1 := new Info;
+      n1.i := 1;
+      n2 := new Info;
+      n2.i := 2;
+      n3 := new Info;
+      n3.i := 3;
+      n4 := new Info;
+      n4.i := 4;
+      n5 := new Info;
+      n5.i := 5;
+      n6 := new Info;
+      n6.i := 6;
+      n7 := new Info;
+      n7.i := 7;
+      n8 := new Info;
+      n8.i := 8;
+      n9 := new Info;
+      n9.i := 9;
+      n10 := new Info;
+      n10.i := 10;
+      n11 := new Info;
+      n11.i := 11;
+      n12 := new Info;
+      n12.i := 12;
+      n13 := new Info;
+      n13.i := 13;
+      n14 := new Info;
+      n14.i := 14;
+      n15 := new Info;
+      n15.i := 15;
+      t := new T;
+      t.Insert(n1, k1, success);
+      writeln("An AVL binary tree with 1 node.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n2, k2, success);
+      writeln("An AVL binary tree with 2 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n3, k3, success);
+      writeln("An AVL binary tree with 3 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n4, k4, success);
+      writeln("An AVL binary tree with 4 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n5, k5, success);
+      writeln("An AVL binary tree with 5 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n6, k6, success);
+      writeln("An AVL binary tree with 6 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n7, k7, success);
+      writeln("An AVL binary tree with 7 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n8, k8, success);
+      writeln("An AVL binary tree with 8 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n9, k9, success);
+      writeln("An AVL binary tree with 9 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n10, k10, success);
+      writeln("An AVL binary tree with 10 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n11, k11, success);
+      writeln("An AVL binary tree with 11 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n12, k12, success);
+      writeln("An AVL binary tree with 12 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n13, k13, success);
+      writeln("An AVL binary tree with 13 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n14, k14, success);
+      writeln("An AVL binary tree with 14 nodes.");
+      PrintTree(t);
+      writeln;
+      t.Insert(n15, k15, success);
+      writeln("An AVL binary tree with 15 nodes.");
+      PrintTree(t);
+      writeln;
+      write("This tree finally has");
+      i := t.Entries();
+      write(i.ToString());
+      write(" entries with a height of");
+      i := t.Height();
+      writeln(i.ToString());
+      writeln("Remove the root node, i.e., node 8.");
+      t.Delete(k8, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 12.");
+      t.Delete(k12, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 2.");
+      t.Delete(k2, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 15.");
+      t.Delete(k15, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 4.");
+      t.Delete(k4, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 7.");
+      t.Delete(k7, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 11.");
+      t.Delete(k11, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 5.");
+      t.Delete(k5, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 6.");
+      t.Delete(k6, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 14.");
+      t.Delete(k14, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 3.");
+      t.Delete(k3, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 9.");
+      t.Delete(k9, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 13.");
+      t.Delete(k13, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 10.");
+      t.Delete(k10, success);
+      PrintTree(t);
+      writeln;
+      writeln("Remove node 1.");
+      t.Delete(k1, success);
+      PrintTree(t);
+      write("Finally, the tree finally has");
+      i := t.Entries();
+      write(i.ToString());
+      writeln(" entries.");
+      writeln
+   end Tree;
+
+begin
+   Queue;
+   Stack;
+   List;
+   Tree;
+   Log.Close
+end Main.

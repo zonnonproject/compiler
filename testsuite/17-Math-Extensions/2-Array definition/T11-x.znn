@@ -1,0 +1,15 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Definition
+ * 
+ * Negative test: dynamic math array creation & expression array definition:
+ * incorrect type
+ *)
+
+module Main;
+var
+	b : array {math} * of cardinal;
+begin
+	b := [7, 8, -9, 10];
+	halt(0);
+end Main.

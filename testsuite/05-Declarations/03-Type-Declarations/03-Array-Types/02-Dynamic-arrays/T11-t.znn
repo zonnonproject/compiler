@@ -1,0 +1,25 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: 1-dimensional semi-dynamic array elements using.
+ *)
+module Main;
+	procedure P(n : integer);
+		type Vector = array * of real;
+
+		var x : Vector;
+	begin
+		x := new Vector(n);
+		x[1] := 3.14;
+
+		if x[1] = 3.14 
+		then halt(1) else halt(0) end;
+	end P;
+
+	var n : integer;
+begin
+	n := 5;
+	P(n);
+end Main.

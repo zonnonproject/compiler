@@ -1,0 +1,20 @@
+module Main;
+definition {public} D1;  
+	var x: real;  
+end D1;
+
+definition D2 refines D1;
+	var y: real;  
+end D2;
+
+definition D3 refines Main.D1;
+	var y: real;  
+end D3;
+
+begin
+	halt(1)
+end Main.
+
+definition D4 refines Main.D1;
+	var y: real;  
+end D4.

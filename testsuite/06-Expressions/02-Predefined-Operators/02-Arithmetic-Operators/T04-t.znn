@@ -1,0 +1,18 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Negative test: devision to zero variable must not be executed.
+ *)
+module Main;
+	var i1, i2 : integer;
+begin
+	do
+		i2 := integer(0.0);
+		i1 := integer(1 / i2);
+		halt(0)
+	on ZeroDivision do
+		halt(1)
+	end;
+end Main.

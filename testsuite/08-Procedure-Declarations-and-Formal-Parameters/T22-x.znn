@@ -1,0 +1,15 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: undeclared parameter type in procedure of nested object.
+ *)
+module Main;
+
+object A;
+	procedure f(p : a);
+	begin
+	end f;
+end A;
+
+begin
+end Main.

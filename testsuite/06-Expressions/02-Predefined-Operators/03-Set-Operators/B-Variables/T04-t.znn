@@ -1,0 +1,17 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.4. Set Operators.
+ *
+ * Positive test: set difference.
+ *)
+module Main;
+	var s1, s2, s3 : set;
+begin
+	s1 := { 1, 2, 3 };
+	s2 := { 3, 4, 5 };
+	s3 := s1 - s2; (* { 1, 2 } is content of s3 set. *)
+
+	if (1 in s3) & (2 in s3) & ~(3 in s3)
+	then halt(1) else halt(0) end;
+end Main.

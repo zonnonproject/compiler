@@ -1,0 +1,28 @@
+module Main;
+
+import 
+	System.Collections as SysCol,
+	System;
+
+var myCol: SysCol.ArrayList;
+	i: integer;	
+
+begin
+	myCol := new SysCol.ArrayList();
+	myCol.Add( 0 );
+	myCol.Add( 8 );
+	myCol.Add( 1 );
+	myCol.Add( 5 );
+
+	for i:=0 to (myCol.Count-1) do 
+(* (myCol.Count-0) gives no compiler error but (myCol.Count) gives compile error message
+[17,15] [2050] Illegal type Int32 of the to-expression in the for-statement
+*)	System.Console.Write( myCol[i] );
+(*		write( myCol[i] ) gives compile error message
+[16,10] [2050] Illegal type Object of the argument for 'write/writeln'  
+*)	end;
+	writeln;
+
+	write( "Enter to quit" );
+	readln;
+end Main.

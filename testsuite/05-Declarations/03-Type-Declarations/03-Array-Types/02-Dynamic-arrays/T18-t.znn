@@ -1,0 +1,31 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: 1-dimensional semi-dynamic array.
+ * The index is out of the array limits.
+ *)
+module Main;
+        import System;
+	procedure P(n : integer);
+		type Vector = array * of real;
+
+		var x : Vector;
+	begin
+		x := new Vector(n);
+
+		do
+			x[5] := 3.14;
+		on System.IndexOutOfRangeException do
+			halt(1);
+		end;
+
+		halt(0);
+	end P;
+
+	var n : integer;
+begin
+	n := 5;
+	P(n);
+end Main.

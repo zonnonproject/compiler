@@ -1,0 +1,23 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: return type with convertion with width
+ *)
+
+module Main;
+	var c8  : char {  8 };
+	var c16 : char { 16 };
+procedure p:char{8};
+begin
+ writeln("called");
+ return char{8}(91);
+end p;
+begin
+	c8 := 'a'{8};
+	c16 := c8;
+	writeln(c16);
+	c16 := p;
+	writeln(c16);
+	if c16 = '[' then halt(1) else halt(0) end;
+	p	
+end Main.

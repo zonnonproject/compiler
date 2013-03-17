@@ -1,0 +1,50 @@
+(* ********* Zonnon online collection ***********
+ * Magic Squares
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module MagicSquares;
+const
+	MAX_SIZE = 13;
+var
+    M: array 13, 13 of integer;
+	n: integer;
+procedure InputSize;
+begin 
+	repeat
+		write("N (even): "); readln(n); 
+	until (n > 0) & (n < MAX_SIZE) & (n mod 2 = 0); 
+end InputSize;
+
+procedure Generate;  (*magic square of order 3, 5, 7, ... *)
+var i, j, x, nx, nsq: integer;
+begin 
+	nsq := n*n; x := 0;
+	i := n div 2; j := n-1;
+	while x < nsq do
+		nx := n + x; j := (j - 1) mod n; inc(x); 
+		M[i, j] := x;
+		while x < nx do
+			i := (i+1) mod n; j := (j+1) mod n;
+			inc(x); M[i, j] := x;
+		end
+	end ;
+end Generate;
+
+procedure PrintSquare;
+var i, j: integer;
+begin 
+	for i := 0 to n-1 do
+		for j := 0 to n-1 do write(M[i, j]: 6); end ;
+		writeln;
+	end ;
+end PrintSquare;
+
+begin
+	InputSize;
+	Generate;
+    PrintSquare;
+end MagicSquares.

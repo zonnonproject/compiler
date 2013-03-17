@@ -1,0 +1,39 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Checking protocol runtime exception
+ *)
+
+module {protected} Main;
+
+protocol P = (
+	A, B, C, D, E, 
+	dialog = ( A | B | C )
+);
+
+activity A implements P;
+var p: P;
+begin 
+	accept p;
+	if p = P.A then
+		(* Command A *)
+	elsif p = P.B then
+		(* Command B *)
+	elsif p = P.C then
+		(* Command C *)
+	else
+		(* Not possible variant *)
+		halt(0); (* Not possible variant *)
+	end
+end A;
+
+
+var a:A;
+begin
+	a := new A;
+	do
+		a( P.E );
+	on ProtocolMismatch do 
+		halt (1); (* Success! Protocol exception *)	
+	end
+end Main.

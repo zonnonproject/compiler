@@ -1,0 +1,27 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Unary
+ * 
+ * Positive test: inversion
+ *)
+
+module Main;
+
+var
+	ab1, ab2 : array {math} 2, 3 of boolean;
+	
+begin	
+	
+	ab1 := [[false, true, false], [true, false, true]];
+	
+	ab2 := ~ab1;
+	
+	if (ab2[0, 0] # true) or (ab2[0, 1] # false) or (ab2[0, 2] # true) or (ab2[1, 0] # false) or (ab2[1, 1] # true) or (ab2[1, 2] # false)
+	then
+		halt(0);
+	end;
+		
+	halt(1);
+	
+end Main.

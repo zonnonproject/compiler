@@ -1,0 +1,9 @@
+object {ref, public} TreeNode;
+var {public}
+left, right : TreeNode;
+end TreeNode.
+
+module Main;
+begin
+  halt(1);
+end Main.

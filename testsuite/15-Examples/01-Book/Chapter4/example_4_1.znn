@@ -1,0 +1,147 @@
+(* ********* Zonnon online collection ***********
+ * List (Chapter 4, Example 4.1)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module List;
+
+object {ref, public} Node;
+var {public} 
+    key, count:integer;
+    next:Node;
+end Node;
+
+var k: integer; root: Node;
+
+procedure search(x:integer; var root: Node);
+var w:Node;
+begin
+   w:=root;
+   while (w # nil) & (w.key # x) do w := w.next; end;
+   if w = nil then
+      w := root; root := new Node;
+      root.key := x;
+      root.count := 1;
+      root.next := w;
+   else
+      w.count := w.count + 1;
+   end;
+end search;
+
+var sentinel:Node;
+
+procedure search0(x: integer; var root: Node);
+var w: Node;
+begin w := root; 
+   sentinel.key := x;
+   while w.key # x do w := w.next end;
+   if w = sentinel then
+      w:=root; root:=new Node;
+      root.key := x; root.count:=1; root.next := w;
+   else
+      w.count := w.count + 1;
+   end;
+end search0;
+
+
+procedure search2(x: integer; var root: Node);
+   var w1, w2, w3: Node;
+begin
+   w2 := root; w1 := w2.next;
+   while (w1 # nil) & (w1.key < x) do
+      w2 := w1; w1 := w2.next;
+   end;
+   if (w1 = nil) or (w1.key > x) then
+      w3 := new Node; w2.next := w3;
+      w3.key := x;
+      w3.count := 1;
+      w3.next := w1;
+   else
+      w1.count := w1.count + 1;
+   end;
+end search2;
+
+
+
+procedure search3(x: integer; var root: Node);
+var w1,w2: Node;
+begin w1 := root; 
+   sentinel.key := x;
+   if w1 = sentinel then 
+      root := new Node;
+      root.key := x;
+      root.count := 1;
+      root.next := sentinel;
+   elsif w1.key = x then w1.count := w1.count + 1;
+   else
+      repeat w2 := w1; w1 := w2.next;
+      until w1.key = x;
+      if w1 = sentinel then
+         w2 := root; root := new Node;
+         root.key := x;
+         root.count := 1;
+         root.next := w2;
+      else
+         w1.count := w1.count + 1;
+         w2.next := w1.next;
+         w1.next := root;
+         root := w1;
+      end;
+   end;
+end search3;
+
+procedure PrintList(w:Node);
+begin
+   while w # nil do
+      writeln(w.key:8, w.count:8);
+      w := w.next;
+   end;
+   writeln("=============")
+end PrintList;
+
+begin
+   writeln("Example 4.1 (Searches)");   
+   writeln("Enter numbers ( 0 - to finish ): ");   
+
+   root := nil;
+   writeln("Search 1");
+   readln(k);
+   while k#0 do 
+      search(k, root); readln(k);
+   end;
+   PrintList(root);
+   (************************)
+   writeln("Search 0");
+   readln(k);
+   sentinel := new Node;
+   root := sentinel;
+   while k#0 do 
+      search3(k, root); readln(k);
+   end;
+   PrintList(root);
+   root :=  new Node;
+   root.next := nil;
+
+   (************************)
+   writeln("Search 2");
+   readln(k);
+   while k#0 do 
+      search2(k, root); readln(k);
+   end;
+   PrintList(root);
+
+   (************************)
+   writeln("Search 3");
+   readln(k);
+   sentinel := new Node;
+   root := sentinel;
+   while k#0 do 
+      search3(k, root); readln(k);
+   end;
+   PrintList(root);
+
+   writeln("Type 'q' to exit");	
+end List.

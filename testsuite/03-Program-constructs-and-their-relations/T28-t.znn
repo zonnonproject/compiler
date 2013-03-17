@@ -1,0 +1,24 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: object implements implementation.
+ *)
+definition A;
+end A.
+
+implementation A;
+end A.
+
+	object B implements C, A;
+	end B.
+
+definition C;
+end C.
+
+implementation C;
+end C.
+
+module Main;
+begin
+	halt(1);
+end Main.

@@ -1,0 +1,16 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: string variables not equality 
+ *)
+module Main;
+var s1, s2 : string;
+begin
+	s1 := "A";
+	s2 := "AA";
+
+	if s1 # s2
+	then halt(1) else halt(0) end;
+end Main.

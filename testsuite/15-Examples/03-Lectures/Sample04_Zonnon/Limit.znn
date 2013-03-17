@@ -1,0 +1,116 @@
+(* ********* Zonnon online collection ***********
+ * Limit
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Limit; (* mc 2001-10-12 / rg 2002-08-18 / mg 2002-11-25 *)
+
+import System.Random;
+
+const
+	N = 10000;
+	my_size = 100;
+
+var
+	random  : System.Random;
+	my_data : array N of real;
+	barrier_ : integer;
+
+(* Fills the my_data array with random numbers between 0 and my_size. *)
+procedure Fill;
+var
+	i : integer;
+begin
+	for i := 0 to N - 1 do
+		my_data[i] := random.NextDouble() * my_size
+	end
+end Fill;
+
+(* Prints the my_data array. *)
+procedure Print;
+var
+	i : integer;
+begin
+	for i := 0 to N - 1 do
+		writeln(my_data[i])
+	end;
+	writeln()
+end Print;
+
+(* Prints the result (i.e. the highest 5% values) *)
+procedure PrintResult;
+var
+	i : integer;
+begin
+	for i := barrier_ to N - 1 do
+		writeln(my_data[i])
+	end;
+	writeln()
+end PrintResult;
+
+(* Sorts the array (only the part interested by the 5% is sorted!) *)
+procedure Sort(left, right, limit : integer);
+var
+	l, r : integer;
+	m, temp : real;
+begin
+	temp := random.NextDouble() * (right - left) + 0.5;
+	m := my_data[left + integer(temp)];
+	l := left; r := right;
+
+	while l < r do
+		while my_data[l] < m do inc(l) end;
+		while my_data[r] > m do dec(r) end;
+		if l < r then
+			temp := my_data[l]; my_data[l] := my_data[r]; my_data[r] := temp;
+			inc(l); dec(r)
+		end
+	end;
+
+	if l = limit 
+	then return
+	elsif l < limit 
+	then Sort(l, right, limit)
+	else Sort(left,  r, limit)
+	end
+end Sort;
+
+(* Starts the sorting process (input: limit (e.g 0.95 for 5%) *)
+procedure LimitMain;
+var
+	r : real;
+	limit : integer;
+	b : boolean;
+begin 
+	writeln("Please enter the limit,");
+
+	repeat
+		writeln("e.g. 0.95 for 5%");
+		readln(r);
+		write("your input is "); writeln(r);
+		if (r < 0) or (r > 1) then
+			writeln("this is not a correct value");
+			writeln("Please re-enter the limit,");
+		end;
+	until (0 < r) & (r < 1);
+
+	limit := integer(N * r + 0.5);
+	barrier_ := limit;
+	Sort(0, N-1, limit);
+end LimitMain;
+
+var s : string;
+
+begin
+	random := new System.Random();
+	Fill();
+	(* Print(); *)
+	LimitMain();
+	PrintResult(); 
+
+	writeln("The sample is done, press the Enter key.");
+	read(s);
+end Limit.

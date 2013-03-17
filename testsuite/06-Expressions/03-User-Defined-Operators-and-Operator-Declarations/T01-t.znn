@@ -1,0 +1,36 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ *
+ * Positive test: two points adding.
+ * 
+ *)
+module Main;
+	type Point = object
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator "+" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin
+		p.x := p1.x + p2.x;
+		p.y := p1.y + p2.y;
+		return p;
+	end "+";
+
+	var p1, p2 : Point;
+begin
+	p1.x := 2;
+	p1.y := 3;
+
+	p2.x := 3;
+	p2.y := 2;
+
+	p1 := p1 + p2;
+
+	if (p1.x = 5) & (p1.y = 5) 
+	then halt(1) else halt(0) end;
+end Main.

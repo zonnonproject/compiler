@@ -1,0 +1,19 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.1. The-Granularity-of-Concurrency
+ *
+ *	Positive test: Activity execution with a link
+ *)
+module {protected} Main;
+
+activity A;
+begin
+	
+end A;
+
+var 
+	a : A;
+begin
+	a := new A;
+	halt(1)  (* success *)
+end Main.

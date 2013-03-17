@@ -1,0 +1,14 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: definition contains definition.
+ *)
+definition A;
+	definition B;
+	end B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

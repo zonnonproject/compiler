@@ -1,0 +1,23 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Unary
+ * 
+ * Negative test: inversion
+ * array was not math
+ *)
+
+module Main;
+
+type v = array {math} *,* of boolean;
+
+var
+	ab1 : array 2, 3 of boolean;
+	ab2 : v;
+	
+begin	
+	
+	ab2 := ~ab1;	
+	halt(0);
+	
+end Main.

@@ -1,0 +1,329 @@
+(******************************************************************************************)
+(******************************************************************************************)
+(*                                                                                        *)
+(*                                 Dynamics3D                                             *)
+(*                                                                                        *)
+(******************************************************************************************)
+(******************************************************************************************)
+module Dynamics3D;
+
+	import System;
+
+	type {public, ref} Vector = array {math} 3 of real;
+
+	definition {public} Particle;
+		var {public} 
+			dt, t, tMax : real;
+			x : Vector;
+		var {private} 
+			x1, k1, k2, k3, k4 : Vector;
+		
+		procedure {public} f (t0 : real; x0 : Vector): Vector; 
+		procedure {public} Connect (x0, y0 : Vector); 
+	end Particle;
+
+end Dynamics3D.
+
+(******************************************************************************************)
+(******************************************************************************************)
+(*                                                                                        *)
+(*                                 Graph3D                                                *)
+(*                                                                                        *)
+(******************************************************************************************)
+(******************************************************************************************)
+module Graph3D;
+
+	import System.Math as Math, Dynamics3D;
+
+	const arc = 0.01745;
+
+	type {public, ref} Vector = array {math} 4 of real; 
+	type {public, ref} Matrix = array {math} 4,4 of real;
+
+	procedure {public} Hom (x : Dynamics3D.Vector): Vector;
+		var
+			VRes : Vector;
+		begin 
+			VRes[0..2] := x;
+			VRes[3] := 1.0;
+			return VRes;
+		end Hom;
+
+	procedure {public} Unhom (x : Vector) : Dynamics3D.Vector;
+		var
+			VRes : Dynamics3D.Vector;
+		begin 
+			VRes := x[0..2] / x[3];
+			return VRes; 
+		end Unhom;
+
+	procedure {public} Trans (v1, v2, v3 : real) :  Matrix;
+		var
+			MRes : Matrix;
+			i : integer;
+		begin
+			MRes := [[1., 0., 0., v1], 
+					 [0., 1., 0., v2], 
+					 [0., 0., 1., v3], 
+					 [0., 0., 0., 1.]];
+			
+			return MRes;
+		end Trans;
+
+
+	procedure {public} RotX (phi : real) : Matrix;
+		var 
+			c, s : real;
+			MRes : Matrix;
+		begin
+			c := Math.Cos(arc*phi); 
+			s := Math.Sin(arc*phi);		
+			MRes := [[1., 0., 0., 0.], 
+					 [0., c, -s , 0.], 
+					 [0., s, c  , 0.], 
+					 [0., 0., 0., 1.]];
+			return MRes;
+		end RotX;
+
+
+	procedure {public} RotY (phi : real) : Matrix;
+		var 
+			c, s : real;
+			MRes : Matrix;
+		begin
+			c := Math.Cos(arc*phi); 
+			s := Math.Sin(arc*phi);			
+			MRes := [[c , 0., s , 0.], 
+					 [0., 1., 0., 0.], 
+					 [-s, 0., c , 0.], 
+					 [0., 0., 0., 1.]];
+			return MRes;
+		end RotY;
+
+
+	procedure {public} Proj (left, right, bottom, top, near, far : real) : Matrix;
+		var
+			MRes : Matrix;
+		begin
+			MRes := [
+					 [2*near / (right-left), 0., (right+left) / (right-left), 0.],
+					 [0., 2*near / (top-bottom), (top+bottom) / (top-bottom), 0.],
+					 [0., 0., -(far+near) / (far-near), -2*far*near / (far-near)],
+					 [0., 0., -1., 0.]];
+
+			return MRes;
+		end Proj;
+
+end Graph3D.
+
+
+
+(******************************************************************************************)
+(******************************************************************************************)
+(*                                                                                        *)
+(*                                 Lorenz3D                                               *)
+(*                                                                                        *)
+(******************************************************************************************)
+(******************************************************************************************)
+module Lorenz3D;
+	import 
+		Dynamics3D, Graph3D;
+
+	const VW = 600; VH = 600; asp = 800.0/700.0;	
+
+	var {public} 
+		MainCamera: Camera;
+
+(******************************************************************************************)
+(*                                 Camera                                                 *)
+(******************************************************************************************)
+	type {public, ref} Camera = object (zm0, d0, azim0, elev0,
+			left0, right0, bottom0, top0, near0, far0 : real)
+		var 
+			M : Graph3D.Matrix;
+			left, right, bottom, top, near, far, zm, d, azim, elev : real;
+
+		procedure {public} Move (dazim, delev, dd : real);
+			begin
+				azim := azim + dazim; 
+				elev := elev + delev; 
+				d := d + dd;
+				M := Graph3D.Proj(left, right, bottom, top, near, far)
+				  * Graph3D.Trans(0.0, 0.0, -d) * Graph3D.RotX(elev)
+				  * Graph3D.RotY(-azim) * Graph3D.Trans(0.0, 0.0,- zm)
+			end Move;
+			
+		procedure {public} GetAzim : real;
+		begin
+			return azim;
+		end GetAzim;
+	    
+	    procedure {public} GetElev : real;
+		begin
+			return elev;
+		end GetElev;
+		
+		procedure {public} GetD : real;
+		begin
+			return d;
+		end GetD;
+	        
+		procedure {public} Map (x : Dynamics3D.Vector) : Dynamics3D.Vector;
+			begin 
+				return Graph3D.Unhom(M * Graph3D.Hom(x))
+			end Map;
+
+		begin
+			zm := zm0; 
+			d := d0;  
+			azim := azim0; 
+			elev := elev0;
+			left := left0; 
+			right := right0; 
+			bottom := bottom0; 
+			top := top0;
+			near := near0; 
+			far := far0; 
+			Move(0.0, 0.0, 0.0);
+	  
+	end Camera;
+
+
+(******************************************************************************************)
+(*                                 LorenzParticle                                         *)
+(******************************************************************************************)
+	type {public, ref} LorenzParticle = object (p0, r0, c0, dt0, tMax0 : real;
+				x0 : Dynamics3D.Vector) implements Dynamics3D.Particle
+		var 
+
+			p, r, c: real;
+			
+		var {public} 
+
+	
+		procedure {public} f (t0 : real; x0 : Dynamics3D.Vector): Dynamics3D.Vector implements Dynamics3D.Particle.f;
+			var
+				VRes : Dynamics3D.Vector;
+			begin
+				VRes := [-p*x[0] + p*x[1], 
+						 -x[0]*x[2] + r*x[0] - x[1], 
+						 x[0]*x[1] - c*x[2]];
+				return VRes;
+			end f;
+	  
+		procedure {public} Connect (x0, y0 : Dynamics3D.Vector) implements Dynamics3D.Particle.Connect;
+			begin 
+				
+			end Connect;
+	    
+	    procedure {public} Process;
+			var
+			begin 
+				t := 0.0;
+				while t <= tMax do
+					k1 := f(t, x);
+					k2 := f(t + dt/2, x + dt/2 * k1);
+					k3 := f(t + dt/2, x + dt/2 * k2);
+					k4 := f(t + dt, x + dt * k3);
+					x1 := x + dt/3 * (1/2 * k1 + k2 + k3 + 1/2 * k4);
+					Connect(x, x1); 
+					x := x1; 
+					t := t + dt;
+				end;
+			end Process;   
+	    	    
+		begin
+			 
+			p := p0; 
+			r := r0; 
+			c := c0;
+			dt := dt0; 
+			tMax := tMax0; 
+			t := 0.0; 
+			x := x0;
+		
+	end LorenzParticle;
+
+
+	procedure {public} Initialize;
+	begin
+		MainCamera := new Camera(25.0, 120.0, 20.0, 20.0, -0.27, 0.27,
+				-asp*0.27, asp*0.27, 1.0, 1000.0);	
+	
+		
+	end Initialize;
+	
+
+	procedure {public} Simulate;
+		var 
+			lp: LorenzParticle;
+			xcur: Dynamics3D.Vector; 
+			p, r, c, dt, tMax: real;
+			
+		begin	
+			
+			
+			p := 10.0; 
+			r := 28.0; 
+			c := 8/3.0;
+			dt := 0.001; 
+			tMax := 100.0;
+			
+			xcur := [15., -10., 10.];
+			lp := new LorenzParticle(p, r, c, dt, tMax, xcur);
+			lp.Process;
+			
+			xcur := [16., -11., 9.];
+			lp := new LorenzParticle(p, r, c, dt, tMax, xcur);
+			lp.Process;
+			
+			xcur := [17., -12., 8.];
+			lp := new LorenzParticle(p, r, c, dt, tMax, xcur); 
+			lp.Process;
+			
+			
+			
+		end Simulate;
+
+end Lorenz3D.
+
+
+(*************************************************************************
+Lorenz attractor simulation (using runge-kutta algorithm).
+
+The Lorenz attractor, named for Edward N. Lorenz, is a fractal structure 
+corresponding to the long-term behavior of the Lorenz oscillator.
+The equations that govern the Lorenz oscillator are:
+dx/dt = p(y - x)  
+dy/dt = x(r - z) - y
+dz/dt = xy - cz
+
+The following parameters' values are used in simulation:
+p := 10; 
+r := 28; 
+c := 8/3;
+
+Method description: http://en.wikipedia.org/wiki/Lorenz_attractor
+
+Author: Jurg Gutknecht    
+Implementation in Zonnon: Nina Gonova                 
+Last change: 08.07.2009
+**************************************************************************)
+
+
+(******************************************************************************************)
+(******************************************************************************************)
+(*                                                                                        *)
+(*                                 Main                                                   *)
+(*                                                                                        *)
+(******************************************************************************************)
+(******************************************************************************************)
+
+module Main;
+
+import	
+	Lorenz3D;
+
+begin
+	Lorenz3D.Initialize();
+end Main.

@@ -1,0 +1,141 @@
+module {public} Main;
+
+   (* Tests the module Math.Derivatives *)
+
+   import
+      System.Int32     as Int32,
+      Core.Math        as Fn,
+      Core.Numbers     as N,
+      Core.Arrays      as A,
+      Core.Matrices    as M,
+      Math.Derivatives as D;
+
+   type
+      NbrNbr = procedure (N.Number) : N.Number;
+      NbrArr = procedure (N.Number; var : A.Array);
+
+   procedure {private} Write (y : NbrNbr; x, h, f : N.Number);
+   var
+      e, g : N.Number;
+   begin
+      g := D.DyNbrDxNbr(y, x, h, D.Difference.forward);
+      e := Fn.Abs(f - g);
+      writeln("forward differencing:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.DyNbrDxNbr(y, x, h, D.Difference.central);
+      e := Fn.Abs(f - g);
+      writeln("central differencing:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.DyNbrDxNbr(y, x, h, D.Difference.backward);
+      e := Fn.Abs(f - g);
+      writeln("backward differencing:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.DyNbrDxNbr(y, x, h, D.Difference.richardson);
+      e := Fn.Abs(f - g);
+      writeln("Richardson extrapolation:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset())
+   end Write;
+
+   procedure {private} Sin (x : N.Number) : N.Number;
+   begin
+      return Fn.Sin(x)
+   end Sin;
+
+   procedure {private} Cos (x : N.Number) : N.Number;
+   begin
+      return Fn.Cos(x)
+   end Cos;
+
+   procedure {private} WriteNA (y : NbrArr; x, h : N.Number; f : A.Array);
+   var
+      e, n, a : N.Number;
+      g : A.Array;
+   begin
+      n := A.TwoNorm(f);
+      writeln("soln norm  = " + n.Typeset());
+      g := y(x);
+      a := g[1];
+      writeln("    before = " + a.Typeset());
+      a := g[2];
+      writeln("             " + a.Typeset());
+      writeln("         h = " + h.Typeset());
+      g := D.DyArrDxNbr(y, x, h, D.Difference.forward);
+      e := Fn.Abs(n - A.TwoNorm(g));
+      writeln("forward differencing:");
+      a := g[1];
+      writeln("  solution = " + a.Typeset());
+      a := g[2];
+      writeln("             " + a.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.DyArrDxNbr(y, x, h, D.Difference.central);
+      e := Fn.Abs(n - A.TwoNorm(g));
+      writeln("central differencing:");
+      a := g[1];
+      writeln("  solution = " + a.Typeset());
+      a := g[2];
+      writeln("             " + a.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.DyArrDxNbr(y, x, h, D.Difference.backward);
+      e := Fn.Abs(n - A.TwoNorm(g));
+      writeln("backward differencing:");
+      a := g[1];
+      writeln("  solution = " + a.Typeset());
+      a := g[2];
+      writeln("             " + a.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.DyArrDxNbr(y, x, h, D.Difference.richardson);
+      e := Fn.Abs(n - A.TwoNorm(g));
+      writeln("Richardson extrapolation:");
+      a := g[1];
+      writeln("  solution = " + a.Typeset());
+      a := g[2];
+      writeln("             " + a.Typeset());
+      writeln("  error    = " + e.Typeset())
+   end WriteNA;
+
+   procedure {private} NA (x : N.Number; var a : A.Array);
+   begin
+      a.Initialize(2);
+      a[1] := Fn.Sin(x);
+      a[2] := Fn.Cos(x);
+      return a
+   end NA;
+
+   procedure {private} DNA (x : N.Number; var a : A.Array);
+   begin
+      a.Initialize(2);
+      a[1] := Fn.Cos(x);
+      a[2] := -Fn.Sin(x);
+      return a
+   end DNA;
+
+   procedure {public} Run;
+   var
+      a : A.Array;
+      h, x, y : N.Number;
+      i : integer;
+      j : Int32;
+   begin
+      h := Fn.Pi/100;
+      writeln("Derivatives based on a step size of h = " + h.Typeset());
+      for i := 1 to 6 do
+         j := i;
+         x := Fn.Pi/j;
+         y := Fn.Cos(x);
+         writeln("dSin(x)/dx = Cos(x):  x = pi/" + j.ToString());
+         writeln("           = " + y.Typeset());
+         Write(Sin, x, h, Cos(x))
+      end;
+      writeln();
+      writeln("dA/dx");
+      DNA(x, a);
+      WriteNA(NA, x, h, a)
+   end Run;
+
+begin
+   Run
+end Main.

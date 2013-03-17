@@ -1,0 +1,17 @@
+(**
+ * 09.Predefined procedures.
+ * The pred (x) procedure.
+ *
+ * Positive test: pred of enumeration type value.
+ *)
+module Main;
+	type E = ( zero, one, two );
+
+	var e1, e2 : E;
+begin
+	e1 := E.one;
+	e2 := pred(e1); 
+
+	if e2 = E.zero 
+	then halt(1) else halt(0) end;
+end Main.

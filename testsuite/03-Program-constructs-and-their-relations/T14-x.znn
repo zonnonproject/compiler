@@ -1,0 +1,17 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: implementation contains module.
+ *)
+definition A;
+end A.
+
+implementation A;
+	definition B;
+    end B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

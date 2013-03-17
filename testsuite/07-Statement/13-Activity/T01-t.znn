@@ -1,0 +1,16 @@
+module Main;
+type {ref, public, protected} O = object
+
+activity a;
+begin
+
+end a;
+
+end O;
+
+var arr: array 10 of O;
+begin
+  arr[1] := new O;
+  new arr[1].a;
+  halt(1);
+end Main.  

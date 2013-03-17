@@ -1,0 +1,63 @@
+(* ********* Zonnon online collection ***********
+ * Puzzle
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*
+
+ it computes a circular  arrangement of
+ the numbers 1, 2,..., 12 such that no sum of three consecutive numbers
+ exceeds 21.
+*)
+
+(*************************************************)
+
+module Puzzle;
+   const
+	  _N = 12;	
+   var
+      h,  (* {0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 12} *)
+      s   (* {0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 12, 12} *)
+		:array _N of integer;
+
+    procedure WriteLine;
+	var i: integer;
+	begin
+       	for i := 0 to 10 do
+           write(h[i]:3," ");
+       	end;
+		writeln;
+	end WriteLine;
+
+    procedure trynext (n: integer);
+	var m, k, j, i: integer;
+	begin
+          m := 21 - n;
+          for k := 0 to 10 do
+               if h[k] = 0 then
+
+                   j := (k + 11) mod 12;
+
+                   i := (k + 10) mod 12;
+
+                   if ((s[i] <= m) & (s[j] <= m) & (s[k] <= m)) then
+
+                      h[k] := n; s[i] := s[i] + n; s[j] := s[j] + n; s[k] := s[k] + n;
+
+                      if n > 1 then trynext(n - 1); else WriteLine(); end;
+
+                      s[k] := s[k] - n; s[j] := s[j] - n; s[i] := s[i] - n; h[k] := 0;
+					end;
+                end;
+          end;
+     end trynext;
+var i:integer;
+begin
+  for i:= 1 to _N - 1 do h[i]:=0; s[i]:=0 end;
+  h[11] := 12; s[10] := 12;  s[11] := 12;
+  trynext(11);
+end Puzzle.
+

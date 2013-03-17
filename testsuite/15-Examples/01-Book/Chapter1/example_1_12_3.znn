@@ -1,0 +1,52 @@
+(* ********* Zonnon online collection ***********
+ * Binary search in a table (Chapter 1, Example 1.12.2)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Main;
+	const STRING_LENGTH = 20;
+	const N = 50;
+    type mystring = array STRING_LENGTH of char;
+	var a: array N of mystring;
+
+
+procedure search(x: mystring; n:integer): integer;
+	var l, r, m: integer;
+begin l := 0; r := n;
+	while l < r do
+		m := (l + r) div 2; i:=0;
+		while (a[m][i] = x[i]) & (x[i] # 0) do i:=i+1;end;
+		if a[m][i] < x[i] then l := m+1 else r := m end;
+	end;
+	if r<n then i:=0; 
+           while (a[r][i] = x[i]) & (x[i] #0) do i := i+1; end;
+        end;
+        return r;
+end search;
+
+
+var x:string; n, i: integer; p: mystring;
+
+procedure Binary;
+begin
+	i := search(p, n);
+	writeln(i: 5); 
+end Binary;
+
+begin   n := 0;
+    writeln("Example 1.12.2: Binary search in table");	
+    write("Element to search: "); readln(x);
+    copy(x,p);
+	writeln("Enter strings in alphabetical order: ");
+	write('a[',n:2,'] = '); readln(x);
+	a[n] := x;
+	while a[n] # "" do
+		 inc(n); write('a[',n:2,'] = '); readln(x);
+		 a[n] := x;
+	end;
+	writeln("Use commands: Searches.Binary");
+    writeln("Type 'q' to exit");	
+end Main. 
+

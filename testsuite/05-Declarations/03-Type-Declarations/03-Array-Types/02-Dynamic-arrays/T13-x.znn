@@ -1,0 +1,22 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: 2-dimensional semi-dynamic array is used as 1-dimensional array.
+ *)
+module Main;
+	procedure P(n : integer);
+		type Matrix = array *,* of real;
+		var x : Matrix;
+	begin
+		x := new Matrix(n, n);
+		x[1] := 3.14;
+	end P;
+
+	var n : integer;
+begin
+	n := 5;
+	P(n);
+	halt(0);
+end Main.

@@ -1,0 +1,40 @@
+(** 
+ * 11.Program Units.
+ * 11.3. Definition
+ *
+ * Positive test: the definition type A is used in the definition declaration.
+ *)
+module Main;
+	import A, B;
+
+	var a : object {A};	
+begin
+	a := new B;
+	a := a.P(a);
+	
+	if a.X = 5
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, ref} B implements A;
+	procedure {public} P(a : object{A}) : object {A} implements A.P;
+	begin 
+		x := 5;
+		return self;
+	end P;
+	
+	procedure {public} X:integer implements A.X;
+	begin
+		return x;
+	end X;
+
+	var {public} x : integer;
+begin
+	x := 1;
+end B.
+
+definition {public} A;
+	procedure P(a : object{A}) : object {A};
+    procedure X : integer;
+	var b : object{A}; 
+end A.

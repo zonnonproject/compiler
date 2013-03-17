@@ -1,0 +1,28 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Positive test: the type of object D parameter is declared inside the object A.
+ *)
+object {public, ref} A(e1 : E);
+	type {public} 
+		E = (c1, c2);
+
+	var {public}
+		e : E;
+begin
+	e := e1;
+end A.
+
+module Main;
+	import A;
+
+	var b : A;
+begin
+	b := new A(A.E.c1);
+
+	if b.e = A.E.c1
+	then halt(1) else halt(0) end;
+end Main.
+

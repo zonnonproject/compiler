@@ -1,0 +1,18 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * implements clause
+ *
+ * Positive test: the module A uses definition B in implements clause.
+ * The definition is declared after it is used.
+ *)
+module A implements B;
+end A.
+
+definition B;
+end B.
+
+module Main;
+begin
+    halt(1);
+end Main.

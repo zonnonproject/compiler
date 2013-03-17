@@ -1,0 +1,198 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Overload operators
+ * 
+ * Negative test: overload generalized comparison; operator for comparison should return boolean in this case
+ * with scalar
+ *)
+
+module Main;
+
+type v = array {math} * of integer;
+type vc = array {math} * of complex;
+type vb = array {math} * of boolean;
+
+type {public, ref} complex = object
+var {public}
+	re, im : real;
+	
+procedure {public} init(re_, im_: real);
+begin
+	re := re_;
+	im := im_;
+end init;
+	
+begin
+	re := 0.0;
+	im := 0.0;
+end complex;
+
+operator {public} '>' (z1, z2 : complex) : integer;
+var res: integer;
+begin
+	if z1.re > z2.re
+	then
+		res := 2;
+		if z1.im > z2.im
+		then
+			res := 3;
+		end;
+	else
+		res := 0;
+		if z1.im > z2.im
+		then
+			res := 1;
+		end;
+	end;
+	return res;
+end '>';
+
+operator {public} '>=' (z1, z2 : complex) : integer;
+var res: integer;
+begin
+	if z1.re >= z2.re
+	then
+		res := 2;
+		if z1.im >= z2.im
+		then
+			res := 3;
+		end;
+	else
+		res := 0;
+		if z1.im >= z2.im
+		then
+			res := 1;
+		end;
+	end;
+	return res;
+end '>=';
+
+operator {public} '<' (z1, z2 : complex) : integer;
+var res: integer;
+begin
+	if z1.re < z2.re
+	then
+		res := 2;
+		if z1.im < z2.im
+		then
+			res := 3;
+		end;
+	else
+		res := 0;
+		if z1.im < z2.im
+		then
+			res := 1;
+		end;
+	end;
+	return res;
+end '<';
+
+operator {public} '<=' (z1, z2 : complex) : integer;
+var res: integer;
+begin
+	if z1.re <= z2.re
+	then
+		res := 2;
+		if z1.im <= z2.im
+		then
+			res := 3;
+		end;
+	else
+		res := 0;
+		if z1.im <= z2.im
+		then
+			res := 1;
+		end;
+	end;
+	return res;
+end '<=';
+
+operator {public} '=' (z1, z2 : complex) : integer;
+var res: integer;
+begin
+	if z1.re = z2.re
+	then
+		res := 2;
+		if z1.im = z2.im
+		then
+			res := 3;
+		end;
+	else
+		res := 0;
+		if z1.im = z2.im
+		then
+			res := 1;
+		end;
+	end;
+	return res;
+end '=';
+
+operator {public} '#' (z1, z2 : complex) : integer;
+var res: integer;
+begin
+	if z1.re # z2.re
+	then
+		res := 2;
+		if z1.im # z2.im
+		then
+			res := 3;
+		end;
+	else
+		res := 0;
+		if z1.im # z2.im
+		then
+			res := 1;
+		end;
+	end;
+	return res;
+end '#';
+
+var
+	a, b : v;
+	ac, bc : vc;
+	cb1, cb2 : vb;
+	i : integer;
+	z : complex;
+	q1, q2 : boolean;
+  
+begin
+	a := [1, 2];
+	b := [-1, -4];
+	q1 := a > b;
+	
+	ac := new vc(2);
+	ac[0] := new complex;
+	ac[0].init(2., 3.);
+	ac[1] := new complex;
+	ac[1].init(-1., 0.);
+	bc := new vc(2);
+	bc[0] := new complex;
+	bc[0].init(3., -1.);
+	bc[1] := new complex;
+	bc[1].init(1., -4.);
+	
+	q2 := ac = bc;
+	
+	halt(0);
+	
+	(*
+	for i := 0 to len(ac) - 1 do
+		if (q2 # (ac[i] # bc[i]))
+		then
+			halt(0);
+		end;
+	end;
+	*)
+	
+	(*
+	a := [0, 1, 0];
+	b := [1, 1, 0];
+	z := ac[a] +* bc[b];
+	if (z # (ac[0] * bc[1] + ac[1] * bc[1] + ac[0] * bc[0]))
+	then
+		halt(0);
+	end;
+	*)
+	
+end Main.
+

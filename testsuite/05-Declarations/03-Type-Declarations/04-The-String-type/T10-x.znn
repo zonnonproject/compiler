@@ -1,0 +1,13 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Negative test: assign string constant to integer.
+ *)
+module Main;
+	var i : integer;
+begin
+	i := "";
+end Main.
+

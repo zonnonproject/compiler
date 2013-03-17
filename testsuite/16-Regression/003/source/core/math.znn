@@ -1,0 +1,610 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The modules in CORE form a foundation for computation modeling in Zonnon.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Provides a math library for numbers defined for us in this framework.      *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* References: Press et al., Numerical Recipes in C, Cambridge U. Press, 1992 *)
+(*             Spanier, J. and Oldham, K.B., An Atlas of Functions,           *)
+(*                         Hemisphere Publishing Corp., Washington DC, 1987.  *)
+(*             Pugh, G.R., "An analysis of the Lanczos gamma approximation,"  *)
+(*                   PhD thesis, Univ. British Columbia, Nov. 2004, pg. 116.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* constants   : E           - 2.7182818284590452354, base of natural logs    *)
+(*             : Pi          - 3.1415926535897932385, the number \pi          *)
+(* Functions   : Random      - a random number bound to interval [0,1]        *)
+(*             : Max         - returns the greater of the two arguments       *)
+(*             : Min         - returns the lesser of the two arguments        *)
+(*             : Ceiling     - returns smallest integer number >= argument    *)
+(*             : Floor       - returns greatest integer number <= argument    *)
+(*             : Round       - returns the nearest integer to a real argument *)
+(*             : Abs         - returns the absolute value of a number         *)
+(*             : Sign        - returns the sign of a number                   *)
+(*             : Sqrt        - returns the square root of a number            *)
+(*             : Pythag      - returns Pythagorean distance Sqrt(x^2 + y^2)   *)
+(*             : Log         - returns the base 10 log of a number            *)
+(*             : Ln          - returns the base e or natural log of a number  *)
+(*             : Exp         - returns the exponential of a number            *)
+(*             : Sin         - returns the sine of a number                   *)
+(*             : Cos         - returns the cosine of a number                 *)
+(*             : Tan         - returns the tangent of a number                *)
+(*             : ArcSin      - returns the arcus sine of a number             *)
+(*             : ArcCos      - returns the arcus cosine of a number           *)
+(*             : ArcTan      - returns the arcus tangent of a number          *)
+(*             : ArcTan2     - returns quadrant correct arcus tangent of y/x  *)
+(*             : Sinh        - returns the hyperbolic sine of a number        *)
+(*             : Cosh        - returns the hyperbolic cosine of a number      *)
+(*             : Tanh        - returns the hyperbolic tangent of a number     *)
+(*             : ArcSinh     - returns the arcus hyperbolic sine of a number  *)
+(*             : ArcCosh     - returns the arcus hyperbolic cosine of a real  *)
+(*             : ArcTanh     - returns the arcus hyperbolic tangent of a real *)
+(*             : Gamma       - returns the gamma function of a number         *)
+(*             : Beta        - Beta(x,y) = Gamma(x)*Gamma(y)/Gamma(x+y)       *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCore.Math;
+
+   import
+      System.Convert as Convert,
+      System.Math    as M,
+      System.Random  as RG,
+      System.Double  as Real64,
+      BelCore.EvaluateSeries,
+      BelCore.Log     as L,
+      BelCore.Numbers as N,
+      BelCore.Series  as S;
+
+   (* the private variables, functions, and procedures of this module *)
+
+   var {private}
+      lanczos : array 11 of N.Number;
+      lanczosGamma, lnTwoRootEOnPi, nearInfinity : N.Number;
+      maxIterations : integer;
+      randomGenerator : RG;
+      zero, one : Real64;
+
+   (* the public variables, functions, procedures, etc. of this module *)
+
+   var {public, immutable}
+      E, Pi : N.Number;
+
+   procedure {private} LogAWarning
+      (input, output : N.Number; function : string);
+   var
+      s : string;
+   begin
+      s := "BelCore.Math." + function;
+      if ~output.IsFinite() then
+         if input.IsFinite() then
+            if output.IsPositiveInfinity() then
+               L.WarningMessage(-1,420, s)
+            elsif output.IsNegativeInfinity() then
+               L.WarningMessage(-1,421, s)
+            else
+               L.WarningMessage(-1,422, s)
+            end
+         elsif input.IsPositiveInfinity() then
+            if output.IsPositiveInfinity() then
+               L.WarningMessage(400,420, s)
+            elsif output.IsNegativeInfinity() then
+               L.WarningMessage(400,421, s)
+            else
+               L.WarningMessage(400,422, s)
+            end
+         elsif input.IsNegativeInfinity() then
+            if output.IsPositiveInfinity() then
+               L.WarningMessage(401,420, s)
+            elsif output.IsNegativeInfinity() then
+               L.WarningMessage(401,421, s)
+            else
+               L.WarningMessage(401,422, s)
+            end
+         else
+            if output.IsPositiveInfinity() then
+               L.WarningMessage(402,420, s)
+            elsif output.IsNegativeInfinity() then
+               L.WarningMessage(402,421, s)
+            else
+               L.WarningMessage(402,422, s)
+            end
+         end
+      end
+   end LogAWarning;
+
+   procedure {private} LogAWarning2
+      (input1, input2, output : N.Number; function : string);
+   begin
+      LogAWarning(input1, output, function);
+      LogAWarning(input2, output, function)
+   end LogAWarning2;
+
+   procedure {public} Random () : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := randomGenerator.NextDouble();
+      return y
+   end Random;
+
+   procedure {public} Max (x, y : N.Number) : N.Number;
+   var
+      z : N.Number;
+   begin
+      if x > y then
+         z := x
+      elsif ~x.IsNaN() & ~y.IsNaN() then
+         z := y
+      else
+         z := N.NaN
+      end;
+      LogAWarning2(x, y, z, "Max");
+      return z
+   end Max;
+
+   procedure {public} Min (x, y : N.Number) : N.Number;
+   var
+      z : N.Number;
+   begin
+      if x < y then
+         z := x
+      elsif ~x.IsNaN() & ~y.IsNaN() then
+         z := y
+      else
+         z := N.NaN
+      end;
+      LogAWarning2(x, y, z, "Min");
+      return z
+   end Min;
+
+   procedure {public} Ceiling (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      if x.IsFinite() then
+         y := Convert.ToDouble(M.Ceiling(x.Get()))
+      elsif x.IsNaN() then
+         y := N.NaN
+      else
+         y := x
+      end;
+      LogAWarning(x, y, "Ceiling");
+      return y
+   end Ceiling;
+
+   procedure {public} Floor (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      if x.IsFinite() then
+         y := Convert.ToDouble(M.Floor(x.Get()))
+      elsif x.IsNaN() then
+         y := N.NaN
+      else
+         y := x
+      end;
+      LogAWarning(x, y, "Floor");
+      return y
+   end Floor;
+
+   procedure {public} Round (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      if x.IsFinite() then
+         y := Convert.ToDouble(M.Round(x.Get()))
+      elsif x.IsNaN() then
+         y := N.NaN
+      else
+         y := x
+      end;
+      LogAWarning(x, y, "Round");
+      return y
+   end Round;
+
+   procedure {public} Abs (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := x.Magnitude();
+      LogAWarning(x, y, "Abs");
+      return y
+   end Abs;
+
+   procedure {public} Sign (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      if x.IsFinite() then
+         if x > 0.0 then
+            y := 1
+         elsif x < -0.0 then
+            y := -1
+         else
+            y := 0
+         end
+      elsif x.IsPositiveInfinity() then
+         y := 1
+      elsif x.IsNegativeInfinity() then
+         y := -1
+      else
+         y := 0
+      end;
+      LogAWarning(x, y, "Sign");
+      return y
+   end Sign;
+
+   procedure {public} Sqrt (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Sqrt(x.Get());
+      LogAWarning(x, y, "Sqrt");
+      return y
+   end Sqrt;
+
+   (* computes the Pythagorean distance:  Sqrt(x^2 + y^2) *)
+   procedure {public} Pythag (x, y : N.Number) : N.Number;
+   var
+      absx, absy, dist, ratio : N.Number;
+   begin
+      absx := Abs(x);
+      absy := Abs(y);
+      if absx > absy then
+         ratio := absy / absx;
+         dist  := absx * Sqrt(1 + ratio*ratio)
+      elsif absy = 0 then
+         dist := 0
+      else
+         ratio := absx / absy;
+         dist  := absy * Sqrt(1 + ratio*ratio)
+      end;
+      LogAWarning2(x, y, dist, "Pythag");
+      return dist
+   end Pythag;
+
+   procedure {public} Log (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Log10(x.Get());
+      LogAWarning(x, y, "Log");
+      return y
+   end Log;
+
+   procedure {public} Ln (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Log(x.Get());
+      LogAWarning(x, y, "Ln");
+      return y
+   end Ln;
+
+   procedure {public} Exp (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Exp(x.Get());
+      LogAWarning(x, y, "Exp");
+      return y
+   end Exp;
+
+   procedure {public} Sin (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Sin(x.Get());
+      LogAWarning(x, y, "Sin");
+      return y
+   end Sin;
+
+   procedure {public} Cos (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Cos(x.Get());
+      LogAWarning(x, y, "Cos");
+      return y
+   end Cos;
+
+   procedure {public} Tan (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Tan(x.Get());
+      LogAWarning(x, y, "Tan");
+      return y
+   end Tan;
+
+   procedure {public} ArcSin (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Asin(x.Get());
+      LogAWarning(x, y, "ArcSin");
+      return y
+   end ArcSin;
+
+   procedure {public} ArcCos (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Acos(x.Get());
+      LogAWarning(x, y, "ArcCos");
+      return y
+   end ArcCos;
+
+   procedure {public} ArcTan (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Atan(x.Get());
+      LogAWarning(x, y, "ArcTan");
+      return y
+   end ArcTan;
+
+   (* the quadrant-correct arcus tangent for y/x *)
+   procedure {public} ArcTan2 (y, x : N.Number) : N.Number;
+   var
+      z : N.Number;
+   begin
+      z := M.Atan2(y.Get(), x.Get());
+      LogAWarning2(x, y, z, "ArcTan2");
+      return z
+   end ArcTan2;
+
+   procedure {public} Sinh (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Sinh(x.Get());
+      LogAWarning(x, y, "Sinh");
+      return y
+   end Sinh;
+
+   procedure {public} Cosh (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Cosh(x.Get());
+      LogAWarning(x, y, "Cosh");
+      return y
+   end Cosh;
+
+   procedure {public} Tanh (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Tanh(x.Get());
+      LogAWarning(x, y, "Tanh");
+      return y
+   end Tanh;
+
+   procedure {public} ArcSinh (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      if x.IsFinite() then
+         if x < -0.0 then
+            y := -ArcSinh(-x)
+         elsif x <= 0.0 then
+            y := 0
+         elsif x < nearInfinity then
+            y := Ln(x + Sqrt(x)*Sqrt(x + 1/x))
+         else
+            y := N.PositiveInfinity
+         end
+      elsif x.IsPositiveInfinity() then
+         y := N.PositiveInfinity
+      elsif x.IsNegativeInfinity() then
+         y := N.NegativeInfinity
+      else
+         y := N.NaN
+      end;
+      LogAWarning(x, y, "ArcSinh");
+      return y
+   end ArcSinh;
+
+   procedure {public} ArcCosh (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      if x.IsFinite() then
+         if x < 1 then
+            y := N.NaN
+         elsif x = 1 then
+            y := 0
+         elsif x < nearInfinity then
+            y := Ln(x + Sqrt(x)*Sqrt(x - 1/x))
+         else
+            y := N.PositiveInfinity
+         end
+      elsif x.IsPositiveInfinity() then
+         y := N.PositiveInfinity
+      else
+         y := N.NaN
+      end;
+      LogAWarning(x, y, "ArcCosh");
+      return y
+   end ArcCosh;
+
+      type {public, ref} ArcTanhA = object implements BelCore.EvaluateSeries
+         procedure {public} GetCoef (n : integer; x : N.Number) : N.Number
+            implements BelCore.EvaluateSeries.GetCoef;
+         var
+            coef : N.Number;
+         begin
+            if n = 0 then
+               coef.Set(zero)
+            elsif n = 1 then
+               coef.Set(one)
+            else
+               coef.Set(n - one);
+               coef := coef.Multiply(x);
+               coef := coef.Multiply(coef);
+               coef := coef.Negative()
+            end;
+            if n > maxIterations then
+               eos := true
+            end;
+            return coef
+         end GetCoef;
+      begin
+         eos := false
+      end ArcTanhA;
+      type {public, ref} ArcTanhB = object implements BelCore.EvaluateSeries
+         procedure {public} GetCoef (n : integer; x : N.Number) : N.Number
+            implements BelCore.EvaluateSeries.GetCoef;
+         var
+            coef  : N.Number;
+            index : integer;
+         begin
+            if n = 0 then
+               index := 0
+            else
+               index := 2*n - 1
+            end ;
+            coef.Set(real(index, 64));
+            if n > maxIterations then
+               eos := true
+            end;
+            return coef
+         end GetCoef;
+      begin
+         eos := false
+      end ArcTanhB;
+   procedure {public} ArcTanh (x : N.Number) : N.Number;
+   var
+      a : ArcTanhA;
+      b : ArcTanhB;
+      y : N.Number;
+   begin
+      if x.IsFinite() then
+         if x > 1 then
+            y := N.NaN
+         elsif x = 1 then
+            y := N.PositiveInfinity
+         elsif x > 0.1 then
+            y := Ln((1 + x)/(1 - x)) / 2
+         elsif x > -0.1 then
+            a := new ArcTanhA;
+            b := new ArcTanhB;
+            y := x * S.ContinuedFraction(a, b, x)
+         elsif x > -1 then
+            y := Ln((1 + x)/(1 - x)) / 2
+         elsif x = -1 then
+            y := N.NegativeInfinity
+         else
+            y := N.NaN
+         end
+      else
+         y := N.NaN
+      end;
+      LogAWarning(x, y, "ArcTanh");
+      return y
+   end ArcTanh;
+
+      procedure {private} LnGammaFn (zPlusOne : N.Number) : N.Number;
+      var
+         i : integer;
+         lnGamma, series, z1, z2 : N.Number;
+      begin
+         (* employs Lanczos algorithm for computing Gamma(z), z > 1 *)
+         z1 := zPlusOne - 0.5;
+         series := lanczos[0];
+         for i := 1 to 10 do
+            series := series + lanczos[i] / (zPlusOne + real(i-1, 64))
+         end;
+         z2 := (z1 + lanczosGamma) / E;
+         (* apply natural logarithm to Lanczos formula to avoid overflow *)
+         lnGamma := lnTwoRootEOnPi + z1*Ln(z2) + Ln(series);
+         return lnGamma
+      end LnGammaFn;
+   procedure {public} Gamma (x : N.Number) : N.Number;
+   var
+      x1, y : N.Number;
+   begin
+      if x.IsFinite() then
+         if x > 0.0 then
+            y := Exp(LnGammaFn(1+x))/x
+         else
+            x1 := Sin(Pi*x);
+            if x1 = 0.0 then
+               (* at a positive pole *)
+               y := N.PositiveInfinity
+            elsif x1 = -0.0 then
+               (* at a negative pole *)
+               y := N.NegativeInfinity
+            else
+               (* apply Euler's reflection formula *)
+               y := Pi / (x1 * Exp(LnGammaFn(1-x)))
+            end
+         end
+      elsif x.IsPositiveInfinity() then
+         y := N.PositiveInfinity
+      else
+         y := N.NaN
+      end;
+      LogAWarning(x, y, "Gamma");
+      return y
+   end Gamma;
+
+   procedure {public} Beta (x, y : N.Number) : N.Number;
+   var
+      b : N.Number;
+   begin
+      b := Exp(Ln(Gamma(x)) + Ln(Gamma(y)) - Ln(Gamma(x+y)));
+      LogAWarning2(x, y, b, "Beta");
+      return b
+   end Beta;
+
+begin
+   E := M.E;
+   Pi := M.PI;
+
+   zero := Real64.Parse("0.0E+0");
+   one  := Real64.Parse("1.0E+0");
+
+   maxIterations := 1000;
+
+   lnTwoRootEOnPi := Ln(2*Sqrt(E/Pi));
+   nearInfinity := Sqrt(N.MaximumPositiveNumber);
+   randomGenerator := new RG();
+
+   (* Lanczos coefficients derived by Pugh for \gamma = 10.900511, N = 10 *)
+   lanczosGamma := "1.0900511E+1";
+
+   lanczos[0] := 2.485740891387536E-5;
+   lanczos[1] := 1.051423785817220E+0;
+   lanczos[2] := -3.456870972220162E+0;
+   lanczos[3] := 4.512277094668948E+0;
+   lanczos[4] := -2.982852253235767E+0;
+   lanczos[5] := 1.056397115771267E+0;
+   lanczos[6] := -1.954287731916459E-1;
+   lanczos[7] := 1.709705434044412E-2;
+   lanczos[8] := -5.719261174043058E-4;
+   lanczos[9] := 4.633994733599056E-6;
+   lanczos[10] := -2.719949084886077E-9
+end Math.

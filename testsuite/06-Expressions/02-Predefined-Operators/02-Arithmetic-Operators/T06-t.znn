@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Positive test: operator +.
+ *)
+
+module Main;
+	var q1, q2, q3 : integer{16};
+	var c1, c2, c3 : cardinal{16};
+	var b1, b2, b3 : integer{8};
+	var u1, u2, u3 : cardinal{8};	
+begin
+	q2 := 1; q3 := 2;
+	c2 := 2; c3 := 3;
+	b2 := 3; b3 := 4;
+	u2 := 4; u3 := 5;
+	
+	q1 := q2 + q3;
+	c1 := c2 + c3;
+	b1 := b2 + b3;
+	u1 := u2 + u3;
+	c1 := u2 + u3;
+	if (q1 = 3) & (c1 = 9) & (b1 = 7) & (u1 = 9) then
+		halt(1);
+	end; 
+	halt(0);	 
+end Main.

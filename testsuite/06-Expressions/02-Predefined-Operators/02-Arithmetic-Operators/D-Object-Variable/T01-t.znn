@@ -1,0 +1,24 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Positive test: 5 + 2 with object variables.
+ * The object is declared after its using.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b.x := 5;
+	b.y := 3;
+
+	if b.x + b.y = 8 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public }
+		x, y : integer;
+end B.

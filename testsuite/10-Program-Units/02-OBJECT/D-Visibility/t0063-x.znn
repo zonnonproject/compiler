@@ -1,0 +1,24 @@
+(**
+ * 5. Declarations.
+ * 6.4. Variable declarations.
+ * Enumeration type of variable
+ *
+ * Negative test: access to private type.
+ *)
+object A;
+	import B.C;
+
+	var	X : B.C.D;
+end A.
+
+module B.C;
+	type { private }
+		D = ( one, two, three );
+end C.
+
+module Main;
+import A;
+var a:A;
+begin
+	halt(1);
+end Main.

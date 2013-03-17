@@ -1,0 +1,29 @@
+(** 
+ * 11.Program Units.
+ * 11.3. definition
+ *
+ * Positive test: the public procedure P is declared in definition A.
+ * The procedure is implemented and used in object B; run;
+ *
+ * The definition is declared before its using.	
+ *)
+definition {public} A;
+	procedure {public} P : integer;
+end A.
+
+object {public, value} B implements A;
+	procedure {public} P : integer implements A.P;
+	begin
+		return 5
+	end P;
+begin
+end B.
+
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.P() = 5
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,25 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: the 1-dimensional array overflow at run time.
+ *)
+module Main;
+	import System.IndexOutOfRangeException;
+
+	type T = array 1 of char;
+
+	var x : T;
+		i : integer;
+		c : char;
+begin
+	i := 1;
+	do
+		x[i] := "c";
+		c := x[i];
+		halt(0);
+	on IndexOutOfRangeException do
+		halt(1);
+	end
+end Main.

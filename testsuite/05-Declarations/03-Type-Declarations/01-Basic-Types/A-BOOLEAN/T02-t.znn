@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * A-boolean
+ *
+ * Positive test: false value assignment for boolean variable.	
+ *)
+module Main;
+var 
+	b : boolean;
+begin
+	b := false;
+
+	if b 
+	then halt(0) else halt(1) end;
+end Main.

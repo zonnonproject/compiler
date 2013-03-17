@@ -1,0 +1,33 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Negative test: writing to immutable array element.
+ * The object A.B was declared after it is used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+
+	procedure p(var p1 : integer);
+	begin 
+		p1 := 5 
+	end p;
+begin
+	p(b.vk[0]);
+	halt(0);
+end Main.
+
+object A.B;
+	var { public } 
+		vi : array 1 of integer;
+
+	var { public, immutable } 
+		vk : array 1 of integer;
+
+	var { private } 
+		vj : array 1 of integer;
+end B.

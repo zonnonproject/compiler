@@ -1,0 +1,16 @@
+(** 
+ * 7. Statement 
+ * 7.10. Block statement and exception handling.
+ *
+ * Positive test: await in a protected module.
+ *)
+module {protected} Main;
+
+var a : boolean;
+begin
+	a := true;
+
+	await a;
+
+	if a then halt(1) else halt(0) end;
+end Main.

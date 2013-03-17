@@ -1,0 +1,20 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.2. Enumeration types.
+ *
+ * Positive test: predefined procedures pred and succ was used with enumeration values.
+ *)
+module Main;
+type 
+	NumberKind = ( Bin, Oct, Dec, Hex );
+
+var {private} nk1, nk2 : NumberKind;
+
+begin
+	nk1 := pred( succ(NumberKind.Oct) );
+	nk2 := succ( pred(NumberKind.Oct) ); 
+
+	if nk1 = nk2
+	then halt(1) else halt(0) end;
+end Main.

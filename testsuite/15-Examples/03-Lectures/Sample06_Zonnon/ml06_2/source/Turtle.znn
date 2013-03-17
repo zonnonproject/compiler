@@ -1,0 +1,80 @@
+(* ********* Zonnon online collection ***********
+ * Turtle
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Turtle;
+
+import 
+	System.Drawing.Pen as Pen, 
+	System.Drawing.Pens as Pens, 
+	System.Drawing.Graphics as Graphics, 
+	System.Windows.Forms,
+	XYDrawing;
+
+var
+	x, y, dir : integer;
+	G : Graphics;
+	P : Pen;
+
+(* Check if an angle is valid: otherwise it is rounded to multiples of 90 degrees *)
+procedure CheckAngle(angle : integer) : integer;
+begin
+	return angle - (angle mod 90)
+end CheckAngle;
+
+(* 
+	Oeffnet ein Grafikfenster und setzt die 'Turtle' an die Koordinaten (x/y) mit Richtung 'dir' 
+	(ein Vielfaches von 90 Grad) 
+*)
+procedure {public} SetTo(sx, sy, sdir : integer);
+begin
+	x := sx;
+	y := sy;
+	dir := CheckAngle(sdir);
+	XYDrawing.Open(500, 500, G);
+end SetTo;
+
+(* Nimmt ein Vielfaches von 90 Grad als Parameter und dreht die 'Turtle' entsprechend *)
+procedure {public} Turn(angle : integer);
+begin
+	dir := (dir + CheckAngle(angle)) mod 360
+end Turn;
+	
+(* Zeichnet eine Linie der Laenge 'len' entsprechend der aktuellen Richtung *)
+procedure {public} Walk(len_, color : integer);
+var
+	i : integer;
+begin
+	case color of (* Which color, black is default. *)
+		  0 : P := Pens.Black;
+		| 1 : P := Pens.Blue;
+		| 2 : P := Pens.Red;
+		| 3 : P := Pens.Green;
+		| 4 : P := Pens.Yellow;
+		else  P := Pens.Black;
+	end;
+
+	case dir of
+	   0:
+		G.DrawLine(P, x, y, x + len_, y);
+		x := x + len_
+	| 90:
+		G.DrawLine(P, x, y, x, y + len_);
+		y := y + len_
+	| 180:
+		G.DrawLine(P, x, y, x - len_, y);
+		x := x - len_
+	| 270:
+		G.DrawLine(P, x, y, x, y - len_);
+		y := y - len_
+	end;
+	P.Dispose();
+end Walk;
+
+begin
+
+end Turtle.

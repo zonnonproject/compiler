@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.6. REPEAT statement.
+ *
+ * Positive test: repeat statement executed two times.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 5;
+	j := 5;
+
+	repeat 
+		i := i - 1;
+		j := j - 1;
+	until i = 3;
+
+	if j = 3 then halt(1) else halt(0) end;
+end Main.

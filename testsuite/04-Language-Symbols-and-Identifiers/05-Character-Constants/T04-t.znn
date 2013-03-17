@@ -1,0 +1,13 @@
+(** 
+ * 4. Language symbols and identifiers. 
+ * 4.5. Character Constants
+ *
+ * Positive test: compare character variable and constant.
+ *)
+module Main;
+	var c : char;
+begin
+	c := 20X;
+	if c = 20X
+	then halt(1) else halt(0) end;
+end Main.

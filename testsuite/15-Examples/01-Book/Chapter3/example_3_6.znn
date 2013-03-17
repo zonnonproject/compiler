@@ -1,0 +1,84 @@
+(* ********* Zonnon online collection ***********
+ * Marriage (Chapter 3, Example 3.4)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Marriage;
+
+const n = 8;
+
+var 
+   m,w,r:integer;
+   wmr, (* man, rank, of woman *)
+   mwr, (* woman, rank, of man *)
+   rmw, (* man, woman, of rank *)
+   rwm: (* woman, man, of rank *)
+       array n, n of integer;
+   x,  (* man, of woman *)
+   y:  (* woman, of man *)
+       array n of integer;
+   single: array 8 of boolean; (* woman *)
+   h: integer;
+
+procedure Print;
+  var m, rm, rw: integer;
+begin
+  rm := 0; rw := 0;
+  for m:=0 to n - 1 do
+     write(x[m]:4);
+     rm := rmw[m, x[m]] + rm; rw := rmw[x[m],m] + rw;
+  end;
+  writeln(rm:8,rw:4);
+end Print;
+
+procedure Stable(m,w,r:integer): boolean;
+var pm,pw:integer;
+    i,lim: integer; S: boolean;
+begin
+    S:=true; i:=0;
+    while (i<r) & S do
+       pw := wmr[m,i]; i := i+1;
+       if ~single[pw] then S:= rwm[pw,m] >rwm[pw,y[pw]] end;
+    end;
+    i:=0; lim := rwm[w,m];
+    while (i<lim) & S do
+       pm := mwr[w,i]; i := i+1;
+       if pm < m then S := rmw[pm,w] > rmw[pm,x[pm]] end;
+    end;
+    return S;
+end Stable;
+
+procedure Try(m: integer);
+   var w,r:integer;
+begin
+   for r := 0 to n - 1 do w:= wmr[m,r];
+      if single[w] & Stable(m,w,r) then
+         x[m] := w; y[w] := m; single[w] := false;
+         if m < n - 1 then Try(m+1) else Print; end;
+         single[w] := true;
+      end;
+   end;
+end Try;
+
+begin
+   writeln("Example 3.6 (Marriage)");   
+   writeln("Enter the fisrt table (",n,"x",n,"):");   
+   writeln("You can just copy sample data from example_3_6.in");   
+   for m := 0 to n - 1 do
+      for r := 0 to n - 1 do
+         read(h); wmr[m,r] := h - 1; rmw[m,wmr[m,r]] := r;
+      end;
+   end;
+   writeln("Enter the second table (",n,"x",n,"):");   
+   for w := 0 to n - 1 do
+      single[w] := true;
+      for r := 0 to n - 1 do
+         read(h); mwr[w,r] := h - 1; rwm[w,mwr[w,r]] := r;
+      end;
+   end;
+   Try(0);
+   writeln("Type 'q' to exit");	
+end Marriage.

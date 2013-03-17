@@ -1,0 +1,72 @@
+(* ********* Zonnon online collection ***********
+ * Buffer (Chapter 1, Example 1.11.2)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Main;
+
+const BUFFER_SIZE = 1024;
+
+var n, ain, aout: integer;
+    buf: array BUFFER_SIZE of integer;
+
+procedure Deposit(x: integer);
+begin
+   if n = BUFFER_SIZE then halt(0); end;
+   n := n + 1; 
+   buf[ain] := x; 
+   ain := integer(ain + 1) mod BUFFER_SIZE;
+end Deposit;
+
+procedure Fetch(var x:integer);
+begin
+   if n = 0 then halt(0); end;
+   n := n-1; 
+   x:= buf[aout]; 
+   aout := integer(aout + 1) mod BUFFER_SIZE;
+end Fetch;
+
+(******** example ************)
+
+procedure Display;
+var i:integer;
+begin
+   if aout <= ain then 
+     for i:= aout to ain-1 do write(buf[i mod BUFFER_SIZE]:3); end;
+   else
+     for i:= aout to 1023 do write(buf[i mod BUFFER_SIZE]:3); end;
+     for i:= 0 to ain-1 do write(buf[i mod BUFFER_SIZE]:3); end;
+   end;
+   writeln;
+end Diaplay;
+
+procedure Push;
+var x:integer;
+begin
+  write('x=');
+  readln(x);
+  Deposit(x);
+end Push;
+
+procedure Pop;
+var x:integer;
+begin
+  Fetch(x);
+  writeln('>', x);
+end Pop;
+
+var x:integer;
+begin
+  n:=0; ain :=0; aout := 0;
+  writeln("Example 1.3: BM");
+  writeln('Use commands: Buffer.Push, Buffer.Pop, Buffer.Display');
+  Deposit(10);
+  Fetch(x);
+  if x = 10 then
+    halt(1)
+  else
+    halt(0)
+  end
+end Main.

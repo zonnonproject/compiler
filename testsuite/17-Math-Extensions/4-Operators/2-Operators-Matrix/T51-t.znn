@@ -1,0 +1,55 @@
+(** 
+ * 17. Math extensions.
+ * 17.4.2. Matrix operators
+ * 
+ * Positive test: matrix division
+ * with scalar
+ *)
+
+module Main;
+
+type vi = array {math} * of integer;
+type vr = array {math} * of real;
+type mi = array {math} *,* of integer;
+type mr = array {math} *,* of real;
+type vb = array {math} * of boolean;
+
+var
+	Ai, Bi, Ci : mi;
+	ai, bi, ci : vi;
+	X1, X2, R : mr;
+	x, r : vr;
+	ab, bb, cb : vb;
+	
+	ii, ji : vi;
+	ib, jb : vb;
+	
+	i, j : integer;
+	k : integer;
+  
+begin
+	  
+	ai := [1,2];
+	  
+	Ai := [[1, 2, 4], [6, -1, 7], [5, -1, 7]];  
+	Ci := [[0, 1, 0], [0, 0, 1], [1, 0, 0]];
+	Bi := [[-3, 2, 1], [5, -4, 6]];  
+	ai := [4, -3, 5];
+	bi := [1, 4, -2];
+	
+	ii := [0, 1];
+	ji := [0, 2, 1];
+	ib := [true, false, true];
+	
+	X1 := Bi / Ai;
+	X2 := !(!Ai \ !Bi);
+	
+	if abs(X1 - X2) > 0.001
+	then
+		halt(0);
+	else
+		halt(1);
+	end;
+		
+end Main.
+

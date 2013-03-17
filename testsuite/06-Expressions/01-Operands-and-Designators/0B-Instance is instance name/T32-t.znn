@@ -1,0 +1,31 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Positive test: access to public array element.
+ * The object A.B is declared after it was used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	b.vi[0] := 1;
+	b.vi[0] := b.vi[0] + 1;
+
+	if b.vi[0] = 2 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public } 
+		vi : array 1 of integer;
+
+	var { public, immutable } 
+		vk : array 1 of integer;
+
+	var { private } 
+		vj : array 1 of integer;
+end B.

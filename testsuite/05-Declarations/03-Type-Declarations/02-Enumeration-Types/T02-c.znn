@@ -1,0 +1,20 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.2. Enumeration types.
+ *
+ * Positive test: the enumeration type B.C is used as array element type.
+ * The enumeration type is used after it was declared.
+ *)
+
+module Main;
+
+definition B;
+	type C = ( one, two );
+end B;
+
+var x : array 1 of B.C;
+
+begin
+	halt(1);
+end Main.

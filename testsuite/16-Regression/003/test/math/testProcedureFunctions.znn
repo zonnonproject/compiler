@@ -1,0 +1,72 @@
+module {public} Main;
+
+   import
+      System.Double as Double,
+      System.Math   as MD,
+      BelCore.Numbers  as N,
+      BelCore.Math     as MN;
+
+   type {public, value} Real = object
+      var {public}
+         d : Double;
+      procedure {public} Print () : string;
+      begin
+         return d.ToString("E6")
+      end Print;
+   begin
+      d := 0.0D0
+   end Real;
+
+   type
+      F = procedure (Real) : Real;
+      G = procedure (N.Number) : N.Number;
+
+   procedure WriteReal (f : F; name : string; x : Real);
+   var
+      y : Real;
+   begin
+      y := f(x);
+      writeln(name + "( " + x.Print() + " ) = " + y.Print())
+   end WriteReal;
+
+   procedure WriteNumber (g : G; name : string; x : N.Number);
+   var
+      y : N.Number;
+   begin
+      y := g(x);
+      writeln(name + "(" + x.ToString(6) + ") =" + y.ToString(6))
+   end WriteNumber;
+
+   procedure Sin (x : Real) : Real;
+   var
+      y : Real;
+   begin
+      y.d := MD.Sin(x.d);
+      return y
+   end Sin;
+
+   procedure Cos (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := MN.Cos(x);
+      return y
+   end Cos;
+
+   procedure {public} Run;
+   var
+      i : integer;
+      n : N.Number;
+      r : Real;
+   begin
+      for i := 1 to 8 do
+         r.d := MD.PI/real(i,64);
+         WriteReal(Sin, "sin", r);
+         n := MN.Pi/i;
+         WriteNumber(Cos, "cos", n)
+      end
+   end Run;
+
+begin
+   Run
+end Main.

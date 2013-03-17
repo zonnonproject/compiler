@@ -1,0 +1,18 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: real expression casting to integer.
+ *)
+module Main;
+var 
+	r : real;
+	i : integer;
+begin
+	r := 0.5;
+	i := integer(r + 0.5);
+
+	if i = 1 
+	then halt(1) else halt(0) end;
+end Main.

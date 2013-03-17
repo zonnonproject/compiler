@@ -1,0 +1,22 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * implements clause
+ *
+ * Negative test: wrong definition name B.C is used in implements clause.
+ * The name B.C is variable name. It is declared after it is used.
+ * 	
+ * Correct diagnostic must be output for wrong name B.C!
+ *)
+module A implements B.C;
+end A.
+
+module B;
+	var { public }
+		C : integer;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.

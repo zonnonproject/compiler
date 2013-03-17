@@ -1,0 +1,22 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * A-boolean
+ *
+ * Positive test: boolean and BOOL types are equivalent.
+ *)
+module Main;
+
+type BOOL = boolean;
+
+var 
+	b1 : BOOL;
+    b2 : boolean;
+begin
+	b1 := true;
+	b2 := true;
+
+	if b1 # b2 
+	then halt(0) else halt(1) end;
+end Main.

@@ -1,0 +1,9 @@
+module Main;
+
+var
+	A: array {sparse, math} *,* of integer;
+  
+begin
+	halt(0);
+end Main.
+

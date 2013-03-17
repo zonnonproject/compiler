@@ -1,0 +1,15 @@
+(** 
+ * 7. Statement 
+ * 7.5. WHILE statement.
+ *
+ * Negative test: not declared variable in WHILE clause. 
+ *)
+module Main;
+	var i : integer;
+begin
+	while j do
+		i := 0
+	end;
+
+	halt(0)
+end Main.

@@ -1,0 +1,13 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.4. Set Operators.
+ *
+ * Positive test: set equivalence.
+ * Set is presented as constant.
+ *)
+module Main;
+begin
+	if { 1, 2 } = { 1, 2 }
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,33 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.4. Protocted-Objects-and-Modules
+ *
+ * Positive test: Simple protected object
+ *)
+module Main;
+
+type {public} O = object
+	var {public}
+		a, b : integer;
+
+	procedure {public} Exchange;
+	var t : integer;
+	begin
+		t := a;
+		a := b;
+		b := t;
+	end Exchange;
+end O;
+
+var o:O;
+
+begin
+  o.a := 1;
+  o.b := 2;
+  o.Exchange;
+  if (o.a = 2) & (o.b = 1) then
+     halt(1)
+  else
+     halt(0)
+  end
+end Main.

@@ -1,0 +1,16 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports x as clause
+ *
+ * Negative test: the imported name is absent.
+ *)
+module Main;
+	import 
+		C, A.B as C;
+begin
+	halt(0);
+end Main.
+
+object C;
+end C.

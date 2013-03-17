@@ -1,0 +1,24 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: simple indexing
+ *)
+
+module Main;
+
+type v = array {math} * of integer;
+
+var
+	a : v;
+begin	
+	a := new v(3);
+	a[1] := 5;
+	a[2] := 7;
+	if (a[1] = 5) & (a[2] = 7) & (a[0] = 0)
+	then
+		halt(1);
+	else
+		halt(0);
+	end;
+end Main.

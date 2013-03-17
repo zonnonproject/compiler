@@ -1,0 +1,23 @@
+(** 
+ * 6. Expression.
+ * 6.4. Converting
+ *
+ * Positive test: i32 := i64{32};
+ * 
+ *)
+
+module Main;
+var 
+	i : integer;
+	i64: integer{64};
+	i32: integer{32};
+	r : real;
+begin
+	i := 10;
+	i64 := 15;
+	i32 := i64{32};
+	writeln(i32);
+	if i32 = 15 then halt(1) end;
+	halt(0);
+	
+end Main.

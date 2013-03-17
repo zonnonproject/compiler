@@ -1,0 +1,12 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ *
+ * Positive test: >= operator.
+ *)
+module Main;
+begin
+	if 1.3 >= 2.4 
+	then halt(0) else halt(1) end;
+end Main.

@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.1. Identifier Declarations and Scope Rules.
+ *
+ * Negative test: the type A and variable A have same name.
+ *
+ *)
+module Main;
+	type A = ( one, two );
+
+	var A : integer;
+begin
+	halt(0);
+end Main.
+

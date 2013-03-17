@@ -1,0 +1,14 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the procedure call uses wrong parameters count.
+ * The count is less then 1.
+ *)
+module Main;
+	procedure A(i : integer);
+	begin
+	end A;
+begin
+	A();
+	halt(0);
+end Main.

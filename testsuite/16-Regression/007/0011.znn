@@ -1,0 +1,28 @@
+object {public, ref} B;
+
+procedure {public} P;
+var 
+	b : boolean;
+begin {locked}
+	b := false;
+
+	await b;
+
+	writeln("The construct AWAIT does not work !!!");
+end P;
+
+end B.
+
+module run;
+
+import B;
+
+var b : B;
+
+begin
+	b := new B;
+	b.P();
+
+	writeln("Press any key.");
+	readln;
+end run.

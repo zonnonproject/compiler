@@ -1,0 +1,21 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports x as clause
+ *
+ * Positive test: the short name of object A.B is used as variable type.
+ * The object A.B is declared before it is used.
+ *)
+module Main;
+	import A.B as ab;
+
+	var x : ab;
+begin
+	if x.f = 3 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	procedure { public } f : integer;
+	begin return 3 end f;
+end B.

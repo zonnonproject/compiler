@@ -1,0 +1,16 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: assign string constant to element of System.String.
+ * The string has zero length.
+ *)
+module Main;
+	import System.String;
+
+	var sv : array 2 of System.String;
+begin
+	sv[0] := "";
+	halt(1);
+end Main.

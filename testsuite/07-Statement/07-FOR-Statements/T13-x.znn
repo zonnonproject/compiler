@@ -1,0 +1,18 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Negative test: FOR statement uses undeclared variable j 
+ * in TO j
+ *)
+module Main;
+	var	
+		i, a : integer;
+begin
+	for i := 0 to j do;
+		a := 0
+	end;
+
+	halt(0) 
+end Main.
+

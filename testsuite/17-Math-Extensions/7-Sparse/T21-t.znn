@@ -1,0 +1,27 @@
+module Main;
+
+type t1 = array {sparse} * of real;
+
+var
+	a, b, c : t1;	
+	
+	i : array {math} 3 of integer;
+	s : array {math} 3 of real;
+  
+begin
+	i := [4, 0, 2];
+	s := [-2.1, -4.1, 10.1];	
+	a := new t1(i, s, 6);
+	b := -a;
+	b[0] := b[0] + 5.0;
+	b[4] := b[4] + 3.0;
+	c := a + b;
+	
+	if (abs(c[0] - 5.0) < 0.0001) & (c[1] = 0) & (c[2] = 0) & (c[3] = 0) & (abs(c[4] - 3.0) < 0.0001) & (c[5] = 0)
+		& (len(c) = 6)
+		then halt(1);
+	end;
+
+	halt(0);
+end Main.
+

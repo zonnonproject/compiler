@@ -1,0 +1,11 @@
+ismall=line 100 turn 270 go 1 turn 270 line 100 turn 90 go 1 turn 90
+ibold=call ismall 1 call ismall 1 call ismall 1 call ismall 1 call ismall 1 call ismall 1 call ismall 1 call ismall 1
+ndiag=go 100 turn 200 line 107 turn 90 go 1 turn 90 line 107 turn 90 go 1 turn 90
+nbold=go 20 turn 90 call ibold 1 go 100 turn 200 call ibold 1 go 100 turn 160 call ibold 1
+flinesmall=line 50 turn 270 go 1 turn 270 line 50 turn 90 go 1 turn 90
+flinebold=call flinesmall 1 call flinesmall 1 call flinesmall 1 call flinesmall 1 call flinesmall 1 call flinesmall 1 call flinesmall 1 call flinesmall 1
+fshortlinesmall=line 40 turn 270 go 1 turn 270 line 40 turn 90 go 1 turn 90
+fshortlinebold=call fshortlinesmall 1 call fshortlinesmall 1 call fshortlinesmall 1 call fshortlinesmall 1 call fshortlinesmall 1 call fshortlinesmall 1 call fshortlinesmall 1 call fshortlinesmall 1
+fbold=turn 270 go 20 turn 90 call ibold 1 go 100 turn 270 call flinebold 1 turn 270 go 20 turn 90 call fshortlinebold 1 
+obold=call ibold 1 go 15 turn 270 call fshortlinebold 1 go 30 turn 90 call ibold 1 go 85 turn 90 go 10 call fshortlinebold 1
+info=turn 270 call ibold 1 turn 270 call nbold 1 call fbold 1 turn 270 go 47 turn 90 go 60 turn 90 call obold 1 turn 180 go 60 turn 270 call ibold 1

@@ -1,0 +1,16 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ *
+ * Positive test: < operator for character variables.
+ *)
+module Main;
+	var c1, c2 : char;
+begin
+	c1 := '0';
+	c2 := '1';
+
+	if c2 <= c1 
+	then halt(0) else halt(1) end;
+end Main.

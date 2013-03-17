@@ -1,0 +1,23 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ *
+ * Positive test: < operator for object variables.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b.x := 1;
+	b.y := 2;
+
+	if b.x < b.y 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public } 
+		x, y : integer;
+end B.

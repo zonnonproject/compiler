@@ -1,0 +1,33 @@
+(*
+ * This test should be in another place; (but there was a error in the previous version of compiler)
+ * Negative test: the final identifier of the operator should repeat its name
+ *
+*)
+
+module Main;
+
+operator {public} '#'(a: array * of integer; b: array * of integer): array * of integer;
+var
+	c : array 3 of integer;
+begin
+	c[0] := 1;
+	c[1] := 0;
+	c[2] := 1;
+	return c;
+end '<';
+
+var
+	a : array { math } 5 of integer;
+	b : array { math } 5 of integer;
+	
+	d : array 4 of integer;
+	e : array 4 of integer;
+	
+	c : array * of integer;
+	g : array {math} * of integer;
+begin	
+
+	c := d # e;
+	halt(0);
+	
+end Main.

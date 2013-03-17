@@ -1,0 +1,26 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: definition refines definition.
+ *)
+
+(* I. The refined definition A is declared after the refiner definition B. *)
+definition B refines A;
+end B.
+
+definition A;
+end A.
+
+(* II. The refined definition D is declared before the definition module C. *)
+definition D;
+end D.
+
+definition C refines D;
+end C.
+
+module Main;
+begin
+	halt(1);
+end Main.
+
+

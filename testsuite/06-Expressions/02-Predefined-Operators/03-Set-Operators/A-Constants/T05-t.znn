@@ -1,0 +1,16 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.4. Set Operators.
+ *
+ * Positive test: set symmetric difference.
+ * Set is presented as constant.
+ *)
+module Main;
+	var s3 : set;
+begin
+	s3 := { 1, 2 } / { 2, 3 }; (* { 1, 3 } is content of s3 set. *)
+
+	if (1 in s3) & ~(2 in s3) & (3 in s3)
+	then halt(1) else halt(0) end;
+end Main.

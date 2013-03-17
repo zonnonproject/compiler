@@ -1,0 +1,15 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators.
+ * C. ~ (negation) operator.
+ *
+ * Positive test: ~ for boolean variable true value.
+ *)
+module Main;
+	var b : boolean;
+begin
+	b := true;
+	if ~b 
+	then halt(0) else halt(1) end;
+end Main.

@@ -1,0 +1,25 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call.
+ *
+ * Positive test: the constant expression as procedure call parameter.
+ *)
+module Main;
+	const N = 3;
+
+	var i : integer;
+
+	procedure P(one, two, three : integer) : integer;
+	var 
+		s : string;
+	begin
+		if one   # 1 then return 0 end;
+		if two   # 2 then return 0 end;
+		if three # 3 then return 0 end;
+		return 1;
+	end P;
+
+begin
+	i := P(1, N-1, 3);
+	halt(i);
+end Main.

@@ -1,0 +1,62 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.1. New operators.
+ *
+ * Positive test: check all correct operator symbols.
+ * 
+ *)
+module Main;
+	type Point = object
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator "~" (p1 : Point) : Point;
+		var p : Point;		
+	begin return p end "~";
+
+	operator "#" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "#";
+
+	operator "^" (p1 : Point) : Point;
+		var p : Point;		
+	begin return p end "^";
+
+	operator "&" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "&";
+
+	operator "*" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "*";
+
+	operator "+" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "+";
+
+	operator "-" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "-";
+
+	operator "=" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "=";
+
+	operator "/" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "/";
+
+	operator "<" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end "<";
+
+	operator ">" (p1, p2 : Point) : Point;
+		var p : Point;		
+	begin return p end ">";
+begin
+	halt(1);
+end Main.

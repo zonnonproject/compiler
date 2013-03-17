@@ -1,0 +1,60 @@
+(* ********* Zonnon online collection ***********
+ * Sorting: straight insertion (Chapter 2, Example 2.1)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Sorting;
+    const MAX_SIZE = 20;
+  	
+    type ElementOfArray = integer;
+    type DefaultArray = array MAX_SIZE of ElementOfArray;
+    var MyArray: DefaultArray;
+	(* MyArray[0] is used as sentinel *)
+
+
+    (***** Implementation *****)
+    
+    procedure StraightInsertion(var a: DefaultArray; N: integer);
+    var i,j: integer; x: ElementOfArray;
+    begin
+       for i := 2 to N-1 do
+          x := a[i]; a[0] := x; j := i;
+	  while x < a[j-1] do a[j] := a[j-1]; j := j - 1; end;
+	  a[j] := x;
+       end; 
+    end StraightInsertion;
+
+    (***** Example support *****)
+
+    procedure FillTheArray;
+    var i:integer;
+    begin
+      for i := 1 to MAX_SIZE-1 do 
+        MyArray[i] := abs( 10 - i ); 
+      end; 
+    end FillTheArray;
+ 
+    procedure PrintTheArray;
+    var i:integer;
+    begin
+       writeln("Array:");
+       for i := 1 to MAX_SIZE-1 do
+          write( MyArray[i]:2, ', ' ); 
+       end; 
+       writeln;
+    end PrintTheArray;
+    
+    procedure Execute;
+    begin
+       StraightInsertion(MyArray, MAX_SIZE); 
+    end Execute;
+begin
+ writeln("Example 2.1 (Straight Insertion)");
+ FillTheArray;
+ PrintTheArray;
+ Execute;
+ PrintTheArray;
+ writeln("Type 'q' to exit");	
+end Sorting.

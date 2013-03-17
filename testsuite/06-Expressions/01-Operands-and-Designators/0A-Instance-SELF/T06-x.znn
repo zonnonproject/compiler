@@ -1,0 +1,18 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * A. Instance = self
+ *
+ * Negative test: access to array element that does not exist.
+ *)
+object A;
+	var i : integer;
+begin
+	self.x[0] := 1;
+	i := self.x[0];
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

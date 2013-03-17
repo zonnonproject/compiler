@@ -1,0 +1,128 @@
+(* ********* Zonnon online collection ***********
+ * Sherlock_r2x
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Sherlock_r2x;
+
+import Scanner;
+
+const 
+	MaxHash = 1000; 
+	MaxWord = 50;
+	MaxSchluessel = 100;
+
+type 
+	String = array MaxWord of char; 
+
+var 
+	Schluesselwoerter : array MaxSchluessel of string;
+	Hashtab : array MaxHash of string;
+	P : integer;
+
+procedure InitHashtab(length : integer);
+var 
+	i : integer;
+begin
+	for i := 0 to length do
+		Hashtab[i] := ""; 
+	end;
+end InitHashtab;
+
+(* Hashfunction with global parameter P. *)
+procedure H(s : String) : integer;
+var 
+	i, res : integer;           
+begin
+	i := 0;
+	while s[i] # ' ' do 
+		res := res + (integer(s[i]) * 17 * (i+1));
+		inc(i);
+	end; 
+	res := res mod P;
+	return res;
+end H;
+
+procedure Register() : integer;
+var  
+	anzSchluessel, i, currenthash : integer;
+	collision : boolean;
+	cur : string; 
+	a : String;
+begin        
+    writeln("Register..."); 
+    writeln("Please enter the words to hash,");
+    writeln("separated by <return>, terminated by '#'. ");
+    readln(cur); 
+    if cur = "#" then 
+    	writeln("you entered no words, aborting");
+    	return 0;
+    end;
+
+    anzSchluessel := 1; (* Note that we start at index 1 (instead of 0). *)
+    while cur # "#" do 
+    	Schluesselwoerter[anzSchluessel] := cur;
+    	inc(anzSchluessel);
+    	readln(cur); 
+    end;
+    P := anzSchluessel-1;
+
+    collision := true;
+    while collision do
+        i := 1;
+        loop
+(*			a[0] := chr(0); *)
+			cur := Schluesselwoerter[i];
+			if cur = nil then 
+				writeln("cur = nil");
+			else
+				write("cur = "); writeln(cur);
+			end;
+			copy(Schluesselwoerter[i], a);
+			currenthash := H(a);
+            
+			if (i < anzSchluessel) & (Hashtab[currenthash] = "") then
+				Hashtab[currenthash] := Schluesselwoerter[i];
+			elsif i = anzSchluessel then
+				collision := false;
+				exit;
+			else
+				InitHashtab(P);
+				inc(P);
+				exit;
+			end;   
+			inc(i);      
+		end; (* loop *)
+    end; (* while *)
+    return 1;
+end Register;
+     
+procedure Search();
+var   
+	current : String;
+	filename : string;
+	s : string;
+begin
+	writeln("Search...  ");
+	writeln("Please enter the filename:");
+	readln(filename);
+	Scanner.Open(filename);
+
+	while ~Scanner.Done do
+		Scanner.GetWord(current);
+		copy(current, s);
+		if Hashtab[H(current)] = s then
+			write("word found: "); writeln(s);   
+		end;
+	end;
+end Search; 
+
+begin  
+	InitHashtab(MaxHash-1); (* Array size is [0..MaxHash-1]. *)
+	if Register() # 0 
+	then Search();
+	end; (* Else not valid words. *)   
+end Sherlock_r2x.

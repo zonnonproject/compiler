@@ -1,0 +1,17 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Negative test: for statement has not constant step.
+ *)
+module Main;
+	var	s, i, j : integer;
+begin
+	j := 5;
+	s := 1;
+	for i := 1 to 10 by j do;
+		s := i;
+	end;
+
+	halt(0);
+end Main.

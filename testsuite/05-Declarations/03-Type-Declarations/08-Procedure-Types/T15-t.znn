@@ -1,0 +1,33 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: set variable procedure from the object.
+ *)
+object {ref, public} A;
+	var {public} x : integer;
+
+	procedure {public} P;
+	begin x := 5 end P;
+end A.
+
+module Main;
+
+import A;
+
+type PT = procedure;
+
+var  
+	a : A;
+	pt : PT;
+begin
+    a := new A;
+	a.x := 1;
+
+	pt := a.P;
+	pt();
+
+	if a.x = 5
+	then halt(1) else halt(0) end;
+end Main.

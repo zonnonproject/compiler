@@ -1,0 +1,36 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * The sealed modifier
+ *
+ * Positive test: the sealed procedure P has default implementation;
+ *)
+definition {public} A;
+	procedure {sealed} P : integer;
+end A.
+
+implementation A;
+	procedure {public} P : integer;
+	begin 
+		return 3 
+	end P; 
+end A.
+
+object {public} D.B implements A;
+	(* 
+		The object D.B inherits default implementation of P procedure. 
+	*)
+end B.
+ 
+module Main;
+import D;
+
+var 
+	i : integer;
+	b : D.B;
+begin
+	i := 2;
+	i := b.P();
+
+	if i = 3 
+	then halt(1) else halt(0) end;
+end Main.

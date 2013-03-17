@@ -1,0 +1,76 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.3. New operator declaration.
+ *
+ * Negative test: operators can not have arguments by reference
+ *)
+
+
+module Main;
+
+definition De;
+	procedure Hi; 
+end De;
+var globalOK: integer;
+type {value} OA = object
+var {public} val:integer;
+begin
+ writeln("this should be called");
+ globalOK :=597;
+end OA;
+
+type {value} OB = object implements De, []
+    var o: OA;
+	procedure {public} Hi implements De.Hi;
+	begin
+		writeln("Hello");
+	end Hi;
+	
+	procedure {public} Get(i: integer):OA implements [].Get;
+	begin
+		return o;
+	end Get;
+	
+	procedure {public} Set(i:integer; val: OA) implements [].Set;
+	begin
+	    o:= val;
+		writeln("Set", i, o.val);
+	end Set;
+	
+end OB;
+
+var a: OB;
+	o: object{De};
+
+procedure halt(i: integer);
+begin
+	if i=1 then
+		writeln("success")
+	else
+		writeln("failure")
+	end; readln
+end halt;	
+
+var oa: OA;	
+(*
+begin
+	(*a := new OB;*)
+	o := a;
+	oa.val := 5;
+	a[1] := oa;
+	o.Hi;
+	writeln("C: ", a[2].val);
+	if (a[2].val = 5) & (globalOK=597) then halt(1) else halt(0) end
+end Main.
+*)
+operator "+"(var a,b: OA):OA;
+begin
+	writeln("assignment is called");
+	return a;
+end "+";
+begin
+	oa := a[1] + oa;
+	writeln("C: ", oa.val);
+	if (a[2].val = 5) & (globalOK=597) then halt(1) else halt(0) end
+end Main.

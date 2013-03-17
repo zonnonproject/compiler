@@ -1,0 +1,36 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.2 Properties
+ *
+ * Negative test: the definition has not the property variable
+ *)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.age.year = 2000
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, value } B implements A;
+	import C;
+
+	procedure {get, public} age : C implements A.age;
+	var a : C;
+	begin
+		a.day := 1;
+		a.month := 1;
+		a.year := 2000;
+		return a;
+	end age;
+end B.
+
+definition A;
+(*	var age : C; *)
+end A.
+
+object {public, value } C;
+	var {public}
+		year, month, day : integer;
+end C.

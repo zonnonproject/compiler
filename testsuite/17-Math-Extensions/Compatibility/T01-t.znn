@@ -1,0 +1,50 @@
+(** 
+ * 17. Math extensions.
+ * 
+ * Compatibility with overloaded operators for array
+ * Positive test.
+ *)
+
+module Main;
+
+operator {public} '+'(a: array * of integer; b: array * of integer): array * of integer;
+var
+	c : array 3 of integer;
+begin
+	c[0] := 2;
+	c[1] := 3;
+	c[2] := 2;
+	return c;
+end '+';
+
+
+
+var
+	a : array { math } 5 of integer;
+	b : array { math } 5 of integer;
+	
+	d : array 4 of integer;
+	e : array 4 of integer;
+	
+	c : array * of integer;
+	g : array {math} * of integer;
+begin	
+	a := [1, 2, 3, 4, 5];
+	b := [5, 4, 3, 2, 1];
+	
+	c := a + b;
+	if (c[0] # 6) or (c[1] # 6) or (c[2] # 6)
+	then
+		halt(0);
+	end;
+	
+	c := d + e;
+	if (c[0] # 2) or (c[1] # 3) or (c[2] # 2)
+	then
+		halt(0);
+	end;
+
+	
+	halt(1);
+	
+end Main.

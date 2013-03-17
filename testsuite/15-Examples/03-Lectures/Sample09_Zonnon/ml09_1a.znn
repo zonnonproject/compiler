@@ -1,0 +1,264 @@
+(* ********* Zonnon online collection ***********
+ * ClientServerA
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module ClientServerA; (* JG, 12.1.01; mc 26.12.01, mg .net *)
+
+import 
+	System.Random, 
+	System.Math.Log;
+
+const  
+	simEnd = 100000;                   
+	serviceMax = 6; 
+	interArrivalMean = 2; 
+	maxNumberOfServices = 10;
+
+type longreal = real {64};
+                    
+object {ref, public} ClientServer;
+var {public}     
+	next : ClientServer;   
+	t : longreal;     
+	isServer : boolean; (* else client. *)
+		 
+	(* Client attributes: *)
+	cArrT : longreal; (* Client arrival time. *)
+		 
+	(* Server attributes: *)
+	sLineNo : integer;    (* Number of served client waiting line. *)
+	sCurC : ClientServer; (* Current client of server. *)
+end ClientServer; 
+              
+var  
+	freeC : ClientServer;           
+	lenC : array 2 of integer; (* Lengths of client waiting lines. *)
+	firstC, lastC : array 2 of ClientServer; (* Client waiting lines. *)
+	firstS : ClientServer; (* Server pool. *)
+	cal : ClientServer; (* Event calendar. *)
+	now, totTime : longreal;
+	nofC : integer;          
+	services : array maxNumberOfServices of real;
+	rg : System.Random;                 
+	     
+(** Service time. *)     
+procedure Exponential(mu : real) : longreal;    
+var                            
+	z, r : longreal;                     
+begin        
+	r := rg.NextDouble();                
+	z := System.Math.Log(r) / mu;
+	return -z      
+end Exponential;         
+
+procedure InitServices();
+var  
+	i : integer;      
+begin
+	for i := 0 to maxNumberOfServices-1 do
+		services[i] := rg.NextDouble() * serviceMax
+	end
+end InitServices;
+
+procedure ServiceTime() : real;
+var r : real;
+begin
+	r := rg.NextDouble() * maxNumberOfServices;
+	return services[ integer(r) ]
+end ServiceTime;
+
+(** Recycling. *)   
+procedure newC(var c : ClientServer);
+begin
+	if freeC = nil then 
+		c := new ClientServer(); 
+		c.isServer := false
+	else 
+		c := freeC; 
+		freeC := freeC.next
+	end
+end newC;
+ 
+procedure DisPOSEC(c : ClientServer);
+begin 
+	c.next := freeC;      
+	freeC := c
+end DisPOSEC;
+
+(* List Handling *)
+
+(** Handling of the client queue. *)
+procedure PutC(i : integer; var c : ClientServer);
+begin
+	if lastC[i] # nil 
+	then lastC[i].next := c 
+	else firstC[i] := c 
+	end;
+
+	lastC[i] := c; 
+	lenC[i] := lenC[i] + 1                   
+end PutC;      
+
+procedure GetC(i : integer; var c : ClientServer);
+begin
+	if lastC[i] = nil then 
+		c := nil
+	else                 
+		c := firstC[i];
+		if firstC[i] = lastC[i] then 
+			lastC[i] := nil 
+		end; 
+
+		firstC[i] := firstC[i].next;
+		lenC[i] := lenC[i] - 1
+	end
+end GetC;
+ 
+(** Handling of the server pool. *)
+procedure PutS(var s : ClientServer);
+begin 
+	s.next := firstS;
+	firstS := s
+end PutS;
+   
+procedure GetS(var s : ClientServer);
+begin                            
+	if firstS = nil then 
+		s := nil
+	else 
+		s := firstS; 
+		firstS := firstS.next
+	end
+end GetS;
+
+(** Handling of the Event Calendar. *)
+procedure Enter(x : ClientServer; t : longreal);
+var  
+	cur : ClientServer;
+begin 
+	x.t := t;
+	if cal.t <= x.t then 
+		cur := cal;
+
+		while cur.next.t <= t do cur := cur.next end;
+
+		x.next := cur.next;
+		cur.next := x
+	else 
+		x.next := cal; 
+		cal := x
+	end
+end Enter; 
+ 
+procedure GetNext(var x : ClientServer);
+begin (* cal # nil *) 
+	x := cal;
+	if cal.t < max(real) then 
+		cal := cal.next 
+	end
+end GetNext;
+ 
+(* Event Handling. Those procedureS are called, when an event is activated. *)
+
+(** 
+ * Client Arrival: 
+ * - Check if a server is free, if so schedule an end event ...
+ * - Otherwise, go in the appropriate queue
+ * - Schedule the next event 
+ *)
+procedure Arrive(x : ClientServer);
+var 
+	c, s : ClientServer; 
+begin 
+	x.cArrT := now;
+	GetS(s); (* Get server from pool. *)
+
+	if s # nil then 
+		s.sCurC := x; 
+		Enter(s, now + ServiceTime())
+	elsif lenC[0] <= lenC[1] then 
+		PutC(0, x) (* Apply least queuing. *)
+	else 
+		PutC(1, x)
+	end;
+
+	newC(c); 
+	Enter(c, now + Exponential(1 / interArrivalMean))
+end Arrive;
+
+(** 
+ * Server finished to serve a client:
+ *  - account stats for the leaving client
+ *  - see if there is another client in the queue ...
+ *  - otherwise make the server available (back in server pool) 
+ *)
+procedure End(x : ClientServer);
+var 
+	c : ClientServer;
+begin
+	inc(nofC); 
+	totTime := totTime + now - x.sCurC.cArrT;
+	DisPOSEC(x.sCurC); 
+	GetC(x.sLineNo, c); (* Get next client from served waiting line. *)
+
+	if c # nil then 
+		x.sCurC := c; 
+		Enter(x, now + rg.NextDouble() * serviceMax)
+	else 
+		PutS(x) (* Return server. *)
+	end
+end End;
+
+(* Main *)
+procedure { public } Simulate;
+var 
+	x, c, s : ClientServer;
+begin
+	InitServices();
+	lenC[0] := 0; 
+	lenC[1] := 0; 
+	lastC[0] := nil; 
+	lastC[1] := nil; (* Init client waiting lines to empty. *)
+	firstS := nil; 
+	
+	s := new ClientServer(); 
+	s.isServer:= true;
+	s.sLineNo := 0; 
+	PutS(s); 
+	
+	s := new ClientServer(); 
+	s.isServer := true;
+	s.sLineNo  := 1; 
+	PutS(s); (* Init server pool. *);
+
+	cal := new ClientServer(); 
+	cal.t := max(real); (* Init cal with sentinel. *)
+
+	nofC := 0; 
+	totTime := 0.0;
+	newC(c);
+	Enter(c, 0.0); 
+	GetNext(x);
+
+	while x.t <= simEnd do
+		now := x.t; (* Set virtual clock. *)
+		if ~x.isServer then Arrive(x) else End(x) end;
+		GetNext(x)         
+	end;
+        
+	write("number of clients:"); write(nofC); 
+	write(" waiting time per client:"); writeln(totTime / nofC)
+end Simulate; 
+
+begin   
+	rg := new System.Random();
+	freeC := nil;  
+	Simulate();  
+
+	writeln("Done. Press Enter key");
+	readln
+end ClientServerA.  

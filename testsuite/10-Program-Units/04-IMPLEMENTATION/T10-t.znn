@@ -1,0 +1,34 @@
+(** 
+ * 11.Program Units.
+ * 11.4. implementation
+ *
+ * Positive test: the procedure P is declared in definition A.
+ * The procedure P has default implementation. It is called in object B;
+ *)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.j = 5
+	then halt(1) else halt(0) end;
+end Main.
+
+object B implements A;
+	var { public }
+		j : integer;
+begin
+	j := P();
+end B.
+
+implementation A;
+	procedure { public } P : integer;
+	begin
+		return 5
+	end P;
+begin
+end A.
+
+definition A;
+	procedure P : integer;
+end A.

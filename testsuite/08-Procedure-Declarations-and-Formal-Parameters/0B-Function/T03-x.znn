@@ -1,0 +1,14 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the function does not return correct result.
+ *)
+module Main;
+	procedure A : integer;
+	begin
+		return 'A';
+	end A;
+begin
+	A;
+	halt(0);
+end Main.

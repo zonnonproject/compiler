@@ -1,0 +1,33 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * IMPLEMENTS clause
+ *
+ * Negative test: the OBJECT A uses public variable (i) from definition B. 
+ * The OBJECT A has own public variable (i) also.
+ *
+ * The DEFINITION B is used before it was declared.
+ *)
+definition {public} B;
+	var { public } 
+		i : integer;
+end B.
+
+object {public} A implements B;
+	var { public } 
+		i : integer;
+begin 
+	i := 1;
+end A.
+
+module Main;
+	import A;
+
+	var a : A;
+begin
+	if a.i = 1
+	then halt(1) else halt(0) end;
+end Main.
+
+
+

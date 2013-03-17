@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ *
+ * Negative test: the definition B name is used as variable type.
+ * The definition B is declared after it is used.
+ *)
+module A;
+	var X : B;
+
+	definition B;
+	end B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

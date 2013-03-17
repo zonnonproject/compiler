@@ -1,0 +1,79 @@
+(* ********* Zonnon online collection ***********
+ * Sorting: non recursive quick sort (b) (Chapter 2, Example 2.10)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Sorting;
+    const MAX_SIZE = 20;
+
+    type ElementOfArray = integer;
+    type DefaultArray = array MAX_SIZE + 1 of ElementOfArray;
+    var MyArray: DefaultArray;
+
+    (***** Implementation *****)
+    
+    object { value } StackElement;
+    var { public }
+        L,R : integer;
+    end StackElement;
+	
+    procedure NonRecursiveQuickSort(var a: DefaultArray; n:integer);
+    const M = 12;
+    var i,j,s,L,R: integer; w,x: ElementOfArray;
+        stack: array M of StackElement;
+    begin i := L; j := R;
+       s := 0; stack[0].L := 1; stack[0].R := n;
+       repeat
+          L := stack[s].L; R := stack[s].R; s := s - 1;
+             i := L; j := R;
+             x := a[(L + R) div 2];
+             repeat
+                while a[i] < x do i := i + 1; end;
+                while x < a[j] do j := j - 1; end;
+                if i <= j then
+                   w := a[i]; a[i] := a[j]; a[j] := w; i := i + 1; j := j - 1;
+                end;
+             until i > j;
+             if j - L < R - i then
+                if i < R then s := s + 1; stack[s].L := i; stack[s].R := R; end;
+                R := j;
+                if L < j then s := s + 1; stack[s].L := L; stack[s].R := j; end;
+                L := i;
+             end;
+       until s = -1;
+    end NonRecursiveQuickSort;
+
+    (***** Example support *****)
+
+    procedure FillTheArray;
+    var i:integer;
+    begin
+      for i := 1 to MAX_SIZE do 
+        MyArray[i] := abs( 10 - i ); 
+      end; 
+    end FillTheArray;
+ 
+    procedure PrintTheArray;
+    var i:integer;
+    begin
+       writeln("Array:");
+       for i := 1 to MAX_SIZE do
+          write( MyArray[i]:2, ', ' ); 
+       end; 
+       writeln;
+    end PrintTheArray;
+    
+    procedure Execute;
+    begin
+       NonRecursiveQuickSort(MyArray, MAX_SIZE); 
+    end Execute;
+begin
+ writeln("Example 2.11b (Non recursive quick sort)");
+ FillTheArray;
+ PrintTheArray;
+ Execute;
+ PrintTheArray;
+ writeln("Type 'q' to exit");	
+end Sorting.

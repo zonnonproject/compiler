@@ -1,0 +1,16 @@
+(**
+ * 09.Predefined procedures.
+ * The max(T) procedure.
+ *
+ * Positive test: max value for enumeration type.
+ *)
+module Main;
+	type E = ( one, two, three );
+	
+	var e : E;
+begin
+	e := min(E);
+
+	if e = E.one 
+	then halt(1) else halt(0) end;
+end Main.

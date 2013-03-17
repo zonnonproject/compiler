@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ *
+ * Negative test: the imported identifier C is not declared in module B.
+ * The module B is declared after it is used.
+ *)
+module A;
+	import B;
+
+	var X : B.C;
+end A.
+
+module B;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

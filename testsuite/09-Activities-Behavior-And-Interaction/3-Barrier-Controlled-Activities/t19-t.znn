@@ -1,0 +1,63 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.3. Barrier-Controlled-Activities
+ *
+ * Positive test: Execution oriented example
+ *)
+
+module {protected} Main;
+(*
+   Note:
+    The idea of this test is to check if subactivities 
+    are terminated within the blocks they are initialised.
+
+    We have 3 activities that set global flag into 1 
+    in several miliseconds after its execution.
+*)
+import System.Threading;
+
+var
+	a1, a2, a3 : integer; (* flags *)
+
+activity Activity3;
+begin
+	await 500;
+	a3 := 1
+end Activity3;
+
+activity Activity2;
+begin
+	await 100;
+	a2 := a3;	(* a3 will be zero by the time of
+					assignment *)
+end Activity2;
+
+activity Activity1;
+begin		
+	do {barrier}
+   		new Activity3;
+		new Activity2
+	end; (* Will wait for Activity 2 and 3 *)
+
+	a1 := a3 + a2; (* a3 is zero in this example *)
+end Activity1;
+
+var 
+	sum : integer;
+begin
+	a1 := 0;
+	a2 := 0;
+	a3 := 0;
+
+	do {barrier}
+		new Activity1
+	end;
+
+	sum := a1 + a2 + a3; (* should be a1=a3=1, a2=0 => sum=1 *)
+
+	if sum = 2 then (* it is OK *)
+ 		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end;
+end Main.

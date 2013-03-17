@@ -1,0 +1,24 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Negative test: simple indexing (dynamic array)
+ *)
+
+module Main;
+
+type v = array {math} * of integer;
+
+var
+	a : v;
+begin	
+	a := new v(3);
+	a[1] := 5;
+	a[2] := 7;
+	do
+		a[4] := 9;
+	on OutOfRange do
+		halt(1);
+	end;
+	halt(0);
+end Main.

@@ -1,0 +1,30 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: is the procedure P from module A delegate? 
+ *)
+module A;
+	procedure {public} P(var i : integer);
+	begin
+		i := i + 1;
+	end P;
+end A.
+
+module Main;
+	import A;
+
+	type PT = procedure(var integer);
+
+	var pt : PT;
+		k : integer;
+begin
+	k := 3;
+	pt := A.P;
+	pt(k);
+	
+	if k = 4 
+	then halt(1) else halt(0) end;
+end Main.
+

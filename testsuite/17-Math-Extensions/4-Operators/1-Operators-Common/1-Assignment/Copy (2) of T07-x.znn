@@ -1,0 +1,20 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Assignment
+ * 
+ * Negative test: lengths are not equal
+ * math static := static
+ *)
+
+module Main;
+
+var
+	a : array {math} 2, 3, 4 of integer;
+	c : array 2, 3, 3 of integer;
+	
+begin	
+
+	a := c;
+	halt(0);
+end Main.

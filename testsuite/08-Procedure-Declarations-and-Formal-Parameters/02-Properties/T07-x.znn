@@ -1,0 +1,32 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.2 Properties
+ *
+ * Negative test: the property getter and property have different types
+ *)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.age.year = 2000
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, value} B implements A;
+	procedure {get, public} age : integer implements A.age;
+	begin
+		return 2000;
+	end age;
+end B.
+
+definition {public} A;
+	import C;
+
+	var age : C;
+end A.
+
+object {public, value } C;
+	var {public}
+		year, month, day : integer;
+end C.

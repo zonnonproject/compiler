@@ -1,0 +1,25 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators.
+ *
+ * Negative test: private boolean variables of object A.B are used in logical operator.
+ * The object is declared before its variables are used.
+ *)
+object A.B;
+	var { private } 
+		p, q : boolean;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+		r : boolean;
+begin
+	b.p := true;
+	b.q := false;
+
+	r := b.p or b.q;
+	halt(0);
+end Main.

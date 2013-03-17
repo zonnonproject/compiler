@@ -1,0 +1,16 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the old Pascal function value return does not work now!
+ *)
+module Main;
+	procedure F(i : integer) : integer;
+	begin
+		F := i + 1;
+	end F;
+
+	var r : integer;
+begin
+	r := F(1);
+	halt(0);
+end Main.

@@ -1,0 +1,23 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * implements operator.
+ *
+ * Negative test: the implements operator is applied to definition.
+ * The result is false.
+ *)
+definition A;
+	procedure p1 : integer;
+end A.
+
+definition B refines A;
+	procedure p2 : integer;
+end B.
+
+module Main;
+	import A, B;
+begin
+	if A implements B
+	then halt(0) else halt(1) end;
+end Main.

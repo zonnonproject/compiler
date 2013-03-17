@@ -1,0 +1,407 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates a persistent double-linked list for data storage                   *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : ListNode    - a node for double-linked lists                 *)
+(*   var       : data        - where the data (instance of Datum) are stored  *)
+(*             : key         - a key used for locating (sorting) the node     *)
+(*             : next        - a link to the next node in the list            *)
+(*             : prev        - a link to the previous node in the list        *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : List        - a doubly-linked data structure                 *)
+(*    methods  : Initialize  - prepares the list for use                      *)
+(*             : Nullify     - sets all dynamic links and memories to nil     *)
+(*             : Load        - reads a list from file: call Configure first   *)
+(*             : Store       - writes a list to a binary file                 *)
+(*             : Clone       - returns an empty list                          *)
+(*             : Copy        - returns a deep copy of the list                *)
+(*             : Configure   - specifies the data type for list insertion     *)
+(*             : Contains    - returns the data type of the data in the list  *)
+(*             : Length      - returns the number of nodes in the list        *)
+(*             : Delete      - removes datum (at specified key) from the list *)
+(*             : Insert      - places a new datum into the list               *)
+(*    # additional procedures for managing a list via its rider               *)
+(*             : Find        - searchs for a specified key in the list        *)
+(*             : Home        - moves the rider to its home node               *)
+(*             : Next        - ratchets the rider to the next node            *)
+(*             : Previous    - ratchets the rider to the previous node        *)
+(*             : GetData     - gets the datum at the rider's current position *)
+(*             : GetKey      - gets the key at the rider's current position   *)
+(*             : Update      - replaces the datum at that node in the list    *)
+(*                             with the matching key                          *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+object {public, ref} BelData.ListNode;
+   import
+      BelData.Datum,
+      BelData.Keys;
+   var {public}
+      data : object{BelData.Datum};
+      key  : BelData.Keys.Key;
+      next, prev : ListNode;
+begin
+   data := nil;
+   key.Initialize;
+   next := nil;
+   prev := nil
+end ListNode.
+
+
+object {public, ref} BelData.List implements BelData.Structure;
+
+   import
+      System.Int32  as Int32,
+      System.Object as Obj,
+      BelCore.Log      as L,
+      BelData.Keys     as K,
+      BelData.ListNode as N;
+
+   var {private}
+      dataClone   : object{BelData.Datum};
+      dataType    : Type;
+      home, rider : N;
+      length      : integer;
+
+   procedure {public} Initialize
+      implements BelData.Object.Initialize;
+   begin
+      dataClone := nil;
+      home   := nil;
+      length := 0;
+      rider  := nil
+   end Initialize;
+
+   procedure {public} Nullify
+      implements BelData.Object.Nullify;
+   var
+      n : N;
+   begin {locked}
+      n := home;
+      while n # nil do
+         n.data.Nullify;
+         n := n.next;
+         if n # nil then
+            n.prev.next := nil;
+            n.prev := nil
+         end
+      end;
+      dataClone := nil;
+      home   := nil;
+      length := 0;
+      rider  := nil
+   end Nullify;
+
+   procedure {public} Load (br : BinaryReader)
+      implements BelData.Object.Load;
+   var
+      d : object{BelData.Datum};
+      i, j : integer;
+      k : K.Key;
+      o : object{BelData.Object};
+      success : boolean;
+   begin {locked}
+      length := 0;
+      j := br.ReadInt32();
+      for i := 1 to j do
+         o := dataClone.Clone();
+         d := BelData.Datum(o);
+         d.Load(br);
+         k.Load(br);
+         Insert(d, k, success)
+      end
+   end Load;
+
+   procedure {public} Store (bw : BinaryWriter)
+      implements BelData.Object.Store;
+   var
+      i : integer;
+      j : Int32;
+      n : N;
+   begin {locked}
+      j := length;
+      bw.Write(j);
+      n := home;
+      for i := 1 to length do
+         n.data.Store(bw);
+         n.key.Store(bw);
+         n := n.next
+      end;
+      bw.Flush
+   end Store;
+
+   procedure {public} Clone () : object{BelData.Datum}
+      implements BelData.Datum.Clone;
+   var
+      d : object{BelData.Datum};
+      l : List;
+   begin
+      l := new List;
+      d := BelData.Datum(l);
+      return d
+   end Clone;
+
+   procedure {public} Copy () : object{BelData.Datum}
+      implements BelData.Datum.Copy;
+   var
+      d : object{BelData.Datum};
+      i : integer;
+      l : List;
+      n : N;
+      success : boolean;
+   begin {locked}
+      l := new List;
+      if home # nil then
+         n := home;
+         for i := 1 to length do
+            l.Insert(n.data, n.key, success);
+            n := n.next
+         end
+      end;
+      d := BelData.Datum(l);
+      return d
+   end Copy;
+
+   procedure {public} Configure (clone : object{BelData.Datum})
+      implements BelData.Structure.Configure;
+   var
+      o : object{BelData.Object};
+      obj : Obj;
+   begin {locked}
+      if clone # nil then
+         Nullify;
+         o := clone.Clone();
+         dataClone := BelData.Datum(o);
+         obj := clone;
+         dataType := obj.GetType()
+      else
+         L.WarningMessage(500,415, "BelData.List.Configure")
+      end
+   end Configure;
+
+   procedure {public} Contains () : Type
+      implements BelData.Structure.Contains;
+   begin
+      return dataType
+   end Contains;
+
+   procedure {public} Length () : integer;
+   begin
+      return length
+   end Length;
+
+   procedure {public} Delete (key : K.Key; var success : boolean);
+   begin {locked}
+      Find(key, success);
+      if success then
+         if length = 1 then
+            home := nil
+         elsif length = 2 then
+            if rider = home then
+               home := rider.next;
+               home.prev := nil;
+               rider.next := nil
+            else
+               home.next := nil;
+               rider.prev := nil
+            end
+         else
+            if rider = home then
+               home := rider.next;
+               home.prev := nil;
+               rider.next := nil
+            elsif rider.next = nil then
+               rider.prev.next := nil;
+               rider.prev := nil
+            else
+               rider.prev.next := rider.next;
+               rider.next.prev := rider.prev;
+               rider.next := nil;
+               rider.prev := nil
+            end
+         end;
+         rider.data.Nullify;
+         dec(length);
+         Home
+      end
+   end Delete;
+
+   procedure {public} Insert
+      (datum : object{BelData.Datum}; key : K.Key; var success : boolean);
+   var
+      left, n, right : N;
+      o : object{BelData.Object};
+      obj : Obj;
+      s : string;
+      t : Type;
+   begin {locked}
+      if datum # nil then
+         if length <= 0 then
+            Configure(datum)
+         end;
+         obj := datum;
+         t := obj.GetType();
+         if dataType.Equals(t) then
+            n := new N;
+            if length = 0 then
+               home := n;
+               rider := n;
+               success := true
+            else
+               if key < home.key then
+                  n.next := home;
+                  home.prev := n;
+                  home := n;
+                  success := true
+               elsif key = home.key then
+                  success := false;
+                  L.WarningMessage(511,415, "BelData.List.Insert")
+               else
+                  left := home;
+                  right := home.next;
+                  loop
+                     if right = nil then
+                        left.next := n;
+                        n.prev := left;
+                        success := true;
+                        exit
+                     end;
+                     if key < right.key then
+                        left.next := n;
+                        right.prev := n;
+                        n.prev := left;
+                        n.next := right;
+                        success := true;
+                        exit
+                     end;
+                     if key = right.key then
+                        success := false;
+                        L.WarningMessage(511,415, "BelData.List.Insert");
+                        exit
+                     end;
+                     left := right;
+                     right := right.next
+                  end
+               end
+            end
+         else
+            success := false;
+            L.WarningMessage(501,415, "BelData.List.Insert")
+         end
+      else
+         success := false;
+         L.WarningMessage(500,415, "BelData.List.Insert")
+      end;
+      if success then
+         o := datum.Copy();
+         n.data := BelData.Datum(o);
+         n.key := key;
+         inc(length)
+      end
+   end Insert;
+
+   (* the following procedures allow the user to explore a list *)
+
+   procedure {public} Find (key : K.Key; var found : boolean);
+   begin {locked}
+      Home;
+      found := false;
+      loop
+         if rider = nil then
+            Home;
+            exit
+         end;
+         if key = rider.key then
+            found := true;
+            exit
+         end;
+         if key < rider.key then
+            Home;
+            exit
+         end;
+         rider := rider.next
+      end
+   end Find;
+
+   procedure {public} Home;
+   begin {locked}
+      rider := home
+   end Home;
+
+   procedure {public} Next (var moved : boolean);
+   begin {locked}
+      if (rider # nil) & (rider.next # nil) then
+         rider := rider.next;
+         moved := true
+      else
+         moved := false
+      end
+   end Next;
+
+   procedure {public} Previous (var moved : boolean);
+   begin {locked}
+      if (rider # nil) & (rider.prev # nil) then
+         rider := rider.prev;
+         moved := true
+      else
+         moved := false
+      end
+   end Previous;
+
+   procedure {public} GetData () : object{BelData.Datum};
+   begin
+      return rider.data
+   end GetData;
+
+   procedure {public} GetKey () : K.Key;
+   begin
+      return rider.key
+   end GetKey;
+
+   procedure {public} Update
+      (datum : object{BelData.Datum}; key : K.Key; var success : boolean);
+   var
+      o : object{BelData.Object};
+   begin {locked}
+      if (rider # nil) & (datum # nil) then
+         Find(key, success);
+         if success then
+            rider.data.Nullify;
+            o := datum.Copy();
+            rider.data := BelData.Datum(o);
+         else
+            Insert(datum, key, success)
+         end
+      elsif datum # nil then
+         Insert(datum, key, success)
+      else
+         success := false;
+         L.WarningMessage(500,415, "BelData.List.Update")
+      end;
+      Home
+   end Update;
+
+begin
+   Initialize
+end List.

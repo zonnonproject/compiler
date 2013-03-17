@@ -1,0 +1,24 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: imports in top level modules
+ *)
+
+definition n.A;
+
+end A.
+
+definition n.B;
+
+end B.
+
+object n.O implements n.A;
+import n.B as B;
+var b:object{B};
+
+end O.
+
+module Main;
+begin
+	halt(1)
+end Main.

@@ -1,0 +1,12 @@
+(** 
+ *	4. Language symbols and identifiers. 
+ *	4.4. Numeric Constants
+ *
+ *	Negative test: incompatible assignment constant width.
+ *)
+module Main;
+	var i : integer { 8 };
+begin
+	i := 0DH { 16 };
+	halt(0);
+end Main.

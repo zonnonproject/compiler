@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: casting from real to integer.
+ *)
+module Main;
+	var i : integer;
+begin
+	i := integer(-3.14);
+
+	if i = -3 
+	then halt(1) else halt(0) end;
+end Main.
+

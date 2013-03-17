@@ -1,0 +1,15 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Negative test: object parameter can not be passed by reference.
+ *)
+object {public, ref} A.B(var i : integer);
+begin
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,473 @@
+module {public} Main;
+
+   import
+      System.IO.BinaryReader     as BinaryReader,
+      System.IO.BinaryWriter     as BinaryWriter,
+      System.IO.Path             as Path,
+      System.IO.StreamReader     as StreamReader,
+      System.IO.StreamWriter     as StreamWriter,
+      System.Reflection.Assembly as Assembly,
+      BelCore.Log       as L,
+      BelCore.DataFiles as DF,
+      BelCore.Matrices  as M,
+      BelCore.Numbers   as N,
+      BelCcm.QuadTensors2 as Q,
+      BelCcm.Scalars      as S,
+      BelCcm.Tensors2     as T,
+      BelCcm.Units        as U,
+      BelCcm.Vectors2     as V;
+
+   var {private}
+      asm : Assembly;
+      dir, file, loc, path : string;
+
+   procedure {private} AssignTensor (var m : T.Tensor);
+   var
+      n : N.Number;
+      x : S.Scalar;
+      s : string;
+      u : U.Si;
+   begin
+      s := "";
+      writeln("Enter a tensor with its SI units.");
+      write("   Input its SI units: ");
+      readln(s);
+      u.Parse(s);
+      x.SetUnits(u);
+      m.SetUnits(u);
+      writeln("   Input its 2x2 elements by row:");
+      write("      m[1,1] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[1,1] := x;
+      write("      m[1,2] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[1,2] := x;
+      writeln("   Input the second row of elements:");
+      write("      m[2,1] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[2,1] := x;
+      write("      m[2,2] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[2,2] := x;
+      writeln
+   end AssignTensor;
+
+   procedure {private} AssignQuad (var q : Q.Tensor);
+   var
+      m : M.Matrix;
+      n : N.Number;
+      s : string;
+      u : U.Si;
+   begin
+      s := "";
+      writeln("Enter a quad tensor with its SI units.");
+      write("   Input its SI units: ");
+      readln(s);
+      u.Parse(s);
+      q.SetUnits(u);
+      m.Initialize(4,4);
+      writeln("   Input its Voigt 4x4 elements by row:");
+      write("      m[1,1] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(1,1, n);
+      write("      m[1,2] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(1,2, n);
+      write("      m[1,3] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(1,3, n);
+      write("      m[1,4] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(1,4, n);
+      writeln("   Input the second row of elements:");
+      write("      m[2,1] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(2,1, n);
+      write("      m[2,2] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(2,2, n);
+      write("      m[2,3] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(2,3, n);
+      write("      m[2,4] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(2,4, n);
+      writeln("   Input the third row of elements:");
+      write("      m[3,1] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(3,1, n);
+      write("      m[3,2] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(3,2, n);
+      write("      m[3,3] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(3,3, n);
+      write("      m[3,4] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(3,4, n);
+      writeln("   Input the forth row of elements:");
+      write("      m[4,1] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(4,1, n);
+      write("      m[4,2] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(4,2, n);
+      write("      m[4,3] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(4,3, n);
+      write("      m[4,4] = ");
+      readln(s);
+      n.Parse(s);
+      m.Set(4,4, n);
+      q.SetMatrix(m);
+      writeln
+   end AssignQuad;
+
+   procedure {public} Store;
+   var
+      bw : BinaryWriter;
+      i : integer;
+      f : string;
+      t1, t2 : Q.Tensor;
+   begin
+      f := "testQuadTensors";
+      bw := DF.OpenWriter(f);
+      writeln("Enter two tensors to store to file.");
+      AssignQuad(t1);
+      t1.Store(bw);
+      AssignQuad(t2);
+      t2.Store(bw);
+      writeln;
+      writeln("The first tensor stored to file is:");
+      for i := 1 to 4 do
+         writeln(t1.Typeset(i))
+      end;
+      writeln;
+      writeln("The second tensor stored to file is:");
+      for i := 1 to 4 do
+         writeln(t2.Typeset(i))
+      end;
+      DF.CloseWriter(bw)
+   end Store;
+
+   procedure {public} Load;
+   var
+      br : BinaryReader;
+      f, s : string;
+      i, j : integer;
+      t : Q.Tensor;
+   begin
+      f := "testQuadTensors";
+      br := DF.OpenReader(f);
+      for i := 1 to 2 do
+         writeln;
+         t.Load(br);
+         s := "The ";
+         if i = 1 then
+            s := s + "first "
+         else
+            s := s + "second"
+         end;
+         s := s + " tensor read from a binary file was: ";
+         writeln(s);
+         for j := 1 to 4 do
+            writeln(t.Typeset(j))
+         end
+      end;
+      DF.CloseReader(br)
+   end Load;
+
+   procedure {public} Operators;
+   var
+      i : integer;
+      s : string;
+      w : S.Scalar;
+      x, y, z : Q.Tensor;
+   begin
+      writeln("Test the overloaded operators.");
+      writeln;
+      writeln("Enter a quad tensor for the left-hand side:");
+      AssignQuad(x);
+      writeln("Enter a quad tensor for the right-hand side:");
+      AssignQuad(y);
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   =");
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      s :=  "   is ";
+      if x = y then
+         s := s + "true."
+      else
+         s := s + "false."
+      end;
+      writeln(s);
+      writeln;
+      writeln(" " + x.Typeset(1));
+      writeln(" " + x.Typeset(2));
+      writeln("-" + x.Typeset(3));
+      writeln(" " + x.Typeset(4));
+      z := -x;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(" " + z.Typeset(i))
+      end;
+      writeln;
+      z := x + y;
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   +");
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      z := x - y;
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   -");
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Enter a scalar for multiplication and division:");
+      readln(s);
+      w.Parse(s);
+      writeln(w.Typeset() + " *");
+      z := w * x;
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      s := "   / " + w.Typeset();
+      writeln(s);
+      z := x / w;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end
+   end Operators;
+
+   procedure {public} Procedures;
+   var
+      i : integer;
+      s : string;
+      u, v : T.Tensor;
+      w : S.Scalar;
+      x, y, z : Q.Tensor;
+   begin
+      writeln("Test the basic functions of a quad tensor.");
+      writeln;
+      writeln("Enter a quad tensor for the left-hand side:");
+      AssignQuad(x);
+      writeln;
+      writeln("Enter a quad tensor for the right-hand side:");
+      AssignQuad(y);
+      writeln;
+      writeln("Their dot product is:");
+      z := x.Dot(y);
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   .");
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("The dot product where the right side is transposed is:");
+      z := x.DotTranspose(y);
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   . Transpose");
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("The dot product where the left side is transposed is:");
+      z := x.TransposeDot(y);
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   Transpose .");
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln;
+      writeln("Enter a tensor for testing quad-tensor contractions:");
+      AssignTensor(v);
+      writeln;
+      writeln("The contraction of a quad with a tensor is:");
+      u := x.Contract(v);
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   .");
+      writeln(v.TypesetVoigt());
+      writeln("   = ");
+      writeln(u.TypesetVoigt());
+      writeln;
+      writeln("Here the tensor has been output in a Voigt notation.");
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("The contraction of a transposed tensor with a vector is:");
+      u := x.TransposeContract(v);
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   Transpose .");
+      writeln(v.TypesetVoigt());
+      writeln("   = ");
+      writeln(u.TypesetVoigt());
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("Enter two tensors for creating tensor outer products:");
+      AssignTensor(u);
+      AssignTensor(v);
+      x := Q.TensorProduct(u, v);
+      writeln(u.TypesetVoigt());
+      writeln("   O-cross");
+      writeln(v.TypesetVoigt());
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      x := Q.SymTensorProduct(u, v);
+      writeln("   while the symmetric  O-cross  product has components:");
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      x := Q.ODotProduct(u, v);
+      writeln(u.TypesetVoigt());
+      writeln("   O-dot");
+      writeln(v.TypesetVoigt());
+      writeln("   = ");
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      x := Q.SymODotProduct(u, v);
+      writeln("   while the symmetric  O-dot  product has components:");
+      for i := 1 to 4 do
+         writeln(x.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("Enter a non-symmetric invertable tensor.");
+      AssignQuad(x);
+      writeln("The Frobenius norm of this tensor is:");
+      w := Q.Norm(x);
+      writeln(w.Typeset());
+      writeln;
+      writeln("The transpose of this tensor is:");
+      y := Q.Transpose(x);
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("and its inverse is");
+      y := Q.Inverse(x);
+      for i := 1 to 4 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("which, when contracted with itself, ought to return the");
+      writeln("dimensionless identity tensor. When this dot product is");
+      writeln("taken, the following tensor is got:");
+      z := y.Dot(x);
+      for i := 1 to 4 do
+         writeln(z.Typeset(i))
+      end
+   end Procedures;
+
+begin
+   Store;
+   writeln("Data have been stored in the file");
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   file := Path.Combine(dir, "testQuadTensors.dat");
+   writeln(file + ".");
+   writeln;
+   writeln("When read back in to check its integrity, one finds:");
+   Load;
+   writeln;
+   Operators;
+   writeln;
+   Procedures;
+   writeln;
+   writeln("Press 'Enter' to quit.");
+   readln;
+   L.Close
+end Main.

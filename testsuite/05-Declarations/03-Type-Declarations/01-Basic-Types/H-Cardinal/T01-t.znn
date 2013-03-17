@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * cardinal type
+ *
+ * Positive test: cardinal value assignment.
+ *)
+module Main;
+	var i : cardinal;
+begin
+	i := 1;
+
+	if i = 1 
+	then halt(1) else halt(0) end;
+end Main.

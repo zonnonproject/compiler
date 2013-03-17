@@ -1,0 +1,32 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: Overloading
+ *)
+
+module {public} Main;
+
+import
+   System.Int64   as Int64,
+   System.Double  as Real64,
+   System.Convert as Convert;
+
+procedure {public} Run:Int64;
+var
+   i : Int64;
+   r : Real64;
+   s : string;
+begin
+   (* the error *)
+   s := "100";
+   i := Int64.Parse(s);
+   return i;
+end Run;
+
+begin
+   if Run = 100 then
+	halt(1)
+   else
+    halt(0)
+   end
+end Main.

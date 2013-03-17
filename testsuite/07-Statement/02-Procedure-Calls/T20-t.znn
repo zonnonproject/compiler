@@ -1,0 +1,25 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call.
+ *
+ * Positive test: the nested procedure call.
+ *)
+module Main;
+	procedure plus1(i : integer) : integer;
+	begin
+		return i + 1;
+	end plus1;
+
+	procedure plus2(i : integer) : integer;
+	begin
+		return i + 2;
+	end plus2;
+
+	var k : integer;
+begin
+	k := 1;
+	k := plus1( plus2(1) );
+
+	if k = 4 
+	then halt(1) else halt(0) end;
+end Main.

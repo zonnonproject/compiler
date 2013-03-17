@@ -1,0 +1,21 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Negative test: simple indexing (static array)
+ *)
+
+module Main;
+
+var
+	a : array {math} 3 of integer;
+begin	
+	a[1] := 5;
+	a[2] := 7;
+	do
+		a[4] := 9;
+	on OutOfRange do
+		halt(1);
+	end;
+	halt(0);
+end Main.

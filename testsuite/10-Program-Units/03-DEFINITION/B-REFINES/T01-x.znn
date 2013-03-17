@@ -1,0 +1,24 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Negative test: wrong qualified name C.B is used in refines clause.
+ * The qualified name C.B is not definition name. This is object name.
+ *
+ * The object C.B is declared before its using.
+ *
+ * Correct diagnostic must be output for wrong name C.B!
+ *)
+module {public} C;
+	object {public} B;
+    end B;
+end C.
+
+definition {public} A refines C.B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

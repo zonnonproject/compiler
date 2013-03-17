@@ -1,0 +1,111 @@
+(* ********* Zonnon online collection ***********
+ * Quck and Parallel Quick Sort using ThreadPool
+ *
+ * This example is a part of Concurrency examples
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*********************************************
+	QuickSort	(Chapter 2, Example 2.10)
+	Description: Sorting
+ *********************************************)
+
+module Main;
+    const MAX_SIZE = 12;
+
+    type ElementOfArray = integer;
+    type DefaultArray = array MAX_SIZE of ElementOfArray;
+    var MyArray: DefaultArray;
+
+    (***** Implementation *****)
+    
+    procedure QuickSort(L, R: integer);
+    var i,j: integer; w,x: ElementOfArray;
+    begin i := L; j := R;
+       x := MyArray[(L + R) div 2];
+       repeat
+          while MyArray[i] < x do i := i + 1 end;
+          while x < MyArray[j] do j := j - 1 end;
+          if i <= j then
+             w := MyArray[i]; MyArray[i] := MyArray[j]; MyArray[j] := w; 
+             writeln("S: change ",i:2, " with ",j:2," processing [",L:2,"..",R:2,"] interval");
+	     i := i + 1; j := j - 1;
+          end
+       until i > j;
+       if L < j then QuickSort(L, j) end;
+       if i < R then QuickSort(i, R) end;
+    end QuickSort;
+
+
+    activity PQuickSort(L, R: integer);
+    var i,j: integer; w,x: ElementOfArray;
+    begin i := L; j := R;
+       x := MyArray[(L + R) div 2];
+       repeat
+          while MyArray[i] < x do i := i + 1 end;
+          while x < MyArray[j] do j := j - 1 end;
+          if i <= j then
+             w := MyArray[i]; MyArray[i] := MyArray[j]; MyArray[j] := w; 
+             writeln("P: change ",i:2, " with ",j:2," processing [",L:2,"..",R:2,"] interval");
+             i := i + 1; j := j - 1;
+          end
+       until i > j;
+       if L < j then new PQuickSort(L, j) end;
+       if i < R then new PQuickSort(i, R) end;
+    end QuickSort;
+
+
+    (***** Example support *****)
+
+    procedure FillTheArray;
+    var i:integer;
+    begin
+      MyArray[0]  := 10;
+      MyArray[1]  := 3;
+      MyArray[2]  := 2;
+      MyArray[3]  := 5;
+      MyArray[4]  := 4;
+      MyArray[5]  := 7;
+      MyArray[6]  := 8;
+      MyArray[7]  := 1;
+      MyArray[8]  := 11;
+      MyArray[9]  := 6;
+      MyArray[10] := 9;
+      MyArray[11] := 12;
+    end FillTheArray;
+ 
+    procedure PrintTheArray;
+    var i:integer;
+    begin
+       writeln("Array:");
+       for i := 0 to MAX_SIZE - 1 do
+          write( MyArray[i]:2, ',' ); 
+       end; 
+       writeln;
+    end PrintTheArray;
+    
+    procedure ExecuteSeq;
+    begin
+       QuickSort(0, MAX_SIZE - 1); 
+    end ExecuteSqe;
+
+    procedure ExecuteParallel;
+    begin
+       new PQuickSort(integer(0), integer(MAX_SIZE - 1)); 
+    end ExecuteParallel;
+
+begin
+ writeln("------------- Quick sort -------------");
+ FillTheArray;
+ PrintTheArray;
+ ExecuteSeq;
+ PrintTheArray;
+
+ writeln("-------- Parallel quick sort ---------");
+ FillTheArray;
+ PrintTheArray;
+ ExecuteParallel;
+ PrintTheArray;
+
+end Main.

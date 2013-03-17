@@ -1,0 +1,21 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports clause
+ *
+ * Negative test: the module A uses wrong imported name B.X in imports clause.
+ * The element X is variable name. The variable is declared before it is used.
+ *)
+module B;
+var { public }
+	X : integer;
+end B.
+
+module A;
+	import B.X;
+end A.
+
+module Main;
+begin
+    halt(0);
+end Main.

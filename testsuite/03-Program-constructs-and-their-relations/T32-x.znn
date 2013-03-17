@@ -1,0 +1,24 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: dublicate implementation.
+ *)
+
+(* I. The implementation A is declared after its default implementation A. *)
+implementation A;
+end A.
+
+implementation A;
+end A.
+
+(* II. The implementation B is declared before its default implementation B. *)
+implementation B;
+end B.
+
+implementation B;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.

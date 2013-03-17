@@ -1,0 +1,10 @@
+(** 
+  * Russian symbol O in the keyword module.
+  *)
+MDULE A;
+end A;
+
+module Main;
+begin
+	halt(0);
+end Main.

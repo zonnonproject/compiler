@@ -1,0 +1,16 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Negative test: wrong definition name B.C is used for refines clause.
+ * The name B.C is module name.
+ *
+ * The module B.C is declared _after_ the definition A declared.
+ *)
+definition {public} A refines B.C;
+end A.
+
+module {public} B.C;
+end C.
+

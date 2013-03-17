@@ -1,0 +1,19 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Simple activity implements the protocol
+ *)
+
+module {protected} Main;
+
+protocol P = (
+    A, B, C, dialog = ( A | B | C )
+);
+
+activity A implements P;
+begin 
+end A;
+
+begin
+	halt(1)  (* success *)
+end Main.

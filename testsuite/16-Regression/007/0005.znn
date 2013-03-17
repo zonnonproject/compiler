@@ -1,0 +1,16 @@
+
+definition DX;
+end DX.
+
+object {ref} Y implements DX;
+   import Y;
+   procedure {public} Copy () : object{DX};
+   var newY : Y;
+   begin
+      newY := new Y;
+      return newY;
+   end Copy;
+end Y.
+
+module run;
+end run.

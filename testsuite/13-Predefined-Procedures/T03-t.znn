@@ -1,0 +1,18 @@
+(**
+ * 09.Predefined procedures.
+ * The inc procedure.
+ *
+ * Positive test: the predefined procedure inc call with one and two parameters.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 5;
+	j := 5;
+	
+	inc(i);
+	inc(j, 2);
+
+	if (i = 6) & (j = 7)
+	then halt(1) else halt(0) end;
+end Main.

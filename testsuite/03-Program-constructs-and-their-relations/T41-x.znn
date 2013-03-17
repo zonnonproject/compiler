@@ -1,0 +1,25 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: object refines module.
+ *)
+
+(* I. The refined object A is declared after the refiner module B. *)
+object B refines A;
+end B.
+
+module A;
+end A.
+
+(* II. The refined object D is declared before the refiner module C. *)
+module D;
+end D.
+
+object C refines D;
+end C.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

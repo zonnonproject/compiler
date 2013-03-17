@@ -1,0 +1,30 @@
+(** 
+ * 7. Statement 
+ * 7.11. Await starements
+ *
+ * Positive test: await within a protected object
+ *)
+
+module Main;
+
+type {public, ref, protected} MessageBox = object
+var value, empty: integer;
+
+procedure {public} Put(v: integer);
+begin
+	await empty = 0;
+	value := v;
+	empty := 2;
+	writeln(value);
+	writeln(empty);
+end Put;
+
+end MessageBox;
+
+var m:MessageBox;
+begin
+	writeln("test on await variable");
+	m := new MessageBox;
+	m.Put(5);	
+	halt(1);
+end Main.

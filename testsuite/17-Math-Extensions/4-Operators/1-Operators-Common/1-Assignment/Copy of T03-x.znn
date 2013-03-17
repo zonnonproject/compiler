@@ -1,0 +1,20 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Assignment
+ * 
+ * Negative test: base elements types are not assignment compatible
+ * static := math static
+ *)
+
+module Main;
+
+var
+	a : array 2, 3, 4 of integer;
+	c : array {math} 2, 3, 4 of cardinal;
+	
+begin	
+
+	a := c;
+	halt(0);
+end Main.

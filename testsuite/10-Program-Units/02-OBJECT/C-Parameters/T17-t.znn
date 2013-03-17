@@ -1,0 +1,29 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Positive test: the type of procedure P parameter 
+ * is owner of the procedure.
+ *)
+object {public, ref} A.B;
+	procedure {public} P(b : B) : B;
+		var b1 : B;
+	begin 
+		b1 := b;
+		return b1 
+	end P;	
+(*
+	procedure {public} Q(b : B);
+		var b1 : B;
+	begin 
+		return b1 
+	end Q;	
+*)
+	var b : B;
+end B.
+
+module Main;
+begin
+	halt(1);
+end Main.

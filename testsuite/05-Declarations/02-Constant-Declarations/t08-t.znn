@@ -1,0 +1,20 @@
+module Main;
+const 
+    inside=true;
+   outside=false;
+ 
+var 
+  res: boolean;
+begin
+res := inside;  (* error *)
+writeln(res);
+writeln(inside);
+res := outside;
+writeln(res);
+writeln(outside);
+if res = inside then
+	halt(0)
+else
+	halt(1)
+end
+end Main.

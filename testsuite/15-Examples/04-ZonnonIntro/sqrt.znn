@@ -1,0 +1,16 @@
+(* ********* Zonnon online collection ***********
+ * Using FCL function double Sqrt( double )
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Main;
+import System.Math as Math;
+var r, f: real{64};
+begin
+ f := 9.0;
+ r := Math.Sqrt(f);
+ writeln(r);
+end Main.

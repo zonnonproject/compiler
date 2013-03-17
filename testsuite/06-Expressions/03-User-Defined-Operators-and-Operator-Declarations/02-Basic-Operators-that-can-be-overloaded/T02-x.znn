@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.2. Basic operators that can be overloaded.
+ *
+ * Negative test: overloaded prefix operator is used as posfix operator.
+ *)
+module Main;
+	object { public } Point;
+		var { public } 
+			x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator { public } "~" (p1 : Point) : Point;
+	begin return p1 end "~";
+
+	var { public } 
+		p, q : Point;
+begin
+	p.x :=  2;
+	p.y := -4;
+	q := p~; 
+	
+	if (q.x = 2) & (q.y = -4) 
+	then halt(1) else halt(0) end;
+end Main.

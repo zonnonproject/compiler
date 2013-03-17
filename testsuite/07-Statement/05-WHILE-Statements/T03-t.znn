@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.5. WHILE statement.
+ *
+ * Positive test: while statement is executed two times.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 3;
+	j := 3;
+
+	while i # 5 do
+		i := i + 1;
+		j := j + 1;
+	end;
+
+	if j = 5 then halt(1) else halt(0) end;
+end Main.

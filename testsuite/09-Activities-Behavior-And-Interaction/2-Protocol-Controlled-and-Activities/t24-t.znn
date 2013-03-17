@@ -1,0 +1,52 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Use of enumerations as terminal symbols with conversions
+ *)
+
+module Main;
+protocol P = (
+	START_TEXT, MODIFIER1, MODIFIER2, END_TEXT, OK,
+	P = START_TEXT { (string | MODIFIER1 | MODIFIER2) ?OK} END_TEXT
+);
+
+
+procedure processCmd( cmd: P );
+begin
+	writeln("Command: ", string(cmd));
+end processCmd;
+
+procedure addTextLine( s: string );
+begin
+	writeln(s);
+end addTextLine;
+
+
+activity A implements P;
+var request: object; cond: boolean;
+begin 
+	accept request;
+	repeat
+		accept request;
+		cond := request is P;
+		writeln("C1:", cond); 
+		if cond then
+			processCmd( P( request ) );
+		else (* It is a string *)
+			addTextLine( string( request ) );
+		end;
+		cond := (request is P) & (P(request) = P.END_TEXT);
+		writeln("C2:", cond); 
+		if ~cond then return P.OK end
+	until cond;
+on exception do
+	writeln("Protocol exception");
+end A;
+
+var a: activity{P};
+begin
+	a := new A;
+	unused := a(P.START_TEXT, "Hello world");
+	a(P.END_TEXT);
+	halt(1)
+end Main.

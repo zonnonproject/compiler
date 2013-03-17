@@ -1,0 +1,441 @@
+module {public} Main;
+
+   import
+      System.IO.BinaryReader     as BinaryReader,
+      System.IO.BinaryWriter     as BinaryWriter,
+      System.IO.Path             as Path,
+      System.IO.StreamReader     as StreamReader,
+      System.IO.StreamWriter     as StreamWriter,
+      System.Reflection.Assembly as Assembly,
+      BelCore.Log       as L,
+      BelCore.DataFiles as DF,
+      BelCore.Numbers   as N,
+      BelCcm.Scalars  as S,
+      BelCcm.Tensors2 as T,
+      BelCcm.Units    as U,
+      BelCcm.Vectors2 as V;
+
+   var {private}
+      asm : Assembly;
+      dir, file, loc, path : string;
+      zero : N.Number;
+
+   procedure {private} AssignVector (var v : V.Vector);
+   var
+      n : N.Number;
+      x : S.Scalar;
+      s : string;
+      u : U.Si;
+   begin
+      s := "";
+      writeln("Enter a vector with its SI units.");
+      write("   Input its SI units: ");
+      readln(s);
+      u.Parse(s);
+      x.SetUnits(u);
+      v.SetUnits(u);
+      writeln("   Input its two real-valued elements:");
+      write("      v[1] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      v[1] := x;
+      write("      v[2] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      v[2] := x
+   end AssignVector;
+
+   procedure {private} AssignTensor (var m : T.Tensor);
+   var
+      n : N.Number;
+      x : S.Scalar;
+      s : string;
+      u : U.Si;
+   begin
+      s := "";
+      writeln("Enter a tensor with its SI units.");
+      write("   Input its SI units: ");
+      readln(s);
+      u.Parse(s);
+      x.SetUnits(u);
+      m.SetUnits(u);
+      writeln("   Input its real-valued elements by row:");
+      write("      m[1,1] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[1,1] := x;
+      write("      m[1,2] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[1,2] := x;
+      writeln("   Input the second row of elements:");
+      write("      m[2,1] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[2,1] := x;
+      write("      m[2,2] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      m[2,2] := x
+   end AssignTensor;
+
+   procedure {public} Store;
+   var
+      bw : BinaryWriter;
+      i : integer;
+      f : string;
+      t1, t2 : T.Tensor;
+   begin
+      f := "testTensors";
+      bw := DF.OpenWriter(f);
+      writeln("Enter two tensors to store to file.");
+      AssignTensor(t1);
+      t1.Store(bw);
+      AssignTensor(t2);
+      t2.Store(bw);
+      writeln("The first tensor stored to file is:");
+      for i := 1 to 2 do
+         writeln(t1.Typeset(i))
+      end;
+      writeln("The second tensor stored to file is:");
+      for i := 1 to 2 do
+         writeln(t2.Typeset(i))
+      end;
+      DF.CloseWriter(bw)
+   end Store;
+
+   procedure Load;
+   var
+      br : BinaryReader;
+      f, s : string;
+      i, j : integer;
+      t : T.Tensor;
+   begin
+      f := "testTensors";
+      br := DF.OpenReader(f);
+      for i := 1 to 2 do
+         writeln;
+         t.Load(br);
+         s := "The ";
+         if i = 1 then
+            s := s + "first "
+         else
+            s := s + "second"
+         end;
+         s := s + " tensor read from a binary file was: ";
+         writeln(s);
+         for j := 1 to 2 do
+            writeln(t.Typeset(j))
+         end
+      end;
+      DF.CloseReader(br)
+   end Load;
+
+   procedure {public} Boolean;
+   var
+      i : integer;
+      s : string;
+      x, y : T.Tensor;
+   begin
+      writeln("Test the boolean function of equality.");
+      writeln;
+      writeln("Enter the tensor for the left-hand side:");
+      AssignTensor(x);
+      writeln("Enter the tensor for the right-hand side.");
+      AssignTensor(y);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   =");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      s :=  "   is ";
+      if x = y then
+         s := s + "true."
+      else
+         s := s + "false."
+      end;
+      writeln(s)
+   end Boolean;
+
+   procedure {public} Operators;
+   var
+      i : integer;
+      s : string;
+      w : S.Scalar;
+      x, y, z : T.Tensor;
+   begin
+      s := "";
+      writeln("Test the overloaded operators.");
+      writeln;
+      writeln("Enter the tensor for the left-hand side:");
+      AssignTensor(x);
+      writeln("Enter the tensor for the right-hand side:");
+      AssignTensor(y);
+      writeln;
+      writeln(" " + x.Typeset(1));
+      writeln("-" + x.Typeset(2));
+      z := -x;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(" " + z.Typeset(i))
+      end;
+      writeln;
+      z := x + y;
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   +");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      z := x - y;
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   -");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Enter a scalar for multiplication and division:");
+      readln(s);
+      w.Parse(s);
+      writeln(w.Typeset() + " *");
+      z := w * x;
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      s := "   / " + w.Typeset();
+      writeln(s);
+      z := x / w;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end
+   end Operators;
+
+   procedure {public} Procedures;
+   var
+      i : integer;
+      u, v : V.Vector;
+      w : S.Scalar;
+      x, y, z : T.Tensor;
+   begin
+      writeln("Test the basic functions of a tensor.");
+      writeln;
+      writeln("Enter the tensor for the left-hand side:");
+      AssignTensor(x);
+      writeln("Enter the tensor for the right-hand side:");
+      AssignTensor(y);
+      writeln;
+      writeln("Their dot product is:");
+      z := x.Dot(y);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   .");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("The dot product where the right side is transposed is:");
+      z := x.DotTranspose(y);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   . Transpose");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("The dot product where the left side is transposed is:");
+      z := x.TransposeDot(y);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   Transpose .");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = ");
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end;
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln;
+      writeln("Enter a vector for testing tensor-vector contractions:");
+      AssignVector(v);
+      writeln;
+      writeln("The contraction of a tensor with a vector is:");
+      u := x.Contract(v);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   .");
+      writeln(v.Typeset());
+      writeln("   = ");
+      writeln(u.Typeset());
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("The contraction of a transposed tensor with a vector is:");
+      u := x.TransposeContract(v);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   Transpose .");
+      writeln(v.Typeset());
+      writeln("   = ");
+      writeln(u.Typeset());
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("Their double-dot product is:");
+      w := x.DoubleDot(y);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   :");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = " + w.Typeset());
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("Their transpose double-dot product is:");
+      w := x.TransposeDoubleDot(y);
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   Transpose :");
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("   = " + w.Typeset());
+      writeln;
+      writeln("Press 'Enter' to continue.");
+      readln;
+      writeln;
+      writeln("Enter a non-symmetric invertable tensor.");
+      AssignTensor(x);
+      writeln("The Frobenius norm of this tensor is:");
+      w := T.Norm(x);
+      writeln(w.Typeset());
+      writeln;
+      writeln("The symmetric part of this tensor is:");
+      y := T.SymmetricPart(x);
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln;
+      writeln("The skew-symmetric part of this tensor is:");
+      y := T.SkewPart(x);
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln;
+      writeln("The two invariants are, respectively:");
+      w := T.FirstInvariant(x);
+      writeln(w.Typeset());
+      w := T.SecondInvariant(x);
+      writeln(w.Typeset());
+      writeln("The trace and determinant are, respectively:");
+      w := T.Trace(x);
+      writeln(w.Typeset());
+      w := T.Determinant(x);
+      writeln(w.Typeset());
+      writeln("and should equal the first and second invariants, respectively.");
+      writeln;
+      writeln("The transpose of");
+      for i := 1 to 2 do
+         writeln(x.Typeset(i))
+      end;
+      writeln("   is");
+      y := T.Transpose(x);
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("and its inverse is");
+      y := T.Inverse(x);
+      for i := 1 to 2 do
+         writeln(y.Typeset(i))
+      end;
+      writeln("which, when contracted with itself, ought to return the");
+      writeln("dimensionless identity tensor. When this dot product is");
+      writeln("taken, the following tensor is got:");
+      z := y.Dot(x);
+      for i := 1 to 2 do
+         writeln(z.Typeset(i))
+      end
+   end Procedures;
+
+begin
+   zero := 0.0E+0;
+   Store;
+   writeln("Data have been stored in the file");
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   file := Path.Combine(dir, "testTensors.dat");
+   writeln(file + ".");
+   writeln;
+   writeln("When read back in to check its integrity, one finds:");
+   Load;
+   writeln;
+   Boolean;
+   writeln;
+   Operators;
+   writeln;
+   Procedures;
+   writeln;
+   writeln("Press 'Enter' to quit.");
+   readln;
+   L.Close
+end Main.

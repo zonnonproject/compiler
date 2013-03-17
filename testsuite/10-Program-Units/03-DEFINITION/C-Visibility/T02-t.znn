@@ -1,0 +1,32 @@
+(** 
+ * 11.Program Units.
+ * 13.3. definition
+ * Definition visibility
+ *
+ * Positive test: the default (public) visibility value is applied for the definition A.B.
+ * The definition A.B is declared after its using.
+ *)
+object {ref} C implements A.B;
+begin 
+	i := 3; 
+end C.
+
+module Main;
+import 
+	A.B, C;
+
+var 
+	b : object { A.B };
+	c : C;
+begin
+	c := new C;
+	b := c;
+
+	if b.i = 3 
+	then halt(1) else halt(0) end;
+end Main.
+
+definition {public} A.B;
+	var {public} 
+		i : integer;
+end B.

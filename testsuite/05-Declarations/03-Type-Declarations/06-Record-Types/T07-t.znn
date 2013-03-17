@@ -1,0 +1,24 @@
+(** 
+ * 5. Declarations.
+ * 5.3.6 Postulated interface type.
+ * 6.3.5. Value object (RECord).
+ *
+ * Positive test: the record public variable initialization and using.
+ * The record is nested into module.
+ *)
+
+module Main;
+
+type {public}
+     CMatrixType = array 8, 10 of real;
+     
+     TestRecordType =
+        record
+            cm : CMatrixType;
+        end TestRecordType;
+
+begin
+     halt(1)
+end Main.
+
+

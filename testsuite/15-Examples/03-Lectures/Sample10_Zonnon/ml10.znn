@@ -1,0 +1,178 @@
+(* ********* Zonnon online collection ***********
+ * EXAMPLE SOLUTIon for EXERCisE 10. Informatik 1, WS 02/03
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*
+==================================================================
+EXAMPLE SOLUTIon for EXERCisE 10
+Informatik 1, WS 02/03
+
+For questions and propositions contact Michael Gomez 
+==================================================================
+How it works:
+- the participants are sorted by name ("Id") and linked to a list.
+- independent of the id-list, there is a sorted ranking, based on a doubly-linked-list,
+	so it is possible to traverse the ranking forwards and backwards.
+- 'Init' creates the id-list and a first ranking (everybody has 0 points).
+- 'Print' shows the ranking.
+- 'Update' simulates a new leg (etappe). 
+==================================================================
+*)
+module Exercise10;
+
+import System.Random;
+
+const
+	k = 10;  
+	NofUpdates = 10;
+	
+object {public, ref} Person;
+	var {public}
+		id : integer;	(*- name -*)
+		res : real;	(*- result -*)
+		lastRank, nextRank, nextId : Person;
+end Person;
+	
+object {public, value} Ranking; 	(*- Multipe rankings should be possible. -*)
+	var {public}
+		nofP : integer; 	(*- Number of participants/persons. -*)
+		initialised : boolean;
+		firstId, firstRank : Person;
+end Ranking;
+	
+var
+	aR : Ranking; 	(*- Actual ranking to simulate. -*)
+	rg : System.Random;
+	i : integer;
+
+procedure {public} Print(rnk : Ranking);
+var
+	i : integer;
+	cur : Person;
+begin
+	if ~(rnk.initialised) then
+		write("Not yet initialised!")
+	else
+		cur := rnk.firstRank;
+
+		for i := 0 to rnk.nofP-1 do
+			write(i+1:5); write(". : Nr");
+			write(cur.id:5); write(" with ");
+			write(cur.res); writeln(" points");
+			cur := cur.nextRank
+		end;
+
+		writeln
+	end
+end Print;		
+
+(**
+ * Procedure to insert an element ("toinsert") into a sorted, doubly-linked-list.
+ * The insertion starts at element "pos". ( condition: toinsert > pos ).
+ *)
+procedure Insert(toinsert, pos : Person);
+begin
+	while ~((pos.nextRank = nil) or (pos.nextRank.res > toinsert.res)) do
+		pos := pos.nextRank
+	end; 
+
+	if pos.nextRank # nil then (*- not end of the list -*)
+		pos.nextRank.lastRank := toinsert
+	end;
+
+	toinsert.nextRank := pos.nextRank;  
+	toinsert.lastRank := pos;
+	pos.nextRank := toinsert
+end Insert;
+
+procedure {public} Update(var rnk : Ranking);
+var
+	i : integer;
+	cur, pos : Person;
+begin	
+	if ~(rnk.initialised) then
+		writeln("This ranking is not yet initialised!, abort update")
+	else
+		pos := rnk.firstId;
+
+		for i := 0 to rnk.nofP-1 do
+			cur := pos;
+			cur.res := cur.res + (rg.NextDouble() * k); (*- run... -*)
+
+			if ~((cur.nextRank = nil) or (cur.res < cur.nextRank.res)) 
+			then (*- Wrong order. -*)
+				if cur = rnk.firstRank then	
+					rnk.firstRank := cur.nextRank;
+					rnk.firstRank.lastRank := nil;
+					Insert(cur, rnk.firstRank)
+				else (*- Take cur out of the list -*)
+					cur.lastRank.nextRank := cur.nextRank;
+					cur.nextRank.lastRank := cur.lastRank;
+					Insert(cur, cur.nextRank)
+				end
+			end;
+
+			pos := pos.nextId
+		end;
+		Print(rnk)		
+	end
+end Update;
+
+procedure {public} Init(var rnk : Ranking);
+var
+	i : integer;
+	cur, last : Person;
+begin
+	writeln("Please enter the number of participants to simulate: ");
+	readln(rnk.nofP);
+
+	while rnk.nofP < 2 do
+		writeln("More than 2 participants are needed, please reenter:");
+		readln(rnk.nofP)
+    end;	
+
+	(*- reate list of participants and the first ranking => everybody has 0 points. -*)
+	cur := new Person();
+	cur.id := 0; 
+	cur.res := 0.0;
+	rnk.firstId := cur;
+
+	for i := 1 to rnk.nofP-1 do
+		last := cur;
+		cur := new Person();
+		cur.id := i; cur.res := 0.0;
+		last.nextId := cur;
+		last.nextRank := cur;
+		cur.lastRank := last
+	end;
+
+	(* cur.nextId := rnk.firstId; *)
+	cur.nextId := nil;
+
+	(*- Terminate ranking list. -*)
+	cur.nextRank := nil;
+	rnk.firstId.lastRank := nil;
+
+	(*- Set rnk-ranking variables. -*)	
+	rnk.firstRank := rnk.firstId;
+	rnk.initialised := true
+end Init;
+
+begin
+	aR.initialised := false;
+	rg := new System.Random();
+
+	(*- Simulation: -*)
+	Init(aR);
+
+	for i := 0 to NofUpdates do
+		Update(aR)
+	end;
+
+	writeln("example is done. Press the Enter key");
+	readln 
+end Exercise10.

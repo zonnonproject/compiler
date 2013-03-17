@@ -1,0 +1,1318 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The modules in CORE form a foundation for computation modeling in Zonnon.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates a log file for writing error/warning messages to the framework.    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Because Zonnon cannot throw an exception, it can only catch exceptions     *)
+(* thrown by the underlying system, it is useful to have a mechanism whereby  *)
+(* warning and error messages can be logged by a programmer to a common text  *)
+(* file that can be read after program execution as a debugging aid. This log *)
+(* file is found in the subdirectory "iofiles" beneath the executable.        *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Procedures  :   Open              - opens a new log file                   *)
+(*                 Close             - closes this message logger             *)
+(*                 Message           - write an uncoded message               *)
+(*                 ErrorMessage      - write a coded message & halt execution *)
+(*                 WarningMessage    - write a coded message and continue     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Two error-code numbers are allowed.                                        *)
+(*    The first  relates to an error regarding input.                         *)
+(*    The second relates to an error regarding output.                        *)
+(* error codes :   1..999            - admissible error code numbers          *)
+(*                 -1                - skip logging this message              *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCore.Log;
+
+   import
+      System.IO.Directory        as Directory,
+      System.IO.DirectoryInfo    as DirectoryInfo,
+      System.IO.File             as File,
+      System.IO.Path             as Path,
+      System.IO.StreamWriter     as StreamWriter,
+      System.Reflection.Assembly as Assembly;
+
+   var {private}
+      asm : Assembly;
+      dir, loc, path : string;
+      empty, saved : boolean;
+      errorCode : array 1000 of string;
+      info : DirectoryInfo;
+      sw : StreamWriter;
+
+   procedure {public} Open (directory : string);
+   var
+      file, msg, save : string;
+   begin
+      if sw # nil then
+         sw.Close
+      end;
+      dir := directory;
+      file := Path.Combine(dir, "logFile.txt");
+      if File.Exists(file) then
+         save := Path.Combine(dir, "lastLogFile.txt");
+         if File.Exists(save) then
+            File.Delete(save)
+         end;
+         File.Move(file, save);
+         saved := true
+      else
+         saved := false
+      end;
+      sw := new StreamWriter(file)
+   end Open;
+
+   procedure {public} Close;
+   begin {locked}
+      if empty then
+         writeln("Congradulations!");
+         writeln("This session produced an empty log file.");
+         writeln("No warning or error messages were logged.")
+      else
+         writeln("Warning messages have been logged to the file:");
+         write("   ");
+         writeln(Path.Combine(dir, "logFile.txt"));
+         if saved then
+            writeln("The prior log file has been saved at:");
+            write("   ");
+            writeln(Path.Combine(dir, "lastLogFile.txt"))
+         end
+      end;
+      writeln;
+      writeln("This program uses the BEL software library written in Zonnon,");
+      writeln("which is licensed under the GNU Lesser General Public License.");
+      writeln("(c) 2008-2009 Alan D. Freed, Saginaw Valley State University.");
+      sw.Close
+   end Close;
+
+   procedure {public} Message (message : string);
+   begin
+      if empty then
+         empty := false
+      end;
+      sw.WriteLine(message);
+      sw.Flush
+   end Message;
+
+   procedure {private} NumberToChar (i : integer) : char;
+   var
+      c : char;
+   begin
+      c := "?";
+      if i = 0 then
+         c := "0"
+      elsif i = 1 then
+         c := "1"
+      elsif i = 2 then
+         c := "2"
+      elsif i = 3 then
+         c := "3"
+      elsif i = 4 then
+         c := "4"
+      elsif i = 5 then
+         c := "5"
+      elsif i = 6 then
+         c := "6"
+      elsif i = 7 then
+         c := "7"
+      elsif i = 8 then
+         c := "8"
+      elsif i = 9 then
+         c := "9"
+      end;
+      return c
+   end NumberToChar;
+
+   procedure {private} CodeToString (errorNumber : integer) : string;
+   var
+      a : array 6 of char;
+      i, j : integer;
+      s : string;
+   begin
+      j := errorNumber;
+      if j > 99 then
+         i := j div 100;
+         j := j mod 100;
+         a[0] := NumberToChar(i)
+      else
+         a[0] := "0"
+      end;
+      if j > 9 then
+         i := j div 10;
+         j := j mod 10;
+         a[1] := NumberToChar(i)
+      else
+         a[1] := "0"
+      end;
+      a[2] := NumberToChar(j);
+      a[3] := ":";
+      a[4] := " ";
+      copy(a, s);
+      return s
+   end CodeToString;
+
+   procedure {public} ErrorMessage
+      (inputErrorCode, outputErrorCode : integer; originOfError : string);
+   var
+      error, s : string;
+      errorNumber : integer;
+   begin
+      if empty then
+         empty := false
+      else
+         sw.WriteLine("")
+      end;
+      errorNumber := outputErrorCode;
+      if (inputErrorCode > 0) & (inputErrorCode < 1000) then
+         error := errorCode[inputErrorCode];
+         s := "ERROR   " + CodeToString(inputErrorCode) + error;
+         sw.WriteLine(s);
+         if (outputErrorCode > 0) & (outputErrorCode < 1000) then
+            error := errorCode[outputErrorCode];
+            s := "        " + CodeToString(outputErrorCode) + error;
+            sw.WriteLine(s)
+         elsif outputErrorCode = -1 then
+            (* skip reporting an output error message *)
+         else
+            error := errorCode[0];
+            s := "        000: " + error;
+            sw.WriteLine(s)
+         end
+      elsif inputErrorCode = -1 then
+         (* skip reporting an input error message *)
+         if (outputErrorCode > 0) & (outputErrorCode < 1000) then
+            error := errorCode[outputErrorCode];
+            s := "ERROR   " + CodeToString(outputErrorCode) + error;
+            sw.WriteLine(s)
+         else
+            error := errorCode[0];
+            s := "ERROR   000: " + error;
+            sw.WriteLine(s)
+         end
+      else
+         error := errorCode[0];
+         s := "ERROR   000: " + error;
+         sw.WriteLine(s);
+         if (outputErrorCode > 0) & (outputErrorCode < 1000) then
+            error := errorCode[outputErrorCode];
+            s := "        " + error;
+            sw.WriteLine(s)
+         end
+      end;
+      s := "occurred at: " + originOfError + ".";
+      sw.WriteLine(s);
+      sw.Flush;
+      writeln("FATAL ERROR: read the log file:");
+      write("   ");
+      writeln(Path.Combine(dir, "logFile.txt"));
+      halt(errorNumber)
+   end ErrorMessage;
+
+   procedure {public} WarningMessage
+      (inputErrorCode, outputErrorCode : integer; originOfError : string);
+   var
+      error, s : string;
+   begin
+      if empty then
+         empty := false
+      else
+         sw.WriteLine("")
+      end;
+      if (inputErrorCode > 0) & (inputErrorCode < 1000) then
+         error := errorCode[inputErrorCode];
+         s := "WARNING " + CodeToString(inputErrorCode) + error;
+         sw.WriteLine(s);
+         if (outputErrorCode > 0) & (outputErrorCode < 1000) then
+            error := errorCode[outputErrorCode];
+            s := "        " + CodeToString(outputErrorCode) + error;
+            sw.WriteLine(s)
+         elsif outputErrorCode = -1 then
+            (* skip reporting an output error message *)
+         else
+            error := errorCode[0];
+            s := "        000: " + error;
+            sw.WriteLine(s)
+         end
+      elsif inputErrorCode = -1 then
+         (* skip reporting an input error message *)
+         if (outputErrorCode > 0) & (outputErrorCode < 1000) then
+            error := errorCode[outputErrorCode];
+            s := "WARNING " + CodeToString(outputErrorCode) + error;
+            sw.WriteLine(s)
+         else
+            error := errorCode[0];
+            s := "WARNING 000: " + error;
+            sw.WriteLine(s)
+         end
+      else
+         error := errorCode[0];
+         s := "WARNING 000: " + error;
+         sw.WriteLine(s);
+         if (outputErrorCode > 0) & (outputErrorCode < 1000) then
+            error := errorCode[outputErrorCode];
+            s := "        " + error;
+            sw.WriteLine(s)
+         end
+      end;
+      s := "occurred at: " + originOfError + ".";
+      sw.WriteLine(s);
+      sw.Flush
+   end WarningMessage;
+
+begin
+   (* initialize the logger *)
+   empty := true;
+   saved := false;
+   asm   := Assembly.GetExecutingAssembly();
+   loc   := asm.Location;
+   path  := Path.GetDirectoryName(loc);
+   dir   := Path.Combine(path, "iofiles");
+   if ~Directory.Exists(dir) then
+      info := Directory.CreateDirectory(dir)
+   end;
+   Open(dir);
+   (* ------------------------------------------------------------------- *)
+   (* tabulate all of the error codes according to the rule:              *)
+   (*         -1  skip handling this part of the error code               *)
+   (*          0  reserved                                                *)
+   (*      1- 49  pertain to: future plans or implementation limitations  *)
+   (*     50- 99  pertain to: handling system errors                      *)
+   (*    100-199  pertain to: handling Core.Numbers  & Ccm.Scalars errors *)
+   (*    200-299  pertain to: handling Core.Arrays   & Ccm.Vectors errors *)
+   (*    300-399  pertain to: handling Core.Matrices & Ccm.Tensors errors *)
+   (*    400-499  pertain to: handling function/procedure/method errors   *)
+   (*    500-599  pertain to: handling object errors                      *)
+   (*    600-999  reserved for future growth                              *)
+   (* ------------------------------------------------------------------- *)
+   errorCode[0]   := "An invalid error number - valid numbers are in [1..999]";
+   (*  1- 49  future plans or implementation limitations  *)
+   errorCode[1]   := "This is a code limitation to be removed someday";
+   errorCode[2]   := "";
+   errorCode[3]   := "";
+   errorCode[4]   := "";
+   errorCode[5]   := "The assigned glyph was the unknown character '?'";
+   errorCode[6]   := "";
+   errorCode[7]   := "";
+   errorCode[8]   := "";
+   errorCode[9]   := "";
+   errorCode[10]  := "Complex numbers are not yet implemented";
+   errorCode[11]  := "";
+   errorCode[12]  := "";
+   errorCode[13]  := "";
+   errorCode[14]  := "";
+   errorCode[15]  := "The exponent lies outside its range of [-9..9]";
+   errorCode[16]  := "";
+   errorCode[17]  := "";
+   errorCode[18]  := "";
+   errorCode[19]  := "";
+   errorCode[20]  := "";
+   errorCode[21]  := "";
+   errorCode[22]  := "";
+   errorCode[23]  := "";
+   errorCode[24]  := "";
+   errorCode[25]  := "";
+   errorCode[26]  := "";
+   errorCode[27]  := "";
+   errorCode[28]  := "";
+   errorCode[29]  := "";
+   errorCode[30]  := "";
+   errorCode[31]  := "";
+   errorCode[32]  := "";
+   errorCode[33]  := "";
+   errorCode[34]  := "";
+   errorCode[35]  := "";
+   errorCode[36]  := "";
+   errorCode[37]  := "";
+   errorCode[38]  := "";
+   errorCode[39]  := "";
+   errorCode[40]  := "";
+   errorCode[41]  := "";
+   errorCode[42]  := "";
+   errorCode[43]  := "";
+   errorCode[44]  := "";
+   errorCode[45]  := "";
+   errorCode[46]  := "";
+   errorCode[47]  := "";
+   errorCode[48]  := "";
+   errorCode[49]  := "";
+   (*  50- 99  handle system errors  *)
+   errorCode[50]  := "Arithmatic overflow";
+   errorCode[51]  := "Arithmatic underflow";
+   errorCode[52]  := "";
+   errorCode[53]  := "";
+   errorCode[54]  := "";
+   errorCode[55]  := "Iteration terminated due to round off error";
+   errorCode[56]  := "";
+   errorCode[57]  := "";
+   errorCode[58]  := "";
+   errorCode[59]  := "";
+   errorCode[60]  := "The requested binary data file does not exist";
+   errorCode[61]  := "The requested UTF8 text file does not exist";
+   errorCode[62]  := "";
+   errorCode[63]  := "";
+   errorCode[64]  := "";
+   errorCode[65]  := "";
+   errorCode[66]  := "";
+   errorCode[67]  := "";
+   errorCode[68]  := "";
+   errorCode[69]  := "";
+   errorCode[70]  := "The element is not a member of the enumerated type";
+   errorCode[71]  := "The number sent does not belong to the required subset";
+   errorCode[72]  := "";
+   errorCode[73]  := "";
+   errorCode[74]  := "";
+   errorCode[75]  := "";
+   errorCode[76]  := "";
+   errorCode[77]  := "";
+   errorCode[78]  := "";
+   errorCode[79]  := "";
+   errorCode[80]  := "Iteration terminated when an upper iterate limit was hit";
+   errorCode[81]  := "There was an extrapolation instead of an interpolation";
+   errorCode[82]  := "";
+   errorCode[83]  := "";
+   errorCode[84]  := "";
+   errorCode[85]  := "";
+   errorCode[86]  := "";
+   errorCode[87]  := "";
+   errorCode[88]  := "";
+   errorCode[89]  := "";
+   errorCode[90]  := "";
+   errorCode[91]  := "";
+   errorCode[92]  := "";
+   errorCode[93]  := "";
+   errorCode[94]  := "";
+   errorCode[95]  := "";
+   errorCode[96]  := "";
+   errorCode[97]  := "";
+   errorCode[98]  := "";
+   errorCode[99]  := "";
+   (*  100-199  handle Core.Numbers & Ccm.Scalars errors  *)
+   errorCode[100] := "Units were not compatible for assignment";
+   errorCode[101] := "Units were not compatible for arithmatic operation";
+   errorCode[102] := "Units were not compatible for boolean arithmetic";
+   errorCode[103] := "";
+   errorCode[104] := "";
+   errorCode[105] := "";
+   errorCode[106] := "";
+   errorCode[107] := "";
+   errorCode[108] := "";
+   errorCode[109] := "";
+   errorCode[110] := "";
+   errorCode[111] := "";
+   errorCode[112] := "";
+   errorCode[113] := "";
+   errorCode[114] := "";
+   errorCode[115] := "";
+   errorCode[116] := "";
+   errorCode[117] := "";
+   errorCode[118] := "";
+   errorCode[119] := "";
+   errorCode[120] := "";
+   errorCode[121] := "";
+   errorCode[122] := "";
+   errorCode[123] := "";
+   errorCode[124] := "";
+   errorCode[125] := "";
+   errorCode[126] := "";
+   errorCode[127] := "";
+   errorCode[128] := "";
+   errorCode[129] := "";
+   errorCode[130] := "";
+   errorCode[131] := "";
+   errorCode[132] := "";
+   errorCode[133] := "";
+   errorCode[134] := "";
+   errorCode[135] := "";
+   errorCode[136] := "";
+   errorCode[137] := "";
+   errorCode[138] := "";
+   errorCode[139] := "";
+   errorCode[140] := "";
+   errorCode[141] := "";
+   errorCode[142] := "";
+   errorCode[143] := "";
+   errorCode[144] := "";
+   errorCode[145] := "";
+   errorCode[146] := "";
+   errorCode[147] := "";
+   errorCode[148] := "";
+   errorCode[149] := "";
+   errorCode[150] := "";
+   errorCode[151] := "";
+   errorCode[152] := "";
+   errorCode[153] := "";
+   errorCode[154] := "";
+   errorCode[155] := "";
+   errorCode[156] := "";
+   errorCode[157] := "";
+   errorCode[158] := "";
+   errorCode[159] := "";
+   errorCode[160] := "";
+   errorCode[161] := "";
+   errorCode[162] := "";
+   errorCode[163] := "";
+   errorCode[164] := "";
+   errorCode[165] := "";
+   errorCode[166] := "";
+   errorCode[167] := "";
+   errorCode[168] := "";
+   errorCode[169] := "";
+   errorCode[170] := "";
+   errorCode[171] := "";
+   errorCode[172] := "";
+   errorCode[173] := "";
+   errorCode[174] := "";
+   errorCode[175] := "";
+   errorCode[176] := "";
+   errorCode[177] := "";
+   errorCode[178] := "";
+   errorCode[179] := "";
+   errorCode[180] := "";
+   errorCode[181] := "";
+   errorCode[182] := "";
+   errorCode[183] := "";
+   errorCode[184] := "";
+   errorCode[185] := "";
+   errorCode[186] := "";
+   errorCode[187] := "";
+   errorCode[188] := "";
+   errorCode[189] := "";
+   errorCode[190] := "";
+   errorCode[191] := "";
+   errorCode[192] := "";
+   errorCode[193] := "";
+   errorCode[194] := "";
+   errorCode[195] := "";
+   errorCode[196] := "";
+   errorCode[197] := "";
+   errorCode[198] := "";
+   errorCode[199] := "";
+   (*  200-299  handle Core.Arrays & Ccm.Vectors errors  *)
+   errorCode[200] := "Units were not compatible for assignment";
+   errorCode[201] := "Units were not compatible for arithmatic operation";
+   errorCode[202] := "Units were not compatible for boolean arithmetic";
+   errorCode[203] := "";
+   errorCode[204] := "";
+   errorCode[205] := "No array was assigned, the request was ignored";
+   errorCode[206] := "A boolean array of 'false' was assigned";
+   errorCode[207] := "A boolean 'false' was assigned";
+   errorCode[208] := "";
+   errorCode[209] := "";
+   errorCode[210] := "An index was out of range";
+   errorCode[211] := "Index ranges were not compatible for contraction";
+   errorCode[212] := "";
+   errorCode[213] := "";
+   errorCode[214] := "";
+   errorCode[215] := "";
+   errorCode[216] := "";
+   errorCode[217] := "";
+   errorCode[218] := "";
+   errorCode[219] := "";
+   errorCode[220] := "The zero vector has no direction";
+   errorCode[221] := "";
+   errorCode[222] := "";
+   errorCode[223] := "";
+   errorCode[224] := "";
+   errorCode[225] := "";
+   errorCode[226] := "";
+   errorCode[227] := "";
+   errorCode[228] := "";
+   errorCode[229] := "";
+   errorCode[230] := "";
+   errorCode[231] := "";
+   errorCode[232] := "";
+   errorCode[233] := "";
+   errorCode[234] := "";
+   errorCode[235] := "";
+   errorCode[236] := "";
+   errorCode[237] := "";
+   errorCode[238] := "";
+   errorCode[239] := "";
+   errorCode[240] := "";
+   errorCode[241] := "";
+   errorCode[242] := "";
+   errorCode[243] := "";
+   errorCode[244] := "";
+   errorCode[245] := "";
+   errorCode[246] := "";
+   errorCode[247] := "";
+   errorCode[248] := "";
+   errorCode[249] := "";
+   errorCode[250] := "";
+   errorCode[251] := "";
+   errorCode[252] := "";
+   errorCode[253] := "";
+   errorCode[254] := "";
+   errorCode[255] := "";
+   errorCode[256] := "";
+   errorCode[257] := "";
+   errorCode[258] := "";
+   errorCode[259] := "";
+   errorCode[260] := "";
+   errorCode[261] := "";
+   errorCode[262] := "";
+   errorCode[263] := "";
+   errorCode[264] := "";
+   errorCode[265] := "";
+   errorCode[266] := "";
+   errorCode[267] := "";
+   errorCode[268] := "";
+   errorCode[269] := "";
+   errorCode[270] := "";
+   errorCode[271] := "";
+   errorCode[272] := "";
+   errorCode[273] := "";
+   errorCode[274] := "";
+   errorCode[275] := "";
+   errorCode[276] := "";
+   errorCode[277] := "";
+   errorCode[278] := "";
+   errorCode[279] := "";
+   errorCode[280] := "";
+   errorCode[281] := "";
+   errorCode[282] := "";
+   errorCode[283] := "";
+   errorCode[284] := "";
+   errorCode[285] := "";
+   errorCode[286] := "";
+   errorCode[287] := "";
+   errorCode[288] := "";
+   errorCode[289] := "";
+   errorCode[290] := "";
+   errorCode[291] := "";
+   errorCode[292] := "";
+   errorCode[293] := "";
+   errorCode[294] := "";
+   errorCode[295] := "";
+   errorCode[296] := "";
+   errorCode[297] := "";
+   errorCode[298] := "";
+   errorCode[299] := "";
+   (*  300-399  handle Core.Matrices & Ccm.Tensors & Ccm.QuadTensors errors  *)
+   errorCode[300] := "Units were not compatible for assignment";
+   errorCode[301] := "Units were not compatible for arithmatic operation";
+   errorCode[302] := "Units were not compatible for boolean arithmetic";
+   errorCode[303] := "";
+   errorCode[304] := "";
+   errorCode[305] := "No matrix was assigned, the request was ignored";
+   errorCode[306] := "A boolean matrix of 'false' was assigned";
+   errorCode[307] := "A boolean 'false' was assigned";
+   errorCode[308] := "";
+   errorCode[309] := "";
+   errorCode[310] := "A matrix index was out of range";
+   errorCode[311] := "Index ranges were not compatible for contraction";
+   errorCode[312] := "";
+   errorCode[313] := "";
+   errorCode[314] := "";
+   errorCode[315] := "";
+   errorCode[316] := "";
+   errorCode[317] := "";
+   errorCode[318] := "";
+   errorCode[319] := "";
+   errorCode[320] := "The matrix must be square; it was not";
+   errorCode[321] := "The matrix does not have full rank";
+   errorCode[322] := "The matrix was not positive definite";
+   errorCode[323] := "The matrix was singular; its inverse dosn't exist";
+   errorCode[324] := "";
+   errorCode[325] := "";
+   errorCode[326] := "";
+   errorCode[327] := "";
+   errorCode[328] := "";
+   errorCode[329] := "";
+   errorCode[330] := "";
+   errorCode[331] := "";
+   errorCode[332] := "";
+   errorCode[333] := "";
+   errorCode[334] := "";
+   errorCode[335] := "";
+   errorCode[336] := "";
+   errorCode[337] := "";
+   errorCode[338] := "";
+   errorCode[339] := "";
+   errorCode[340] := "";
+   errorCode[341] := "";
+   errorCode[342] := "";
+   errorCode[343] := "";
+   errorCode[344] := "";
+   errorCode[345] := "";
+   errorCode[346] := "";
+   errorCode[347] := "";
+   errorCode[348] := "";
+   errorCode[349] := "";
+   errorCode[350] := "";
+   errorCode[351] := "";
+   errorCode[352] := "";
+   errorCode[353] := "";
+   errorCode[354] := "";
+   errorCode[355] := "";
+   errorCode[356] := "";
+   errorCode[357] := "";
+   errorCode[358] := "";
+   errorCode[359] := "";
+   errorCode[360] := "";
+   errorCode[361] := "";
+   errorCode[362] := "";
+   errorCode[363] := "";
+   errorCode[364] := "";
+   errorCode[365] := "";
+   errorCode[366] := "";
+   errorCode[367] := "";
+   errorCode[368] := "";
+   errorCode[369] := "";
+   errorCode[370] := "";
+   errorCode[371] := "";
+   errorCode[372] := "";
+   errorCode[373] := "";
+   errorCode[374] := "";
+   errorCode[375] := "";
+   errorCode[376] := "";
+   errorCode[377] := "";
+   errorCode[378] := "";
+   errorCode[379] := "";
+   errorCode[380] := "";
+   errorCode[381] := "";
+   errorCode[382] := "";
+   errorCode[383] := "";
+   errorCode[384] := "";
+   errorCode[385] := "";
+   errorCode[386] := "";
+   errorCode[387] := "";
+   errorCode[388] := "";
+   errorCode[389] := "";
+   errorCode[390] := "";
+   errorCode[391] := "";
+   errorCode[392] := "";
+   errorCode[393] := "";
+   errorCode[394] := "";
+   errorCode[395] := "";
+   errorCode[396] := "";
+   errorCode[397] := "";
+   errorCode[398] := "";
+   errorCode[399] := "";
+   (*  400-499  handle function/procedure/method errors  *)
+   errorCode[400] := "An argument sent to the function was: positive infinity";
+   errorCode[401] := "An argument sent to the function was: negative infinity";
+   errorCode[402] := "An argument sent to the function was: not a number";
+   errorCode[403] := "An argument sent to the function was: a nil object";
+   errorCode[404] := "An argument sent to the function had the wrong type";
+   errorCode[405] := "An argument of the function lies outside its domain";
+   errorCode[406] := "An argument of the function must be dimensionless";
+   errorCode[407] := "An argument of the function had the wrong units";
+   errorCode[408] := "";
+   errorCode[409] := "";
+   errorCode[410] := "A nil function was supplied";
+   errorCode[411] := "Function computation produced: a 0/0";
+   errorCode[412] := "Function computation produced: an Infinity/Infinity";
+   errorCode[413] := "Function computation produced: a complex number";
+   errorCode[414] := "";
+   errorCode[415] := "The function was not executed";
+   errorCode[416] := "";
+   errorCode[417] := "";
+   errorCode[418] := "";
+   errorCode[419] := "";
+   errorCode[420] := "The function returned: positive infinity";
+   errorCode[421] := "The function returned: negative infinity";
+   errorCode[422] := "The function returned: not a number";
+   errorCode[423] := "The function returned: a nil object";
+   errorCode[424] := "The function returned: false";
+   errorCode[425] := "The function returned: zero";
+   errorCode[426] := "The function returned: an array of zeros";
+   errorCode[427] := "The function returned: a matrix of zeros";
+   errorCode[428] := "The function returned: a dimensionless scalar";
+   errorCode[429] := "The function returned: a dimensionless vector";
+   errorCode[430] := "The function returned: a dimensionless tensor";
+   errorCode[431] := "The function returned: a dimensionless quad-tensor";
+   errorCode[432] := "";
+   errorCode[433] := "";
+   errorCode[434] := "";
+   errorCode[435] := "";
+   errorCode[436] := "";
+   errorCode[437] := "";
+   errorCode[438] := "";
+   errorCode[439] := "";
+   errorCode[440] := "";
+   errorCode[441] := "";
+   errorCode[442] := "";
+   errorCode[443] := "";
+   errorCode[444] := "";
+   errorCode[445] := "";
+   errorCode[446] := "";
+   errorCode[447] := "";
+   errorCode[448] := "";
+   errorCode[449] := "";
+   errorCode[450] := "";
+   errorCode[451] := "";
+   errorCode[452] := "";
+   errorCode[453] := "";
+   errorCode[454] := "";
+   errorCode[455] := "";
+   errorCode[456] := "";
+   errorCode[457] := "";
+   errorCode[458] := "";
+   errorCode[459] := "";
+   errorCode[460] := "";
+   errorCode[461] := "";
+   errorCode[462] := "";
+   errorCode[463] := "";
+   errorCode[464] := "";
+   errorCode[465] := "";
+   errorCode[466] := "";
+   errorCode[467] := "";
+   errorCode[468] := "";
+   errorCode[469] := "";
+   errorCode[470] := "";
+   errorCode[471] := "";
+   errorCode[472] := "";
+   errorCode[473] := "";
+   errorCode[474] := "";
+   errorCode[475] := "";
+   errorCode[476] := "";
+   errorCode[477] := "";
+   errorCode[478] := "";
+   errorCode[479] := "";
+   errorCode[480] := "";
+   errorCode[481] := "";
+   errorCode[482] := "";
+   errorCode[483] := "";
+   errorCode[484] := "";
+   errorCode[485] := "";
+   errorCode[486] := "";
+   errorCode[487] := "";
+   errorCode[488] := "";
+   errorCode[489] := "";
+   errorCode[490] := "";
+   errorCode[491] := "";
+   errorCode[492] := "";
+   errorCode[493] := "";
+   errorCode[494] := "";
+   errorCode[495] := "";
+   errorCode[496] := "";
+   errorCode[497] := "";
+   errorCode[498] := "";
+   errorCode[499] := "";
+   (*  500-599  handle object errors  *)
+   errorCode[500] := "The object supplied was nil";
+   errorCode[501] := "The object supplied was of the wrong type";
+   errorCode[502] := "";
+   errorCode[503] := "";
+   errorCode[504] := "";
+   errorCode[505] := "";
+   errorCode[506] := "";
+   errorCode[507] := "";
+   errorCode[508] := "";
+   errorCode[509] := "";
+   errorCode[510] := "Once set, a key cannot be reset";
+   errorCode[511] := "The key supplied is already in use in the data structure";
+   errorCode[512] := "";
+   errorCode[513] := "";
+   errorCode[514] := "";
+   errorCode[515] := "An inconsistent data set was supplied";
+   errorCode[516] := "";
+   errorCode[517] := "";
+   errorCode[518] := "";
+   errorCode[519] := "";
+   errorCode[520] := "";
+   errorCode[521] := "";
+   errorCode[522] := "";
+   errorCode[523] := "";
+   errorCode[524] := "";
+   errorCode[525] := "";
+   errorCode[526] := "";
+   errorCode[527] := "";
+   errorCode[528] := "";
+   errorCode[529] := "";
+   errorCode[530] := "";
+   errorCode[531] := "";
+   errorCode[532] := "";
+   errorCode[533] := "";
+   errorCode[534] := "";
+   errorCode[535] := "";
+   errorCode[536] := "";
+   errorCode[537] := "";
+   errorCode[538] := "";
+   errorCode[539] := "";
+   errorCode[540] := "";
+   errorCode[541] := "";
+   errorCode[542] := "";
+   errorCode[543] := "";
+   errorCode[544] := "";
+   errorCode[545] := "";
+   errorCode[546] := "";
+   errorCode[547] := "";
+   errorCode[548] := "";
+   errorCode[549] := "";
+   errorCode[550] := "";
+   errorCode[551] := "";
+   errorCode[552] := "";
+   errorCode[553] := "";
+   errorCode[554] := "";
+   errorCode[555] := "";
+   errorCode[556] := "";
+   errorCode[557] := "";
+   errorCode[558] := "";
+   errorCode[559] := "";
+   errorCode[560] := "";
+   errorCode[561] := "";
+   errorCode[562] := "";
+   errorCode[563] := "";
+   errorCode[564] := "";
+   errorCode[565] := "";
+   errorCode[566] := "";
+   errorCode[567] := "";
+   errorCode[568] := "";
+   errorCode[569] := "";
+   errorCode[570] := "";
+   errorCode[571] := "";
+   errorCode[572] := "";
+   errorCode[573] := "";
+   errorCode[574] := "";
+   errorCode[575] := "";
+   errorCode[576] := "";
+   errorCode[577] := "";
+   errorCode[578] := "";
+   errorCode[579] := "";
+   errorCode[580] := "";
+   errorCode[581] := "";
+   errorCode[582] := "";
+   errorCode[583] := "";
+   errorCode[584] := "";
+   errorCode[585] := "";
+   errorCode[586] := "";
+   errorCode[587] := "";
+   errorCode[588] := "";
+   errorCode[589] := "";
+   errorCode[590] := "";
+   errorCode[591] := "";
+   errorCode[592] := "";
+   errorCode[593] := "";
+   errorCode[594] := "";
+   errorCode[595] := "";
+   errorCode[596] := "";
+   errorCode[597] := "";
+   errorCode[598] := "";
+   errorCode[599] := "";
+   (*  600-999  reserved for future growth  *)
+   errorCode[600] := "";
+   errorCode[601] := "";
+   errorCode[602] := "";
+   errorCode[603] := "";
+   errorCode[604] := "";
+   errorCode[605] := "";
+   errorCode[606] := "";
+   errorCode[607] := "";
+   errorCode[608] := "";
+   errorCode[609] := "";
+   errorCode[610] := "";
+   errorCode[611] := "";
+   errorCode[612] := "";
+   errorCode[613] := "";
+   errorCode[614] := "";
+   errorCode[615] := "";
+   errorCode[616] := "";
+   errorCode[617] := "";
+   errorCode[618] := "";
+   errorCode[619] := "";
+   errorCode[620] := "";
+   errorCode[621] := "";
+   errorCode[622] := "";
+   errorCode[623] := "";
+   errorCode[624] := "";
+   errorCode[625] := "";
+   errorCode[626] := "";
+   errorCode[627] := "";
+   errorCode[628] := "";
+   errorCode[629] := "";
+   errorCode[630] := "";
+   errorCode[631] := "";
+   errorCode[632] := "";
+   errorCode[633] := "";
+   errorCode[634] := "";
+   errorCode[635] := "";
+   errorCode[636] := "";
+   errorCode[637] := "";
+   errorCode[638] := "";
+   errorCode[639] := "";
+   errorCode[640] := "";
+   errorCode[641] := "";
+   errorCode[642] := "";
+   errorCode[643] := "";
+   errorCode[644] := "";
+   errorCode[645] := "";
+   errorCode[646] := "";
+   errorCode[647] := "";
+   errorCode[648] := "";
+   errorCode[649] := "";
+   errorCode[650] := "";
+   errorCode[651] := "";
+   errorCode[652] := "";
+   errorCode[653] := "";
+   errorCode[654] := "";
+   errorCode[655] := "";
+   errorCode[656] := "";
+   errorCode[657] := "";
+   errorCode[658] := "";
+   errorCode[659] := "";
+   errorCode[660] := "";
+   errorCode[661] := "";
+   errorCode[662] := "";
+   errorCode[663] := "";
+   errorCode[664] := "";
+   errorCode[665] := "";
+   errorCode[666] := "";
+   errorCode[667] := "";
+   errorCode[668] := "";
+   errorCode[669] := "";
+   errorCode[670] := "";
+   errorCode[671] := "";
+   errorCode[672] := "";
+   errorCode[673] := "";
+   errorCode[674] := "";
+   errorCode[675] := "";
+   errorCode[676] := "";
+   errorCode[677] := "";
+   errorCode[678] := "";
+   errorCode[679] := "";
+   errorCode[680] := "";
+   errorCode[681] := "";
+   errorCode[682] := "";
+   errorCode[683] := "";
+   errorCode[684] := "";
+   errorCode[685] := "";
+   errorCode[686] := "";
+   errorCode[687] := "";
+   errorCode[688] := "";
+   errorCode[689] := "";
+   errorCode[690] := "";
+   errorCode[691] := "";
+   errorCode[692] := "";
+   errorCode[693] := "";
+   errorCode[694] := "";
+   errorCode[695] := "";
+   errorCode[696] := "";
+   errorCode[697] := "";
+   errorCode[698] := "";
+   errorCode[699] := "";
+   errorCode[700] := "";
+   errorCode[701] := "";
+   errorCode[702] := "";
+   errorCode[703] := "";
+   errorCode[704] := "";
+   errorCode[705] := "";
+   errorCode[706] := "";
+   errorCode[707] := "";
+   errorCode[708] := "";
+   errorCode[709] := "";
+   errorCode[710] := "";
+   errorCode[711] := "";
+   errorCode[712] := "";
+   errorCode[713] := "";
+   errorCode[714] := "";
+   errorCode[715] := "";
+   errorCode[716] := "";
+   errorCode[717] := "";
+   errorCode[718] := "";
+   errorCode[719] := "";
+   errorCode[720] := "";
+   errorCode[721] := "";
+   errorCode[722] := "";
+   errorCode[723] := "";
+   errorCode[724] := "";
+   errorCode[725] := "";
+   errorCode[726] := "";
+   errorCode[727] := "";
+   errorCode[728] := "";
+   errorCode[729] := "";
+   errorCode[730] := "";
+   errorCode[731] := "";
+   errorCode[732] := "";
+   errorCode[733] := "";
+   errorCode[734] := "";
+   errorCode[735] := "";
+   errorCode[736] := "";
+   errorCode[737] := "";
+   errorCode[738] := "";
+   errorCode[739] := "";
+   errorCode[740] := "";
+   errorCode[741] := "";
+   errorCode[742] := "";
+   errorCode[743] := "";
+   errorCode[744] := "";
+   errorCode[745] := "";
+   errorCode[746] := "";
+   errorCode[747] := "";
+   errorCode[748] := "";
+   errorCode[749] := "";
+   errorCode[750] := "";
+   errorCode[751] := "";
+   errorCode[752] := "";
+   errorCode[753] := "";
+   errorCode[754] := "";
+   errorCode[755] := "";
+   errorCode[756] := "";
+   errorCode[757] := "";
+   errorCode[758] := "";
+   errorCode[759] := "";
+   errorCode[760] := "";
+   errorCode[761] := "";
+   errorCode[762] := "";
+   errorCode[763] := "";
+   errorCode[764] := "";
+   errorCode[765] := "";
+   errorCode[766] := "";
+   errorCode[767] := "";
+   errorCode[768] := "";
+   errorCode[769] := "";
+   errorCode[770] := "";
+   errorCode[771] := "";
+   errorCode[772] := "";
+   errorCode[773] := "";
+   errorCode[774] := "";
+   errorCode[775] := "";
+   errorCode[776] := "";
+   errorCode[777] := "";
+   errorCode[778] := "";
+   errorCode[779] := "";
+   errorCode[780] := "";
+   errorCode[781] := "";
+   errorCode[782] := "";
+   errorCode[783] := "";
+   errorCode[784] := "";
+   errorCode[785] := "";
+   errorCode[786] := "";
+   errorCode[787] := "";
+   errorCode[788] := "";
+   errorCode[789] := "";
+   errorCode[790] := "";
+   errorCode[791] := "";
+   errorCode[792] := "";
+   errorCode[793] := "";
+   errorCode[794] := "";
+   errorCode[795] := "";
+   errorCode[796] := "";
+   errorCode[797] := "";
+   errorCode[798] := "";
+   errorCode[799] := "";
+   errorCode[800] := "";
+   errorCode[801] := "";
+   errorCode[802] := "";
+   errorCode[803] := "";
+   errorCode[804] := "";
+   errorCode[805] := "";
+   errorCode[806] := "";
+   errorCode[807] := "";
+   errorCode[808] := "";
+   errorCode[809] := "";
+   errorCode[810] := "";
+   errorCode[811] := "";
+   errorCode[812] := "";
+   errorCode[813] := "";
+   errorCode[814] := "";
+   errorCode[815] := "";
+   errorCode[816] := "";
+   errorCode[817] := "";
+   errorCode[818] := "";
+   errorCode[819] := "";
+   errorCode[820] := "";
+   errorCode[821] := "";
+   errorCode[822] := "";
+   errorCode[823] := "";
+   errorCode[824] := "";
+   errorCode[825] := "";
+   errorCode[826] := "";
+   errorCode[827] := "";
+   errorCode[828] := "";
+   errorCode[829] := "";
+   errorCode[830] := "";
+   errorCode[831] := "";
+   errorCode[832] := "";
+   errorCode[833] := "";
+   errorCode[834] := "";
+   errorCode[835] := "";
+   errorCode[836] := "";
+   errorCode[837] := "";
+   errorCode[838] := "";
+   errorCode[839] := "";
+   errorCode[840] := "";
+   errorCode[841] := "";
+   errorCode[842] := "";
+   errorCode[843] := "";
+   errorCode[844] := "";
+   errorCode[845] := "";
+   errorCode[846] := "";
+   errorCode[847] := "";
+   errorCode[848] := "";
+   errorCode[849] := "";
+   errorCode[850] := "";
+   errorCode[851] := "";
+   errorCode[852] := "";
+   errorCode[853] := "";
+   errorCode[854] := "";
+   errorCode[855] := "";
+   errorCode[856] := "";
+   errorCode[857] := "";
+   errorCode[858] := "";
+   errorCode[859] := "";
+   errorCode[860] := "";
+   errorCode[861] := "";
+   errorCode[862] := "";
+   errorCode[863] := "";
+   errorCode[864] := "";
+   errorCode[865] := "";
+   errorCode[866] := "";
+   errorCode[867] := "";
+   errorCode[868] := "";
+   errorCode[869] := "";
+   errorCode[870] := "";
+   errorCode[871] := "";
+   errorCode[872] := "";
+   errorCode[873] := "";
+   errorCode[874] := "";
+   errorCode[875] := "";
+   errorCode[876] := "";
+   errorCode[877] := "";
+   errorCode[878] := "";
+   errorCode[879] := "";
+   errorCode[880] := "";
+   errorCode[881] := "";
+   errorCode[882] := "";
+   errorCode[883] := "";
+   errorCode[884] := "";
+   errorCode[885] := "";
+   errorCode[886] := "";
+   errorCode[887] := "";
+   errorCode[888] := "";
+   errorCode[889] := "";
+   errorCode[890] := "";
+   errorCode[891] := "";
+   errorCode[892] := "";
+   errorCode[893] := "";
+   errorCode[894] := "";
+   errorCode[895] := "";
+   errorCode[896] := "";
+   errorCode[897] := "";
+   errorCode[898] := "";
+   errorCode[899] := "";
+   errorCode[900] := "";
+   errorCode[901] := "";
+   errorCode[902] := "";
+   errorCode[903] := "";
+   errorCode[904] := "";
+   errorCode[905] := "";
+   errorCode[906] := "";
+   errorCode[907] := "";
+   errorCode[908] := "";
+   errorCode[909] := "";
+   errorCode[910] := "";
+   errorCode[911] := "";
+   errorCode[912] := "";
+   errorCode[913] := "";
+   errorCode[914] := "";
+   errorCode[915] := "";
+   errorCode[916] := "";
+   errorCode[917] := "";
+   errorCode[918] := "";
+   errorCode[919] := "";
+   errorCode[920] := "";
+   errorCode[921] := "";
+   errorCode[922] := "";
+   errorCode[923] := "";
+   errorCode[924] := "";
+   errorCode[925] := "";
+   errorCode[926] := "";
+   errorCode[927] := "";
+   errorCode[928] := "";
+   errorCode[929] := "";
+   errorCode[930] := "";
+   errorCode[931] := "";
+   errorCode[932] := "";
+   errorCode[933] := "";
+   errorCode[934] := "";
+   errorCode[935] := "";
+   errorCode[936] := "";
+   errorCode[937] := "";
+   errorCode[938] := "";
+   errorCode[939] := "";
+   errorCode[940] := "";
+   errorCode[941] := "";
+   errorCode[942] := "";
+   errorCode[943] := "";
+   errorCode[944] := "";
+   errorCode[945] := "";
+   errorCode[946] := "";
+   errorCode[947] := "";
+   errorCode[948] := "";
+   errorCode[949] := "";
+   errorCode[950] := "";
+   errorCode[951] := "";
+   errorCode[952] := "";
+   errorCode[953] := "";
+   errorCode[954] := "";
+   errorCode[955] := "";
+   errorCode[956] := "";
+   errorCode[957] := "";
+   errorCode[958] := "";
+   errorCode[959] := "";
+   errorCode[960] := "";
+   errorCode[961] := "";
+   errorCode[962] := "";
+   errorCode[963] := "";
+   errorCode[964] := "";
+   errorCode[965] := "";
+   errorCode[966] := "";
+   errorCode[967] := "";
+   errorCode[968] := "";
+   errorCode[969] := "";
+   errorCode[970] := "";
+   errorCode[971] := "";
+   errorCode[972] := "";
+   errorCode[973] := "";
+   errorCode[974] := "";
+   errorCode[975] := "";
+   errorCode[976] := "";
+   errorCode[977] := "";
+   errorCode[978] := "";
+   errorCode[979] := "";
+   errorCode[980] := "";
+   errorCode[981] := "";
+   errorCode[982] := "";
+   errorCode[983] := "";
+   errorCode[984] := "";
+   errorCode[985] := "";
+   errorCode[986] := "";
+   errorCode[987] := "";
+   errorCode[988] := "";
+   errorCode[989] := "";
+   errorCode[990] := "";
+   errorCode[991] := "";
+   errorCode[992] := "";
+   errorCode[993] := "";
+   errorCode[994] := "";
+   errorCode[995] := "";
+   errorCode[996] := "";
+   errorCode[997] := "";
+   errorCode[998] := "";
+   errorCode[999] := ""
+end Log.

@@ -1,0 +1,45 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * 11.2.E Import
+ *
+ * Positive test: Test for import with the same name as in def. 
+ *)
+
+definition A;
+import C.T as T;
+
+procedure P(a: T);
+
+end A.
+
+object U implements A;
+import C.T as T;
+procedure {public} P(a: T) implements A.P;
+begin
+end P;
+
+end U.
+
+
+object {ref} C.T;
+
+end T.
+
+
+module {public} Main;
+
+   import
+      System.Double  as Double;
+
+
+   var {public}
+   
+      x : Double;
+      
+begin
+   x:= 10.0;
+   x := - x;
+   
+   halt(1)
+end Main.

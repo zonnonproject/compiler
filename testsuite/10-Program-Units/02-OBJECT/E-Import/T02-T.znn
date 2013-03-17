@@ -1,0 +1,56 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * 11.2.E Import
+ *
+ * Positive test: Test for import with the same name as in def. 
+ *)
+
+
+object {ref} C.T;
+var {public} s: string;
+end T.
+
+
+object U implements X.A;
+import Main, C.T as T;
+
+procedure {public} P(a: T) implements X.A.P;
+var b: T;
+begin
+	writeln("Value: ", a.s);
+	Main.flag := true;
+end P;
+
+end U.
+
+definition X.A;
+import C.T as T;
+
+procedure P(a: T);
+
+end A.
+
+
+module {public} Main;
+
+   import
+      System.Double  as Double,
+	  U,
+	  C.T as T;
+
+   var {public}
+	  flag: boolean;
+      x : Double;
+      u: U;
+      t: T;
+begin
+   flag := false;
+   x:= 10.0;
+   x := - x;
+   t := new T;
+   t.s := "Hello Welt!";
+   u.P(t);   
+   if flag then halt(1) end;
+   halt(0)
+end Main.

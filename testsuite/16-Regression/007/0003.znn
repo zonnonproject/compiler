@@ -1,0 +1,29 @@
+module run;
+
+const bufLen = 128;
+
+type {public, ref, protected} Buffer = object; 
+	var inp, out: integer;
+        buf : array bufLen of integer;
+
+	procedure {public} Put (j : integer);
+	begin 
+		await (* Await until full. *) 
+			  (inp + 1) mod bufLen # out;
+		buf[inp] := j;
+		inp := (inp + 1) mod bufLen;
+	end Put;
+
+	procedure {public} Get(var j : integer);
+	begin 
+		await (* Await until not empty. *) 
+			  inp # out;
+		j := buf[out];
+		out := (out + 1) mod bufLen;
+	end Get;
+begin
+	inp := 0;
+	out := 0;
+end Buffer;
+
+end run.

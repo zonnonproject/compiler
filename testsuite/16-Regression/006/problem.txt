@@ -1,0 +1,54 @@
+Hi Roman,
+
+I ran into an interesting runtime error, which produced an output like:
+
+Unhandled Exception: System.InvalidProgramException: Invalid IL code in Zonnon.Driver:OptimizerSettings (int&,int&,int&,int&,Zonnon.Bel.MF.Numbers/Number&,Zonnon.Bel.MF.Numbers/Number&,string&,string&): IL_02b5: call      0x0a00002d                             
+
+
+  at Zonnon.Driver.Run () [0x00000] 
+  at Zonnon.Driver._body () [0x00000] 
+  at Zonnon.Driver.Main () [0x00000]  
+
+
+It took me awhile to chase down the cause.  It was unexpected, so I thought I'd forward it on to you.
+
+What I did was to define a constant, i.e.,
+
+const
+   numberOfParameters = 3;
+
+Now, I can use this constant as a limit in a FOR loop - that compiles and runs - but I cannot use it in an overloaded sense.
+For example, I wrote:
+
+var
+   x, y : N.Number;
+begin
+   ...
+   x := y/numberOfParameters;
+   ...
+
+This compiles, but it is the cause of the above runtime error.  I get the same error with operations like:
+
+   x := numberOfParameters;
+
+and
+
+   x := numberOfParameters*y
+
+I thought you'd want to know.  There is an easy workaround on this for me, so it's not an urgent 
+bug that needs fixing, just one for your list.  I'm not sure why this arose, because I have overloaded
+the operators for all of the System types (I know of), specifically; these are handled via overloads
+
+      System.Byte    as Card8,   (* core type of  cardinal{8}  *)
+      System.UInt16  as Card16,  (* core type of  cardinal{16} *)
+      System.UInt32  as Card32,  (* core type of  cardinal{32} *)
+      System.UInt64  as Card64,  (* core type of  cardinal{64} *)
+      System.Int16   as Int16,   (* core type of  integer{16}  *)
+      System.Int32   as Int32,   (* core type of  integer{32}  *)
+      System.Int64   as Int64,   (* core type of  integer{64}  *)
+      System.SByte   as Int8,    (* core type of  integer{8}   *)
+      System.Single  as Real32,  (* core type of  real{32}     *)
+      System.Double  as Real64,  (* core type of  real{64}     *)
+
+
+Have a great weekend,

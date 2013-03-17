@@ -1,0 +1,14 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Negative text: Te and Tv are incompatible types.
+ *)
+module Main;
+	var	v : integer {  8 };
+        e : integer { 32 };
+begin
+	e := 3;
+	v := e;
+	halt(0);
+end Main.

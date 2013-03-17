@@ -1,0 +1,21 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.4. Set Operators.
+ *
+ * Positive test: set elements diapason.
+ *)
+module Main;
+	var s : set;
+begin
+	s := {1..2, 4..5, 7};
+	if  ~(0 in s) & 
+         (1 in s) &
+         (2 in s) &
+        ~(3 in s) &
+         (4 in s) &
+         (5 in s) &
+        ~(6 in s) &
+         (7 in s)
+	then halt(1) else halt(0) end;
+end Main.

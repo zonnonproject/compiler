@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * real type
+ *
+ * Positive test: wrong real type width.
+ * Warning from compiler.
+ *)
+module Main;
+	var r1 : real {  32 };
+	var r2 : real {  33 };
+	var r3 : real { 128 };
+begin
+	halt(1);
+end Main.

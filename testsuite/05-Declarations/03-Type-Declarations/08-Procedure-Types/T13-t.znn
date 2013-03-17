@@ -1,0 +1,27 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: variable with procedure type is used to call procedure.
+ *)
+module Main;
+	type PT = procedure(var integer) : integer;
+
+	procedure P(var i : integer) : integer;
+	begin
+		i := i + 1;
+		return i;
+	end P;
+
+	var pt : PT;
+		n, k : integer;
+begin
+	k := 4;
+	pt := P;
+	n := pt(k);
+	
+	if (k = 5) & (n = 5)
+	then halt(1) else halt(0) end;
+end Main.
+

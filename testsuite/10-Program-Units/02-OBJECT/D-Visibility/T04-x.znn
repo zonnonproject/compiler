@@ -1,0 +1,23 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Object visibility
+ *
+ * Negative test: private object A.B is used outside its namespace.
+ * The object A.B is declared before it is used.
+ *)
+object { private } A.B;
+	var { public } 
+		i : integer;
+begin 
+	i := 3; 
+end B.
+
+module Main;
+	import A.B;
+
+	var b : A.B;
+begin
+	if b.i = 3 
+	then halt(1) else halt(0) end;
+end Main.

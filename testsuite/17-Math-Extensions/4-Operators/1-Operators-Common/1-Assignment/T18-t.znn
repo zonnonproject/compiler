@@ -1,0 +1,39 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Assignment
+ * 
+ * Positive test: mixed indexing
+ * dynamic := static
+ * dynamic := dynamic
+ *)
+
+module Main;
+
+type v = array *, *, * of integer;
+type v1 = array *, *, * of integer;
+
+var
+	a : v;
+	b : v1;
+	c : array 2, 3, 4 of integer;
+	
+begin	
+	
+	b := new v(2, 3, 4);
+	a := b;
+	a[0, 0, 0] := 3;
+	if b[0, 0, 0] # 3
+	then
+		halt(0);
+	end;
+	
+	a := c;
+	a[0, 0, 0] := 4;
+	if c[0, 0, 0] # 4
+	then
+		halt(0);
+	end;
+	
+	halt(1);
+end Main.

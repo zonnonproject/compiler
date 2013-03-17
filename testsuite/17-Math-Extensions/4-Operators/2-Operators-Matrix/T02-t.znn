@@ -1,0 +1,47 @@
+(** 
+ * 17. Math extensions.
+ * 17.4.2. Matrix operators
+ * 
+ * Positive test: matrix transposition
+ * with scalar
+ *)
+
+module Main;
+
+type vi = array {math} * of integer;
+type vr = array {math} * of real;
+type mi = array {math} *,* of integer;
+type mr = array {math} *,* of real;
+type vb = array {math} * of boolean;
+
+var
+	Ai, Bi, Ci : mi;
+	ai, bi, ci : vi;
+	Ar, Br, Cr : mr;
+	ar, br, cr : vr;
+	ab, bb, cb : vb;
+	
+	i, j : integer;
+  
+begin
+	  
+	ai := [1,2];
+	  
+	Ai := [[1, 2, 4], [6, -1, 7]];  
+	Ci := !Ai[0..1, ai];
+	
+	for i := 0 to 1
+	do
+		for j := 0 to 1
+		do
+			if (Ai[i, j + 1] # Ci[j, i])
+			then
+				halt(0);
+			end;
+		end;
+	end;
+	
+	halt(1);
+	
+end Main.
+

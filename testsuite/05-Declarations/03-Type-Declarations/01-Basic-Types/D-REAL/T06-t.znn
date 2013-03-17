@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * real type
+ *
+ * Positive test: correct real variables assignment.
+ * Const expression is used for real type width.
+ *)
+module Main;
+	const N = 2;
+	var r64 : real { 164 mod 100 };
+	var r80 : real { 321 div   N };
+begin
+	r64 := 1.28;
+	r80 := 3.14;
+
+	r80 := r64; (* Correct assignment: left type width {80} > right type width {64} *)
+	halt(1);
+end Main.
+

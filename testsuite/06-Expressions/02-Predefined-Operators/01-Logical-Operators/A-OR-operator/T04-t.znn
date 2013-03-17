@@ -1,0 +1,13 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators
+ * A. or operator.
+ *
+ * Positive test: false or false
+ *)
+module Main;
+begin
+	if false or false 
+	then halt(0) else halt(1) end;
+end Main.

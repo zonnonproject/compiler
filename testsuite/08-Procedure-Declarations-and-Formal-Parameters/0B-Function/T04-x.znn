@@ -1,0 +1,15 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the procedure A returns not initialized variable.
+ *)
+module Main;
+	procedure A : integer;
+		var k : integer;
+	begin
+		return k;
+	end A;
+begin
+	A;
+	halt(0);
+end Main.

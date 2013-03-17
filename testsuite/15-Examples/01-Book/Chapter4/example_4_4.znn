@@ -1,0 +1,56 @@
+(* ********* Zonnon online collection ***********
+ * TreeSearch (Chapter 4, Example 4.4)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module TreeSearch;
+
+object {ref, public} Word;
+var {public}
+   key, count: integer;
+   left, right: Word;
+end Word;
+
+var root: Word; n, key: integer;
+
+procedure PrintTree(t: Word; h: integer);
+var i: integer;
+begin
+   if t # nil then
+      PrintTree(t.left, h+1);
+      for i:=1 to h do write(" "); end;
+      writeln(t.key:6);
+      PrintTree(t.right, h+1);
+   end;
+end PrintTree;
+
+procedure search(x:integer; var p: Word);
+begin
+   if p = nil then
+      p := new Word;
+      p.key := x; p.count := 1; p.left := nil; p.right:= nil;
+   elsif
+      x < p.key then
+      search(x,p.left);
+   elsif
+      x > p.key then
+      search(x, p.right);
+   else p.count := p.count + 1;
+   end;
+end search;
+
+begin
+   writeln("Example 4.4 (TreeSearch)");   
+   write("Enter number of nodes: ");
+   root := nil;
+   readln(n);
+   writeln("Enter keys: ");
+   while n>0 do
+       write("?> "); readln(key); search(key, root); n := n-1;
+   end;           
+   PrintTree(root, 0);
+   writeln("Type 'q' to exit");	
+end TreeSearch.

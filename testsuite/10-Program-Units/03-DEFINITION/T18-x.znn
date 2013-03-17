@@ -1,0 +1,15 @@
+(** 
+ * 11.Program Units.
+ * 11.3. Definition
+ *
+ * Negative test: the definition type A is used as procedure result.
+ *)
+definition {public} A;
+	procedure P : A;
+end A.
+
+module Main;
+begin 
+	halt(1);
+end Main.
+

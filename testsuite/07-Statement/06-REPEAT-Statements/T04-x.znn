@@ -1,0 +1,15 @@
+(** 
+ * 7. Statement 
+ * 7.6. REPEAT statement.
+ *
+ * Negative test: undeclared variable in UNTIL clause.
+ *)
+module Main;
+	var i : integer;
+begin
+	repeat 
+		i := 0;
+	until j;
+
+	halt(0);
+end Main.

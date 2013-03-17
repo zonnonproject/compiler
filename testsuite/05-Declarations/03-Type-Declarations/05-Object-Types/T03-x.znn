@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3.6 Postulated interface type.
+ * 6.3.5. Value object (RECord).
+ *
+ * Negative test: it is imposible to use object name for assignment.
+ *)
+object { value } A;
+begin
+	A := 1;
+end A.
+
+module Main; 
+begin
+	halt(0);
+end Main.

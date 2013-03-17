@@ -1,0 +1,26 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators.
+ *
+ * Negative test: private integer array elements of object A.B are used in logical operator.
+ * The object is declared before its array elements are used.
+ *)
+object A.B;
+	var { public } 
+		p : array 2 of set; 
+		q : array 2 of integer;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+		r : boolean;
+begin
+	b.p[0] := true;
+	b.q[1] := false;
+
+	r := b.p[0] or b.q[1];
+	halt(0);
+end Main.

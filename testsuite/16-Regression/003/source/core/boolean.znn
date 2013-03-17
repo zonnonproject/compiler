@@ -1,0 +1,619 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The modules in CORE form a foundation for computation modeling in Zonnon.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Creates boolean arrays and matrices for use in this framework.             *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The row & column indexers go from 1..N, not from 0..N-1 as in C & Zonnon.  *)
+(* All elements in boolean arrays and matrices are initialized to 'false'.    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Constants   : deepCopy      - used as flag for variable copyDepth          *)
+(*             : shallowCopy   - used as flag for variable copyDepth          *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : Array           - a one-dimensional array object             *)
+(*    Methods  : Initialize;     - creates the internal vector array          *)
+(*             : Nullify         - sets the dynamic memory to nil             *)
+(*             : Clone           - returns initialized array of same length   *)
+(*             : Copy            - returns shallow or deep copy of the array  *)
+(*             : Load            - retrieves an array from a binary file      *)
+(*             : Store           - writes the array to a binary file          *)
+(*             : Length          - returns the dimension of the array         *)
+(*             : Get             - implements [].Get                          *)
+(*             : Set             - implements [].Set                          *)
+(*             : Equals          - checks two arrays for equality             *)
+(*             : And             - element-by-element '&' operation           *)
+(*             : Or              - element-by-element 'or' operation          *)
+(*             : Not             - element-by-element '~' operation           *)
+(* Operators   : :=              - assignment                                 *)
+(*             : ~               - uniary logical operator                    *)
+(*             : = | # | & | or  - logical operators                          *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : Matrix          - a two-dimensional array object             *)
+(*    methods  : Initialize;     - creates the internal matrix array          *)
+(*             : Nullify         - sets the dynamic memory to nil             *)
+(*             : Clone           - returns initialized matrix with same size  *)
+(*             : Copy            - returns shallow or deep copy of the matrix *)
+(*             : Load            - retrieves the matrix from a binary file    *)
+(*             : Store           - writes the matrix to a binary file         *)
+(*             : Rows            - returns the number of rows in the matrix   *)
+(*             : Columns         - returns number of columns in the matrix    *)
+(*             : Get             - implements [].Get                          *)
+(*             : Set             - implements [].Set                          *)
+(*             : Equals          - checks two matrices for equality           *)
+(*             : And             - element-by-element '&' operation           *)
+(*             : Or              - element-by-element 'or' operation          *)
+(*             : Not             - element-by-element '~' operation           *)
+(* Operators   : :=              - assignment                                 *)
+(*             : ~               - uniary logical operator                    *)
+(*             : = | # | & | or  - logical operators                          *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCore.Boolean;
+
+   import
+      System.Boolean         as Bool,
+      System.Int32           as Int32,
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      BelCore.Log            as L;
+
+   var {public}
+      deepCopy, shallowCopy : boolean;
+
+   type {public, value} Array = object implements []
+
+      type {private}
+          ArrayBoolean  = array * of boolean;
+
+      var {private}
+         v : ArrayBoolean;
+
+      procedure {public} Initialize (length : integer);
+      var
+         i : integer;
+      begin {locked}
+         if Length() # length then
+            if length > 0 then
+               v := new ArrayBoolean(length);
+               for i := 0 to length-1 do
+                  v[i] := false
+               end
+            else
+               v := nil
+            end
+         end
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin
+         v := nil
+      end Nullify;
+
+      procedure {public} Clone () : Array;
+      var
+         a : Array;
+      begin
+         a.Initialize(Length());
+         return a
+      end Clone;
+
+      procedure {public} Copy (copyDepth : boolean) : Array;
+      var
+         a : Array;
+         i, j : integer;
+      begin
+         j := Length();
+         if (copyDepth = deepCopy) & (j > 0) then
+            a.v := new ArrayBoolean(j);
+            for i := 0 to j-1 do
+               a.v[i] := v[i]
+            end
+         else
+            a.v := v
+         end;
+         return a
+      end Copy;
+
+      procedure {public} Load  (br : BinaryReader);
+      var
+         i, j : integer;
+      begin {locked}
+         j := br.ReadInt32();
+         if j = 0 then
+            Nullify
+         else
+            if j # Length() then
+               v := new ArrayBoolean(j)
+            end;
+            for i := 0 to j-1 do
+               v[i] := br.ReadBoolean()
+            end
+         end
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      var
+         b : Bool;
+         c, i : integer;
+         j : Int32;
+      begin
+         j := Length();
+         bw.Write(j);
+         bw.Flush;
+         c := 0;
+         for i := 0 to j-1 do
+            inc(c);
+            b := v[i];
+            bw.Write(b);
+            if c = 10 then
+               c := 0;
+               bw.Flush
+            end
+         end;
+         bw.Flush
+      end Store;
+
+      procedure {public} Length () : integer;
+      begin
+         if v # nil then
+            return len(v)
+         else
+            return 0
+         end
+      end Length;
+
+      procedure {public} Get (row : integer) : boolean
+         implements [].Get;
+      var
+         b : boolean;
+      begin
+         if (row >= 1) & (row <= Length()) then
+            dec(row);
+            b := v[row]
+         else
+            L.WarningMessage(210,424, "BelCore.Boolean.Array.Get");
+            b := false
+         end;
+         return b
+      end Get;
+
+      procedure {public} Set (row : integer; b : boolean)
+         implements [].Set;
+      begin {locked}
+         dec(row);
+         if (row >= 0) & (row < Length()) then
+            v[row] := b
+         else
+            L.WarningMessage(210,207, "BelCore.Boolean.Array.Set");
+            v[row] := false
+         end
+      end Set;
+
+      procedure {public} Equals (r : Array) : boolean;
+      var
+         i, j : integer;
+      begin
+         j := Length();
+         if r.Length() = j then
+            if j = 0 then
+               return true
+            end;
+            i := -1;
+            repeat
+               inc(i);
+               if v[i] # r.v[i] then
+                  return false
+               end
+            until i = j-1;
+            return true
+         else
+            return false
+         end
+      end Equals;
+
+      procedure {public} And (r : Array) : Array;
+      var
+         a : Array;
+         i, j : integer;
+      begin
+         j := Length();
+         if r.Length() = j then
+            a.Initialize(j);
+            for i := 0 to j-1 do
+               a.v[i] := v[i] & r.v[i]
+            end
+         else
+            L.WarningMessage(210,426, "BelCore.Boolean.Array.And")
+         end;
+         return a
+      end And;
+
+      procedure {public} Or (r : Array) : Array;
+      var
+         a : Array;
+         i, j : integer;
+      begin
+         j := Length();
+         if r.Length() = j then
+            a.Initialize(j);
+            for i := 0 to j-1 do
+               a.v[i] := v[i] or r.v[i]
+            end
+         else
+            L.WarningMessage(210,426, "BelCore.Boolean.Array.Or")
+         end;
+         return a
+      end Or;
+
+      procedure {public} Not () : Array;
+      var
+        a : Array;
+        i, j : integer;
+      begin
+         j := Length();
+         if j > 0 then
+            a.Initialize(j);
+            for i := 0 to j-1 do
+               a.v[i] := ~v[i]
+            end
+         end;
+         return a
+      end Not;
+
+   begin
+      Nullify
+   end Array;
+
+   type {public, value} Matrix = object implements []
+
+      type {private}
+         MatrixBoolean = array *, * of boolean;
+
+      var {private}
+         m : MatrixBoolean;
+
+      procedure {public} Initialize (nbrRows, nbrCols : integer);
+      var
+         i, j : integer;
+      begin
+         if (nbrRows # Rows()) or (nbrCols # Columns()) then
+            if (nbrRows > 0) & (nbrCols > 0) then
+               m := new MatrixBoolean(nbrRows, nbrCols)
+            else
+               m := nil
+            end
+         end;
+         if (nbrRows > 1) & (nbrCols > 1) then
+            for i := 0 to nbrRows-1 do
+               for j := 0 to nbrCols-1 do
+                  m[i,j] := false
+               end
+            end
+         elsif nbrRows = 1 then
+            for j := 0 to nbrCols-1 do
+               m[1,j] := false
+            end
+         elsif nbrCols = 1 then
+            for i := 0 to nbrRows-1 do
+               m[i,1] := false
+            end
+         else
+            m := nil
+         end
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin
+         m := nil
+      end Nullify;
+
+      procedure {public} Clone () : Matrix;
+      var
+         mtx : Matrix;
+      begin
+         mtx.Initialize(Rows(), Columns());
+         return mtx
+      end Clone;
+
+      procedure {public} Copy (copyDepth : boolean) : Matrix;
+      var
+         i, j, k, l : integer;
+         mtx : Matrix;
+      begin
+         k := Rows();
+         l := Columns();
+         if (copyDepth = deepCopy) & (k > 0) then
+            mtx.m := new MatrixBoolean(k, l);
+            for i := 0 to k-1 do
+               for j := 0 to l-1 do
+                  mtx.m[i,j] := m[i,j]
+               end
+            end
+         else
+            mtx.m := m
+         end;
+         return mtx
+      end Copy;
+
+      procedure {public} Load (br : BinaryReader);
+      var
+         i, j, k, l : integer;
+      begin {locked}
+         k := br.ReadInt32();
+         l := br.ReadInt32();
+         if k = 0 then
+            Nullify
+         else
+            if (Rows() # k) or (Columns() # l) then
+               m := new MatrixBoolean(k, l)
+            end;
+            for i := 0 to k-1 do
+               for j := 0 to l-1 do
+                  m[i,j] := br.ReadBoolean()
+               end
+            end
+         end
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      var
+         b : Bool;
+         c, i, j : integer;
+         k, l : Int32;
+      begin {locked}
+         k := Rows();
+         l := Columns();
+         bw.Write(k);
+         bw.Write(l);
+         bw.Flush;
+         c := 0;
+         for i := 0 to k-1 do
+            for j := 0 to l-1 do
+               inc(c);
+               b := m[i,j];
+               bw.Write(b);
+               if c = 10 then
+                  c := 0;
+                  bw.Flush
+               end
+            end
+         end;
+         bw.Flush
+      end Store;
+
+      procedure {public} Rows () : integer;
+      begin
+         if m # nil then
+            return len(m, 0)
+         else
+            return 0
+         end
+      end Rows;
+
+      procedure {public} Columns () : integer;
+      begin
+         if m # nil then
+            return len(m, 1)
+         else
+            return 0
+         end
+      end Columns;
+
+      procedure {public} Get (row, col : integer) : boolean
+         implements [].Get;
+      var
+         b : boolean;
+      begin
+         if ((row >= 1) & (row <= Rows())) &
+               ((col >= 1) & (col <= Columns())) then
+            dec(row);
+            dec(col);
+            b := m[row,col]
+         else
+            L.WarningMessage(310,424, "BelCore.Boolean.Matrix.Get");
+            b := false
+         end;
+         return b
+      end Get;
+
+      procedure {public} Set (row, col : integer; b : boolean)
+         implements [].Set;
+      begin {locked}
+         dec(row);
+         dec(col);
+         if ((row >= 0) & (row < Rows())) &
+               ((col >= 0) & (col < Columns())) then
+            m[row,col] := b
+         else
+            L.WarningMessage(310,307, "BelCore.Boolean.Matrix.Set");
+            m[row,col] := false
+         end
+      end Set;
+
+      procedure {public} Equals (mtx : Matrix) : boolean;
+      var
+         i, j, k, l : integer;
+      begin
+         k := Rows();
+         l := Columns();
+         if (mtx.Rows() = k) & (mtx.Columns() = l) then
+            if k = 0 then
+               return true
+            end;
+            i := -1;
+            repeat
+               inc(i);
+               j := -1;
+               repeat
+                  inc(j);
+                  if m[i,j] # mtx.m[i,j] then
+                     return false
+                  end
+               until j = l-1;
+            until i = k-1;
+            return true
+         else
+            return false
+         end
+      end Equals;
+
+      procedure {public} And (r : Matrix) : Matrix;
+      var
+         i, j, k, l : integer;
+         mtx : Matrix;
+      begin
+         k := Rows();
+         l := Columns();
+         if (r.Rows() = k) & (r.Columns() = l) then
+            mtx.Initialize(k,l);
+            for i := 0 to k-1 do
+               for j := 0 to l-1 do
+                  mtx.m[i,j] := m[i,j] & r.m[i,j]
+               end
+            end
+         else
+            L.WarningMessage(310,427, "BelCore.Boolean.Matrix.And")
+         end;
+         return mtx
+      end And;
+
+      procedure {public} Or (r : Matrix) : Matrix;
+      var
+         i, j, k, l : integer;
+         mtx : Matrix;
+      begin
+         k := Rows();
+         l := Columns();
+         if (r.Rows() = k) & (r.Columns() = l) then
+            mtx.Initialize(k,l);
+            for i := 0 to k-1 do
+               for j := 0 to l-1 do
+                  mtx.m[i,j] := m[i,j] or r.m[i,j]
+               end
+            end
+         else
+            L.WarningMessage(310,427, "BelCore.Boolean.Matrix.Or")
+         end;
+         return mtx
+      end Or;
+
+      procedure {public} Not () : Matrix;
+      var
+        i, j, k, l : integer;
+        mtx : Matrix;
+      begin
+         k := Rows();
+         l := Columns();
+         if k > 0 then
+            mtx.Initialize(k,l);
+            for i := 0 to k-1 do
+               for j := 0 to l-1 do
+                  mtx.m[i,j] := ~m[i,j]
+               end
+            end
+         end;
+         return mtx
+      end Not;
+
+   begin
+      Nullify
+   end Matrix;
+
+   (* OVERLOADED OPERATORS FOR ARRAYS *)
+
+   operator {public} ':=' (var l : Array; r : Array);
+   begin
+      l := r.Copy(deepCopy)
+   end ':=';
+
+   (* unary operators *)
+
+   operator {public} '~' (a : Array) : Array;
+   begin
+      return a.Not()
+   end '~';
+
+   (* binary operators *)
+
+   operator {public} '=' (l, r : Array) : boolean;
+   begin
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '#' (l, r : Array) : boolean;
+   begin
+      return ~l.Equals(r)
+   end '#';
+
+   operator {public} '&' (l, r : Array) : Array;
+   begin
+      return l.And(r)
+   end '&';
+
+   operator {public} 'or' (l, r : Array) : Array;
+   begin
+      return l.Or(r)
+   end 'or';
+
+   (* OVERLOADED OPERATORS FOR MATRICES *)
+
+   operator {public} ':=' (var l : Matrix; r : Matrix);
+   begin
+      l := r.Copy(deepCopy)
+   end ':=';
+
+   (* unary operators *)
+
+   operator {public} '~' (m : Matrix) : Matrix;
+   begin
+      return m.Not()
+   end '~';
+
+   (* binary operators *)
+
+   operator {public} '=' (l, r : Matrix) : boolean;
+   begin
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '#' (l, r : Matrix) : boolean;
+   begin
+      return ~l.Equals(r)
+   end '#';
+
+   operator {public} '&' (l, r : Matrix) : Matrix;
+   begin
+      return l.And(r)
+   end '&';
+
+   operator {public} 'or' (l, r : Matrix) : Matrix;
+   begin
+      return l.Or(r)
+   end 'or';
+
+begin
+   deepCopy    := true;
+   shallowCopy := false
+end Boolean.

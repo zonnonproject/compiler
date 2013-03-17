@@ -1,0 +1,222 @@
+module {public} Main;
+
+   import
+      System.IO.BinaryReader     as BinaryReader,
+      System.IO.BinaryWriter     as BinaryWriter,
+      System.IO.Path             as Path,
+      System.IO.StreamReader     as StreamReader,
+      System.IO.StreamWriter     as StreamWriter,
+      System.Reflection.Assembly as Assembly,
+      BelCore.Log       as L,
+      BelCore.Numbers   as N,
+      BelCore.DataFiles as DF,
+      BelCcm.Scalars    as S,
+      BelCcm.Units      as U,
+      BelCcm.Vectors2   as V;
+
+   var {private}
+      asm : Assembly;
+      dir, file, loc, path : string;
+
+   procedure {private} Assign (var v : V.Vector);
+   var
+      n : N.Number;
+      x : S.Scalar;
+      s : string;
+      u : U.Si;
+   begin
+      s := "";
+      writeln("Enter a vector with its SI units.");
+      write("   Input its SI units: ");
+      readln(s);
+      u.Parse(s);
+      x.SetUnits(u);
+      v.SetUnits(u);
+      writeln("   Input its two real-valued elements:");
+      write("      v[1] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      v[1] := x;
+      write("      v[2] = ");
+      readln(s);
+      n.Parse(s);
+      x.Set(n);
+      v[2] := x
+   end Assign;
+
+   procedure {public} Store;
+   var
+      bw : BinaryWriter;
+      f : string;
+      v1, v2 : V.Vector;
+   begin
+      f := "testVectors";
+      bw := DF.OpenWriter(f);
+      (* use the Store procedure to write some data *)
+      writeln("Enter a vector to store to file.");
+      Assign(v1);
+      v1.Store(bw);
+      writeln();
+      writeln("Enter a second vector to store to file.");
+      Assign(v2);
+      v2.Store(bw);
+      writeln();
+      writeln("The two vectors stored to file were:");
+      writeln(v1.Typeset());
+      writeln(v2.Typeset());
+      writeln();
+      DF.CloseWriter(bw);
+   end Store;
+
+   procedure Load;
+   var
+      br : BinaryReader;
+      f : string;
+      v : V.Vector;
+   begin
+      f := "testVectors";
+      br := DF.OpenReader(f);
+      (* read in the data *)
+      writeln("The vectors read back from file were:");
+      v.Load(br);
+      writeln(v.Typeset());
+      v.Load(br);
+      writeln(v.Typeset());
+      writeln();
+      DF.CloseReader(br)
+   end Load;
+
+   procedure {public} Boolean;
+   var
+      s : string;
+      x, y : V.Vector;
+   begin
+      writeln("Test the boolean function of equality.");
+      writeln;
+      writeln("Enter the vector for the left-hand side:");
+      Assign(x);
+      writeln("Enter the vector for the right-hand side.");
+      Assign(y);
+      writeln;
+      writeln(x.Typeset());
+      writeln("  =");
+      writeln(y.Typeset());
+      s :=  "   is ";
+      if x = y then
+         s := s + "true"
+      else
+         s := s + "false"
+      end;
+      writeln(s)
+   end Boolean;
+
+   procedure {public} Arithmetic;
+   var
+      s : string;
+      w : S.Scalar;
+      x, y, z : V.Vector;
+   begin
+      writeln("Test the arithmetic methods.");
+      writeln;
+      writeln("Enter the vector for the left-hand side:");
+      Assign(x);
+      writeln("Enter the vector for the right-hand side:");
+      Assign(y);
+      writeln;
+      writeln("Test negation");
+      s := "-" + x.Typeset();
+      writeln(s);
+      z := -x;
+      writeln("  =");
+      writeln(z.Typeset());
+      writeln;
+      writeln("Test addition");
+      writeln(x.Typeset());
+      writeln("  + ");
+      writeln(y.Typeset());
+      writeln("  =");
+      z := x + y;
+      writeln(z.Typeset());
+      writeln;
+      writeln("Test subtraction");
+      writeln(x.Typeset());
+      writeln("  - ");
+      writeln(y.Typeset());
+      writeln("  =");
+      z := x - y;
+      writeln(z.Typeset());
+      writeln;
+      writeln("Enter a scalar to test multiplication and division:");
+      readln(s);
+      w.Parse(s);
+      s := w.Typeset() + " * ";
+      writeln(s);
+      writeln(x.Typeset());
+      writeln("  =");
+      z := w * x;
+      writeln(z.Typeset());
+      writeln;
+      writeln(x.Typeset());
+      s := "  / " + w.Typeset();
+      writeln(s);
+      z := x / w;
+      writeln("  = ");
+      writeln(z.Typeset())
+   end Arithmetic;
+
+   procedure {public} Procedures;
+   var
+      s : string;
+      w : S.Scalar;
+      x, y, z : V.Vector;
+   begin
+      writeln("Test the basic functions of a vector.");
+      writeln;
+      writeln("Enter the vector for the left-hand side:");
+      Assign(x);
+      writeln("Enter the vector for the right-hand side:");
+      Assign(y);
+      writeln;
+      writeln("Their dot product is:");
+      w := x.Dot(y);
+      writeln(x.Typeset());
+      writeln("  . ");
+      writeln(y.Typeset());
+      write("  = ");
+      writeln(w.Typeset());
+      writeln;
+      writeln("The Euclidean norm of ");
+      w := V.Norm(x);
+      writeln(x.Typeset());
+      s := "is " + w.Typeset();
+      writeln(s);
+      writeln;
+      z := V.UnitVector(x);
+      writeln("and its unit vector is ");
+      writeln(z.Typeset())
+   end Procedures;
+
+begin
+   Store;
+   writeln("Data have been stored in the files");
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   file := Path.Combine(dir, "testVectors.dat");
+   writeln(file + ".");
+   writeln;
+   writeln("When read back in to check their integrity, one finds:");
+   Load;
+   writeln;
+   Boolean;
+   writeln;
+   Arithmetic;
+   writeln;
+   Procedures;
+   writeln;
+   writeln("Press 'Enter' to quit.");
+   readln;
+   L.Close
+end Main.

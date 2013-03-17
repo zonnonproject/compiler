@@ -1,0 +1,161 @@
+(* ********* Zonnon online collection ***********
+ * Prisoner
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Prisoner;
+
+const
+	ROWS = 3;
+	COLS = 3;
+	DAYS = 4;
+	PRISONERS = ROWS * COLS;
+
+var
+	neighboured : array PRISONERS+1 of array PRISONERS+1 of integer;
+	scheduled : array DAYS of array PRISONERS+1 of integer;
+	table : array DAYS of array ROWS of array COLS of integer;
+
+procedure PrintSolution;
+var 
+	i, j, k : integer;
+begin
+	for i := 0 to DAYS-1 do
+		for j := 0 to ROWS-1 do
+			for k := 0 to COLS-1 do
+				write(table[i][j][k]:3) 
+			end;
+			writeln
+		end;
+		writeln
+	end
+end PrintSolution;
+
+procedure incl_(var ARSET : array of array of integer; pos, val : integer);
+var	
+	i : integer;
+begin
+	i := 0;
+	while ARSET[pos][i] # -1 do
+		i := i + 1
+	end;
+	ARSET[pos][i] := val;
+	ARSET[pos][i+1] := -1
+end incl_;
+
+procedure excl_(var ARSET : array of array of integer; pos, val : integer);
+var	
+	i, j : integer;
+begin
+	i := 0;
+
+	while (ARSET[pos][i] # val) & (i < PRISONERS) do
+		i := i + 1
+	end;
+
+	if i # PRISONERS then
+		while ARSET[pos][i+1] # -1 do
+			ARSET[pos][i] := ARSET[pos][i+1];
+			i := i + 1
+		end;
+		ARSET[pos][i] := -1
+	end
+end excl_;
+
+procedure isin(var ARSET : array of array of integer; pos, val : integer) : boolean;
+var	
+	i : integer;
+begin
+	i := 0;
+	while (ARSET[pos][i] # val) & (i < PRISONERS) do
+		i := i + 1
+	end;
+
+	return i # PRISONERS 
+end isin;
+
+procedure SchedulePrisoner(day, row, col : integer) : boolean;
+var
+	i : integer;
+	neighbour : integer;
+	newCol, newRow, newDay : integer;
+begin
+	(* Who's the neighbour to the left? *)
+	if col = 0 
+	then neighbour := PRISONERS  (*  sentinel; every prisoner goes  *)
+	else neighbour := table[day][row][col-1]
+	end;
+
+	(* Prepare next position for further recursion. *)
+	newCol := col+1;  newRow := row;  newDay := day;
+	if newCol = COLS then newRow := newRow + 1; newCol := 0 end;
+	if newRow = ROWS then newDay := newDay + 1; newRow := 0 end;
+
+	(* Select prisoner to put to row, col, day. *)
+	for i := 0 to PRISONERS-1 do
+    	if ~(isin(scheduled, day, i)) & ~(isin(neighboured, i, neighbour)) then
+      		incl_(neighboured,i , neighbour);
+      		incl_(neighboured, neighbour, i);
+			incl_(scheduled, day, i);
+			table[day][row][col] := i;
+
+			if newDay = DAYS then
+	        	PrintSolution();
+				return true
+			end;
+
+			if SchedulePrisoner(newDay, newRow, newCol) then
+				return true
+			end;
+
+			excl_(neighboured, i, neighbour);
+			excl_(neighboured, neighbour, i);
+			excl_(scheduled, day, i)
+    	end
+	end;
+
+	(*  no solution found  *)
+	return false
+end SchedulePrisoner;
+
+procedure {public} Schedule;
+var
+	b : boolean;
+	i, j : integer;
+begin
+	for i := 0 to PRISONERS do
+		neighboured[i][0] := -1
+	end;
+
+	for i := 0 to DAYS-1 do
+		scheduled[i][0] := -1
+	end;
+
+	(*  day one  *)
+	for i := 0 to ROWS-1 do  (*  rows  *)
+		for j := 0 to COLS-1 do  (*  people in row  *)
+			table[0][i][j] := i * COLS + j
+		end;
+
+		incl_(neighboured, i*COLS,   i*COLS+1);
+		incl_(neighboured, i*COLS+1, i*COLS  );
+		incl_(neighboured, i*COLS+1, i*COLS+2);
+		incl_(neighboured, i*COLS+2, i*COLS+1)
+	end;
+
+	b := SchedulePrisoner(1, 0, 0);
+end Schedule;
+
+begin
+	writeln("Module Prisoner loaded");
+	writeln("Schedule started");
+	Schedule();
+
+	writeln;
+	writeln("The program is done. Press the Enter key.");
+	readln;
+end Prisoner.
+

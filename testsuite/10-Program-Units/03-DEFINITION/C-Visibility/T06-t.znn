@@ -1,0 +1,29 @@
+(** 
+ * 11.Program Units.
+ * 11.3. definition
+ * Definition visibility
+ *
+ * Positive test: private definition A.B is used inside its namespace.
+ * The definition A.B is declared after its using.
+ *)
+module Main;
+	import A.B, A.C;
+
+	var c : A.C;
+begin
+	c := new A.C;
+	if c.j = 3 
+	then halt(1) else halt(0) end;
+end Main.
+
+definition {private} A.B;
+	var i : integer;
+end B.
+
+object {ref} A.C implements A.B;
+var {public} 
+	j : integer;
+begin
+	i := 3;
+	j := i;
+end C.

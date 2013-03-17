@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * real type
+ *
+ * Positive test: correct real variables assignment.
+ *)
+module Main;
+	var r64 : real { 64 };
+	var r80 : real { 80 };
+begin
+	r64 := 1.28;
+	r80 := 3.14;
+
+	r80 := r64;
+
+	if r80 = 1.28 
+	then halt(1) else halt(0) end;
+end Main.
+

@@ -1,0 +1,40 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.1. The-Granularity-of-Concurrency
+ *
+ * Positive test: checking if activities in objects 
+ * are been executed.
+ *
+ *)
+
+object {public, ref, protected}  ActiveObject;
+import 
+	Main, System;
+
+activity Timer;
+begin
+	System.Threading.Thread.Sleep(10);
+	Main.flag := 1;
+end Timer;
+
+begin
+	new Timer();
+end ActiveObject.
+
+module Main;
+import 
+	ActiveObject, System;
+
+var {public}
+	obj : ActiveObject;
+    flag : integer;
+begin
+	flag := 0;	
+	obj := new ActiveObject;
+	System.Threading.Thread.Sleep( 50 );
+	if flag = 1 then
+ 		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end;
+end Main.

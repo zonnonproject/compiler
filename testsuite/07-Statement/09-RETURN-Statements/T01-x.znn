@@ -1,0 +1,14 @@
+(** 
+ * 7. Statement 
+ * 7.9. return statement.
+ *
+ * Negative test: function without return.
+ *)
+module Main;
+	procedure p(i : integer) : integer;
+	begin 
+		i := i + 1 
+	end p;
+begin
+	halt(0);
+end Main.

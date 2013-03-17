@@ -1,0 +1,26 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.2. Dynamic arrays
+ *
+ * Negative test: 2-dimensional dynamic array creating and indexing.
+ * The indexed elements are out of the array.
+ *)
+module Main;
+	type Square = object
+	end Square;
+
+	type Board = array *,* of Square;
+
+	var chessBoard : Board;
+	var chessSquare : Square;
+begin
+	do
+		chessBoard  := new Board(8,8);
+		chessSquare := chessBoard[8,8];
+	on OutOfRange do
+		halt(1)
+	end;
+
+	halt(0)
+end Main.

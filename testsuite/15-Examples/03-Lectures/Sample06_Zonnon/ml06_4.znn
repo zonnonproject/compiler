@@ -1,0 +1,116 @@
+(* ********* Zonnon online collection ***********
+ * Springer: Very simple solution to solve the problem on a 6x6 sized board.
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(* 
+	Very simple solution to solve the problem on a 6x6 sized board.
+	For a more sophisticated solution please have a look at the solution for native Oberon.
+*)
+module Springer;
+
+object {public, value} MOVEBY;
+	var {public} 
+		h, v : integer;
+end MOVEBY;
+ 
+const 
+	bsize = 10; 
+
+var 
+	moves : array 8 of MOVEBY;
+	beento : array bsize, bsize of integer;
+
+procedure Set_default;
+var 
+	i, j : integer;
+begin
+	for i := 0 to bsize - 1 do
+		for j := 0 to bsize - 1 do
+			beento[i,j] := 0
+		end
+	end;
+
+	for i := 2 to 7 do
+		for j := 2 to 7 do
+			beento[i,j] := -1
+		end
+	end;
+
+	for i := 0 to 7 do
+		moves[i] := new MOVEBY
+	end;
+
+	moves[7].h :=  1; moves[7].v :=  2;
+	moves[6].h :=  1; moves[6].v := -2;
+	moves[5].h := -1; moves[5].v :=  2;
+	moves[4].h := -1; moves[4].v := -2;
+	moves[3].h :=  2; moves[3].v :=  1;
+	moves[2].h :=  2; moves[2].v := -1;
+	moves[1].h := -2; moves[1].v :=  1;
+	moves[0].h := -2; moves[0].v := -1;
+end Set_default;
+
+procedure Ausgabe;
+var 
+	i, j, k : integer;
+begin
+	for i := 2 to 7 do
+		for j := 2 to 7 do
+			k := beento[i,j];
+			if (k < 0) 
+			then write(" .":2) 
+			else write(k:2) 
+			end; 
+			write(" ":1)
+		end;
+		writeln
+	end;
+	writeln; writeln
+end Ausgabe;
+
+procedure Search(i, j, movenr : integer); (* i horizontal *)
+var 
+	k, H, V : integer;
+	s : string;
+begin
+	writeln(">>> Search");
+	write(movenr:4); 
+	write(": [":3); write(i:3); write(",":1); write(j:3); writeln("];":2);
+
+	if ( ((i=3)&(j=4)) or ((i=4)&(j=3)) ) & 
+		 (movenr = 36)  & (beento[i,j] = -1)
+	then 
+		beento[i,j] := 36;
+		Ausgabe();
+		beento[i,j] := -1;
+		return;
+	elsif beento[i,j] = -1 
+	then 
+		for k := 0 to 7 do
+			beento[i,j] := movenr;
+			H := i + moves[k].h;
+			V := j + moves[k].v;
+													Ausgabe();
+													readln(s); 
+			Search(H, V, movenr + 1);
+		end;
+		beento[i,j] := -1;
+		return
+	else return
+	end;
+
+	writeln("<<< Search")
+end Search;
+
+begin
+	Set_default();
+	Search(2, 2, 1);
+
+	writeln();
+	writeln("The program is done. Press the Enter key.");
+	readln
+end Springer.

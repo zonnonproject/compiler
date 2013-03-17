@@ -1,0 +1,142 @@
+module {public} Main;
+
+   (* tests the module Math.Integrals:  y = int_a^b f(x) dx *)
+
+   import
+      BelCore.Log       as L,
+      BelCore.Math      as M,
+      BelCore.Numbers   as N,
+      BelMath.Integrals as I;
+
+   type
+      F = procedure (N.Number) : N.Number;
+
+   procedure Write (f : F; a, b, y : N.Number);
+   var
+      e, z : N.Number;
+   begin
+      writeln("analyitic:");
+      writeln("  solution = " + y.Typeset());
+      z := f(a);
+      writeln("  f(a)     = " + z.Typeset());
+      z := f(b);
+      writeln("  f(b)     = " + z.Typeset());
+      z := I.Integrate(f, a, b, I.Method.trapezoidal);
+      e := M.Abs(y - z);
+      writeln("trapezoidal rule:");
+      writeln("  solution = " + z.Typeset());
+      writeln("  error    = " + e.Typeset());
+(*
+      z := I.Integrate(f, a, b, I.Method.simpson);
+      e := M.Abs(y - z);
+      writeln("Simpson's rule:");
+      writeln("  solution = " + z.Typeset());
+      writeln("  error    = " + e.Typeset());
+      z := I.Integrate(f, a, b, I.Method.threeEights);
+      e := M.Abs(y - z);
+      writeln("Simpson's 3/8ths rule:");
+      writeln("  solution = " + z.Typeset());
+      writeln("  error    = " + e.Typeset());
+      z := I.Integrate(f, a, b, I.Method.romberg);
+      e := M.Abs(y - z);
+      writeln("Romberg extrapolation:");
+      writeln("  solution = " + z.Typeset());
+      writeln("  error    = " + e.Typeset());
+      z := I.Integrate(f, a, b, I.Method.gauss);
+      e := M.Abs(y - z);
+      writeln("Gauss-Kronrod:");
+      writeln("  solution = " + z.Typeset());
+      writeln("  error    = " + e.Typeset())
+*)
+   end Write;
+
+   procedure Cos (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Cos(x);
+      return y
+   end Cos;
+
+   procedure SolnCos (a, b : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Sin(b) - M.Sin(a);
+      return y
+   end SolnCos;
+(*
+   procedure F2 (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := M.Sqrt(M.Abs(x - M.Pi/4));
+      return y
+   end F2;
+
+   procedure Y2 (var y : N.Number);
+   var
+      x : N.Number;
+   begin
+      x := M.Pi/4;
+      y := (1 - x)*M.Sqrt(1 - x);
+      y := y + x*M.Sqrt(x);
+      y := y/1.5
+   end Y2;
+
+   procedure F3 (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := Fn.Ln(1/x);
+      y := 1/Fn.Sqrt(y);
+      return y
+   end F3;
+
+   procedure Y3 (var y : N.Number);
+   var
+      a : N.Number;
+   begin
+      a := 0.5;
+      y := Fn.Gamma(a)
+   end Y3;
+
+   procedure F4 (x : N.Number) : N.Number;
+   var
+      y : N.Number;
+   begin
+      y := Fn.Sqrt(x);
+      y := y*Fn.Ln(1/x);
+      return y
+   end F4;
+
+   procedure Y4 (var y : N.Number);
+   begin
+      y := 4;
+      y := y/9
+   end Y4;
+*)
+   procedure {public} Run;
+   var
+      a, b, y : N.Number;
+   begin
+      a := 0;
+      b := M.Pi/100;
+      y := SolnCos(a, b);
+      Write(Cos, a, b, y);
+(*
+      writeln();
+      a := 0;
+      b := 1;
+      Y2(y);
+      Write(Y2, a, b, y)
+*)
+   end Run;
+
+begin
+   Run;
+   writeln();
+   writeln("Press 'Enter' to quit.");
+   readln();
+   L.Close
+end Main.

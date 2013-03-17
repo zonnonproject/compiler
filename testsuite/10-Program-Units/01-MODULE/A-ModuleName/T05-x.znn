@@ -1,0 +1,19 @@
+(**
+ * 11.Program Units.
+ * 11.1. module
+ * ModuleName
+ * 
+ * Negative tests:
+ * 	a) wrong simple name F at module B.F end.
+ * 	b) the simple name C is absent at module A.B.C end.
+ *)
+module B.E;
+end F.
+
+module A.B.C;
+end.
+
+module Main;
+begin
+	halt(0);
+end Main.

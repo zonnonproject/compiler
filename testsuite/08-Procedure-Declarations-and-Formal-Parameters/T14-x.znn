@@ -1,0 +1,26 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the type of procedure P parameters and result 
+ * is declared after the procedure P declaration.
+ * The type B.C has qualified name. But B.C is name of variable!
+ *)
+module A;
+	import B;
+
+	procedure { public } P(var p1 : B.C; p2 : B.C) : B.C;
+	begin 
+		return nil 
+	end P;
+end A.
+
+module B;
+	var { public }
+		C : integer; (* The C is not type! *)
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The assert procedure.
+ *
+ * Positive test: assert without report number.
+ *)
+module Main;
+	var i : integer;
+begin
+	i := 2;	
+	assert(i < 1);
+	halt(0);
+on exception do
+	halt(1);	
+end Main.

@@ -1,0 +1,26 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Positive test: no labels contain obtained value.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 3;
+	j := 2;
+
+	do
+		case i + j of
+			  3 : j := 3;
+			| 4 : j := 4;
+			(* 
+    		 * Program about must be here!!! 
+			 * else alternative is absent!!!	
+			 *)
+		end
+	on UnmatchedCase do
+		halt(1);
+	end;
+	halt(0);
+end Main.

@@ -1,0 +1,21 @@
+module Main;
+
+procedure P(var s : string);
+var 
+	a : array 5 of char;
+	t : string;
+begin 
+	a[0] := "1";
+	a[1] := "2";
+	
+	copy(a, s);
+end P;
+
+var 
+	s1, s : string;
+begin
+	P(s);
+
+	if s = "12"
+	then halt(1) else halt(0) end;
+end Main.

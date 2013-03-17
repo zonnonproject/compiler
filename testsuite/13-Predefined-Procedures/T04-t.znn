@@ -1,0 +1,18 @@
+(**
+ * 09.Predefined procedures.
+ * The dec procedure.
+ *
+ * Positive test: the predefined procedure dec call with one and two parameters.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 5;
+	j := 5;
+	
+	dec(i);
+	dec(j, 2);
+
+	if (i = 4) & (j = 3)
+	then halt(1) else halt(0) end;
+end Main.

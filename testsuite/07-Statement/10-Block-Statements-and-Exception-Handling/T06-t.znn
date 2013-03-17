@@ -1,0 +1,24 @@
+(** 
+ * 7. Statement 
+ * 7.10. Block statement and exception handling.
+ *
+ * Positive test: NilReference exception
+ * for uninitialized array.
+ *)
+module Main;
+var 
+	exc : boolean;
+	v : array * of integer;
+begin
+	exc := false;
+
+	do
+		v[0] := 2;
+
+	on NilReference do 
+		exc := true;
+	end;
+		
+	if exc 
+	then halt(1) else halt(0) end;
+end Main.

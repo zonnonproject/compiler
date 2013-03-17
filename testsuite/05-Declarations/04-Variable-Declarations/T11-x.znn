@@ -1,0 +1,23 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ *
+ * Negative test: wrong imported type name C.
+ * The variable name C is used instead type name C.
+ * The variable C is declared after it is used.
+ *)
+module {public} A;
+	import B;
+
+	var X : B.C;
+end A.
+
+module {public} B;
+	var C : integer;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

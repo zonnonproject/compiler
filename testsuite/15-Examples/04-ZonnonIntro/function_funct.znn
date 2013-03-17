@@ -1,0 +1,25 @@
+(* ********* Zonnon online collection ***********
+ * example on functions, maximum of a and b
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Sorting;
+    procedure Maximum(a,b:integer):integer;
+	begin
+		if a > b then
+			return a
+		else
+			return b
+		end
+	end Maximum;	
+
+var a,b:integer;
+begin
+ write("A = ");	readln(a);
+ write("B = ");	readln(b);
+ writeln("max( A, B ) = ", Maximum(a,b));
+end Sorting.
+

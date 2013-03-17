@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: casting from integer{32} to integer{64}.
+ *)
+module Main;
+	var i   : integer;
+	var i64 : integer { 64 };
+begin
+	i := 3;
+	i64 := integer(i, 64);
+
+	if i64 = 3 
+	then halt(1) else halt(0) end;
+end Main.

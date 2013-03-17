@@ -1,0 +1,109 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Establishes interfaces and objects for types used in our data structures   *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Definition  : Object      - interface for a persistent object              *)
+(*   methods   : Initialize  - abstract: create dynamic memory & zero fields  *)
+(*             : Finalize    - abstract: set all dynamic momories to nil      *)
+(*             : Load        - abstract: read a instance from a binary file   *)
+(*             : Store       - abstract: write itself to a binary file        *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Definition  : Datum       - interface for a data container                 *)
+(*   methods   : Clone       - abstract: return a clone of itself             *)
+(*             : Copy        - abstract: return a deep copy of itself         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Definition  : Structure   - interface for a repository of data containers  *)
+(*   methods   : ContainerFor - abstract: supply instance of data type held   *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : BufferNode  - a node for double-linked buffers               *)
+(*   var       : data        - where the data (instance of Datum) are stored  *)
+(*             : next        - a link to the next node in the data chain      *)
+(*             : prev        - a link to the previous node in the data chain  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : ListNode    - a node for double-linked lists                 *)
+(*   var       : data        - where the data (instance of Datum) are stored  *)
+(*             : key         - a key used for locating (sorting) the node     *)
+(*             : next        - a link to the next node in the list            *)
+(*             : prev        - a link to the previous node in the list        *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : TreeNode    - a node for an balanced tree                    *)
+(*   type      : slantLeft   - the tree is more heavily weighted to the left  *)
+(*             : level       - the tree is equally weighted left to right     *)
+(*             : slantRight  - the tree is more heavily weighted to the right *)
+(*   var       : balance     - stores an instance of the above enumeration    *)
+(*             : data        - where the data (instance of Datum) are stored  *)
+(*             : key         - a key used for locating (sorting) the node     *)
+(*             : left        - a link to the left branch of the tree          *)
+(*             : right       - a link to the right branch of the tree         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+definition {public, ref} Data.Object;
+   import
+      System.IO.BinaryReader,
+      System.IO.BinaryWriter;
+   procedure {public} Initialize;
+   procedure {public} Load  (br : System.IO.BinaryReader);
+   procedure {public} Store (bw : System.IO.BinaryWriter);   
+end Object.
+
+implementation Data.Object;
+
+begin
+	Initialize;
+end Object.
+
+definition {public, ref} Data.Datum refines Data.Object;
+   procedure {public} Clone () : object{Data.Object};
+   procedure {public} Copy  () : object{Data.Object};
+end Datum.
+
+definition {public, ref} Data.Structure refines Data.Object;
+   import
+      Data.Datum;
+   procedure ContainerFor (clone : object{Data.Datum});
+end Structure.
+
+object {public, ref} Data.BufferNode;
+   import
+      Data.Datum as Datum;
+   var {public}
+      next, prev : BufferNode;
+      data : object{Datum};
+begin
+   data := nil;
+   next := nil;
+   prev := nil
+end BufferNode.
+
+object {public, ref} Data.ListNode;
+   import
+      Data.Datum as Datum;
+   var {public}
+      data : object{Datum};
+      next, prev : ListNode;
+begin
+   data := nil;
+   next := nil;
+   prev := nil
+end ListNode.
+
+object {public, ref} Data.TreeNode;
+   import
+      Data.Datum as Datum;
+   type {public}
+      Balance = (slantLeft, level, slantRight);
+   var {public}
+      balance : Balance;
+      data : object{Datum};
+      left, right : TreeNode;
+begin
+   balance := Balance.level;
+   data := nil;
+   left := nil;
+   right := nil
+end TreeNode.

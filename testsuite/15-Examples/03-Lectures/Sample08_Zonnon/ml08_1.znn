@@ -1,0 +1,145 @@
+(* ********* Zonnon online collection ***********
+ * Store
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Store;
+
+object {public, ref} Container; 
+	var	{public}
+		val_ : integer;  
+		next : Container; (* Reference to the next container. *) 
+end Container;
+	
+object {public, ref} List;	 
+	var {public}
+		first, last : Container; (* Last is needed to append -> hinten anhngen. *)
+end List;
+  
+var	list : List; 
+
+procedure Init; 
+begin
+	list := new List()
+end Init;
+
+procedure Append(v : integer); 
+var
+	cur : Container;
+begin	
+	cur := new Container();
+	cur.val_ := v;
+	if list.last = nil then
+		list.first := cur;
+		list.last := cur
+	else
+		list.last.next := cur;
+		list.last := cur
+	end;
+	write(v:2); writeln(": appended")
+end Append;
+
+procedure {public} Exists(v : integer) : boolean; 
+var
+	cur : Container;
+begin	
+	cur := list.first;
+	while cur # nil do
+		if cur.val_ = v then	return true end;
+		cur := cur.next
+	end;
+	return false
+end Exists;
+
+(* Deletes first container with val v. *)
+procedure { public } Delete(v : integer); 
+var
+	toDel, prev : Container;
+begin	
+	toDel := list.first;
+
+while (toDel # nil) & (toDel.val_ # v) do
+		prev := toDel;
+		toDel := toDel.next
+	end;
+
+	if toDel # nil then
+		if prev = nil then (* Delete the first container. *)
+			list.first := toDel.next;
+			if list.first = nil then list.last := nil end (* List is empty. *)
+		else 
+			prev.next := toDel.next;
+			if prev.next = nil then list.last := prev end
+		end
+	end (* else nothing to delete*)
+end Delete;
+
+procedure {public} ElimMultiple;
+var
+	cur, r1, r2 : Container;
+begin
+	cur := list.first;
+	if cur = nil then
+		writeln("Empty list")
+	else
+		while cur.next # nil do
+			r2 := cur.next;
+			if cur.val_ = r2.val_ then
+				cur.next := r2.next
+			elsif r2.next # nil then
+				r1 := r2.next;
+				while r1 # nil do
+					if r1.val_ = cur.val_ then
+						r1 := r1.next;
+						r2.next := r1;
+					else
+						r2 := r1;
+						r1 := r1.next
+					end
+				end;
+				cur := cur.next
+			else	
+				cur := cur.next
+			end
+		end;
+		list.last := cur
+	end
+end ElimMultiple;
+
+procedure PrintList;
+var
+	cur : Container;
+begin	
+	cur := list.first;
+	while cur # nil do
+		write(cur.val_:2); write(" ":1);
+		cur := cur.next
+	end;
+	writeln(" ":1)
+end PrintList;
+
+begin (* Little test. *)
+	Init();
+	Append(6); Append(6); Append(6); Append(1);
+	Append(2); Append(3); Append(2); Append(2);
+	Append(6); Append(2); Append(4); Append(4);
+	Append(3); Append(5); Append(5); Append(6);
+	PrintList();
+
+	if Exists(6) then writeln("6 exists") else writeln("6 does not exist") end;
+	if Exists(7) then writeln("7 exists") else writeln("7 does not exist") end;
+
+	while Exists(6) do
+		Delete(6)
+	end;
+
+	PrintList();
+	ElimMultiple();
+	PrintList();
+
+	writeln("Done. Press the Enter key");
+	readln
+end Store.

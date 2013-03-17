@@ -1,0 +1,17 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.1. The-Granularity-of-Concurrency
+ *
+ *	Positive test: Activity in a top level object
+ *)
+module Main;
+
+type {public, ref, protected} O = object
+	activity A;
+	begin
+	end A;
+end O;
+
+begin
+	halt(1)  (* success *)
+end Main.

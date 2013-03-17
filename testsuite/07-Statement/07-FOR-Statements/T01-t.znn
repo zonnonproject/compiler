@@ -1,0 +1,22 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Positive test: two for statements used the same circle variable i.
+ *)
+module Main;
+	var	s, i : integer;
+begin
+	s := 0;
+
+	for i := 1 to 10 do;
+		s := s + 1;
+	end;
+
+	for i := 1 to 10 do;
+		s := s + 1;
+	end;
+
+	if s = 20 
+	then halt(1) else halt(0) end;
+end Main.

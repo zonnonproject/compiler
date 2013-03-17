@@ -1,0 +1,37 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * implements operator.
+ *
+ * Positive test: The object uses implements operator to check itself.
+ * The result is true.
+ *)
+definition A;
+	procedure p : integer;
+end A.
+
+object B implements A;
+	procedure {public} p : integer implements A.p;
+	begin 
+		return 1 
+	end p;
+
+	var {public} 
+		result : boolean;
+begin
+	if self implements A 
+	then result := true
+	else result := false
+	end;
+end B.
+
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.result 
+	then halt(1) else halt(0) end;
+end Main.
+

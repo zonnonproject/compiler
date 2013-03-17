@@ -1,0 +1,7 @@
+module Main;
+
+var 
+	a : a;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ *
+ * Positive test: the object B name is used as variable type.
+ * The object B is declared before it is used.
+ *)
+module A;
+	type B = object
+	end B;
+
+	var X : B;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

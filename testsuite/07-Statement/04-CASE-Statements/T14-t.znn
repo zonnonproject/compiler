@@ -1,0 +1,33 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Positive test: first label contains obtained value.
+ *)
+object {public, ref} A;
+	var {public}  
+		v, c : char;
+		ok : boolean;
+begin
+    v := "K";
+	c := "a";
+
+	case v of 
+		"c" : 
+			ok := true; 
+		| "Q", "K" : 
+			if c = "a" then ok := true else ok := false end; 
+		else ok := false; 
+	end;
+end A.
+
+module Main;
+	import A;
+
+var a : A;
+begin
+	a := new A;
+
+	if a.ok
+	then halt(1) else halt(0) end;
+end Main.

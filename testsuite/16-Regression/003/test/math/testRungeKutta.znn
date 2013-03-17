@@ -1,0 +1,75 @@
+module {public} Main;
+
+   (* Tests module Math.RungeKutta *)
+
+   import
+      System.Int32          as Int32,
+      BelCore.Log           as L,
+      BelCore.Math          as Fn,
+      BelCore.Numbers       as N,
+      BelMath.RungeKutta    as RK;
+
+   procedure {private} Write (i : integer; x, y, e : N.Number);
+   var
+      err : N.Number;
+      j : Int32;
+   begin
+      j := i;
+      writeln("step = ", j.ToString());
+      write("  x =", x.Typeset());
+      writeln(",  y =", y.Typeset());
+      writeln("      solver error =", e.Typeset());
+      err := Fn.Abs(y - RelaxSoln(x));
+      writeln("      actual error =", err.Typeset())
+   end Write;
+
+   procedure {private} Relax (x, y : N.Number) : N.Number;
+   var
+      f : N.Number;
+   begin
+      f := -y;
+      return f
+   end Relax;
+
+   procedure {private} RelaxSoln (x : N.Number) : N.Number;
+   var
+      y, z : N.Number;
+   begin
+      z := -x;
+      y := Fn.Exp(z);
+      return y
+   end RelaxSoln;
+
+   procedure {public} Run;
+   var
+      done : boolean;
+      e, h, t, x, y : N.Number;
+      i : integer;
+      j : Int32;
+   begin
+      e := 1.0;
+      h := 0.2;
+      i := 0;
+      t := 0.00001;
+      x := 0;
+      y := 1;
+      done := false;
+      writeln("Integrate  dy/dx = -y,  y(0) = 1,  from  0 to 3: ");
+      Write(i, x, y, e);
+      repeat
+         inc(i);
+         RK.Solve(Relax, t, e, h, x, y);
+         Write(i, x, y, e);
+         if x > 3 then
+            done := true
+         end
+      until done;
+      writeln("The step controller seeks to keep the solver");
+      writeln("error, which is a normalized error, around 1.");
+      writeln
+   end Run;
+
+begin
+   Run;
+   L.Close
+end Main.

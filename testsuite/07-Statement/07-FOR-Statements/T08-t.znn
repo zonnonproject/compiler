@@ -1,0 +1,18 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Positive test: for statement has step = -2.
+ *)
+module Main;
+	var	s, i : integer;
+begin
+	s := 1;
+
+	for i := 5 to 1 by -2 do;
+		s := i;
+	end;
+
+	if s = 1 
+	then halt(1) else halt(0) end;
+end Main.

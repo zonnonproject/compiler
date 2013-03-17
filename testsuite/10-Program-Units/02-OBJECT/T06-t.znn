@@ -1,0 +1,25 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ *
+ * fiels of the same name as a type
+ *)
+
+(*
+This test is not passed due to temporary limitations of automatic test suite
+*)
+
+module Main;
+import System.Windows.Forms.Form as Form,
+	   System.Drawing.Icon as Icon;
+
+type {ref} R = object implements Form
+
+begin
+	self.Icon := nil;
+end R;
+
+begin
+   halt(1)
+end Main.
+

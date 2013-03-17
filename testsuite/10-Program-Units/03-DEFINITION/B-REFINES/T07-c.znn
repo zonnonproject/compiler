@@ -1,0 +1,21 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Positive test: normal qualified definition name B.C in refines clause.
+ *
+ * The nested definition C is declared _before_ definition A is declared.
+ *)
+module {public} B;
+	definition {public} C;
+	end C;
+end B.
+
+definition {public} A refines B.C;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.

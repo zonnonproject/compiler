@@ -1,0 +1,13 @@
+(** 
+ * 5. Declarations.
+ * 5.2. Constant Declarations.
+ *
+ * Simple positive test for constant value.
+ *
+ *)
+module Main;
+	const N = 10;
+begin
+	if N = 10 
+	then halt(1) else halt(0) end;
+end Main.

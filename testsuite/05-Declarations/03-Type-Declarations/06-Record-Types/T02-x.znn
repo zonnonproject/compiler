@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3.6 Postulated interface type.
+ * 6.3.5. Value object (RECord).
+ *
+ * Negative test: an object without modifiers is value object.
+ * It can not have parameters also.
+ *)
+object A(i : integer);
+begin
+end A.
+
+module Main; 
+begin
+	halt(0);
+end Main.

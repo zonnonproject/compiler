@@ -1,0 +1,20 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. Variable declarations.
+ *
+ * Positive test: 2-dimensional arrays as array of array.
+ *)
+module Main;
+	var x : array 8 of array 8 of integer;
+
+	procedure p(a : array of array of integer);
+	begin
+		a[1][1] := 1;
+	end p; 
+begin
+	p(x);
+
+	if x[1][1] = 1 
+	then halt(1) else halt(0) end;
+end Main.

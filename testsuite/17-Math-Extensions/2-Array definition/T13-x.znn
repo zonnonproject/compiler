@@ -1,0 +1,15 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Definition
+ * 
+ * Negaive test: dynamic math array creation & expression array definition:
+ * different number of indices (belittling)
+ *)
+
+module Main;
+var
+	a : array {math} *, * of real;
+begin
+	a := [[1., 2., 3.],[4., 5.]];
+	halt(0);
+end Main.

@@ -1,0 +1,17 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Positive text: Te and Tv are the same type.
+ *)
+module Main;
+	type T = ( one, two );
+	var	e1, e2 : T;
+begin
+	e1 := T.one;
+	e2 := T.two;
+	e1 := e2;
+
+	if e1 = T.two 
+	then halt(1) else halt(0) end;
+end Main.

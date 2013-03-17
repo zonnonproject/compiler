@@ -1,0 +1,276 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BF9B97DC-5D86-4043-977A-CB5B8E3BCE3C}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>ETH.Zonnon</AssemblyName>
+    <AssemblyOriginatorKeyFile>InterimKey.snk</AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Compiler</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <SignAssembly>true</SignAssembly>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;VS2005</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>VS2005</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ROTOR-RELEASE|AnyCPU' ">
+    <OutputPath>bin\ROTOR-RELEASE\</OutputPath>
+    <DefineConstants>ROTOR</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ROTORrelease|AnyCPU' ">
+    <OutputPath>bin\ROTORrelease\</OutputPath>
+    <DefineConstants>ROTOR</DefineConstants>
+    <BaseAddress>285212672</BaseAddress>
+    <Optimize>true</Optimize>
+    <DebugType>
+    </DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ROTORdebug|AnyCPU' ">
+    <OutputPath>bin\ROTORdebug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ROTOR</DefineConstants>
+    <BaseAddress>285212672</BaseAddress>
+    <Optimize>false</Optimize>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '2008Release|AnyCPU' ">
+    <OutputPath>bin\2008Release\</OutputPath>
+    <DefineConstants>VS2005</DefineConstants>
+    <BaseAddress>285212672</BaseAddress>
+    <Optimize>true</Optimize>
+    <DebugType>
+    </DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RegisterForComInterop>false</RegisterForComInterop>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '2008Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\2008Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ORCAS</DefineConstants>
+    <BaseAddress>285212672</BaseAddress>
+    <FileAlignment>4096</FileAlignment>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+      <HintPath>..\..\WINNT\Microsoft.NET\Framework\v1.0.3617\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Compiler, Version=1.2.0.0, Culture=neutral, PublicKeyToken=736440c9b414ea16, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CCI\Mono\System.Compiler.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Compiler.Framework, Version=1.2.0.0, Culture=neutral, PublicKeyToken=736440c9b414ea16, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CCI\Mono\System.Compiler.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Compiler.Runtime, Version=1.2.0.0, Culture=neutral, PublicKeyToken=736440c9b414ea16, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CCI\Mono\System.Compiler.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+      <HintPath>..\..\WINNT\Microsoft.NET\Framework\v1.0.3617\System.XML.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Analyzer.cs" />
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ASTChecker.cs" />
+    <Compile Include="ASTtoXML.cs" />
+    <Compile Include="ASTVisitor.cs" />
+    <Compile Include="Attributes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Compiler.cs">
+      <SubType>code</SubType>
+    </Compile>
+    <Compile Include="Compute\AssignmentConverter.cs" />
+    <Compile Include="Compute\ComputeKernelTemplates.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ComputeKernelTemplates.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Compute\MethodConverter.cs" />
+    <Compile Include="Compute\ComputeType.cs" />
+    <Compile Include="Compute\ConversionHelper.cs" />
+    <Compile Include="Compute\Extensions.cs" />
+    <Compile Include="Compute\KernelRegistry.cs" />
+    <Compile Include="Compute\OperationRegistry.cs" />
+    <Compile Include="Compute\Structs.cs" />
+    <Compile Include="Compute\ExpressionConverter.cs" />
+    <Compile Include="Compute\NodeHelper.cs" />
+    <Compile Include="ContextN.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Error.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LanguageService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lexem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ListN.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MathGenerator.cs" />
+    <Compile Include="Options.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ParserN.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Protocol.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Recovery.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReportN.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Scaner.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCFG.cs" />
+    <Compile Include="StandardN.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TreeN.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TreeNUtil.cs" />
+    <Compile Include="zcversion.cs" />
+    <EmbeddedResource Include="Compute\ComputeKernelTemplates.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <CustomToolNamespace>ETH.Zonnon.Compute</CustomToolNamespace>
+      <LastGenOutput>ComputeKernelTemplates.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ErrorMessages.ResX">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Content Include="Compute\Kernels\apply_indexer.c" />
+    <Content Include="Compute\Kernels\LeftDivision.c" />
+    <Content Include="Compute\Kernels\LeftLUDivision.c" />
+    <Content Include="Compute\Kernels\ElementWiseCopy_indexer.c" />
+    <Content Include="Compute\Kernels\LU.c" />
+    <Content Include="Compute\Kernels\MatrixExponent.c" />
+    <Content Include="Compute\Kernels\MatrixTranspose.c" />
+    <Content Include="Compute\Kernels\apply.c" />
+    <Content Include="Compute\Kernels\all.c" />
+    <Content Include="Compute\Kernels\any.c" />
+    <Content Include="Compute\Kernels\pps2.c" />
+    <Content Include="Compute\Kernels\pps1.c" />
+    <Content Include="Compute\Kernels\VectorMatrixMultiplication.c" />
+    <Content Include="Compute\Kernels\ElementWiseCopy.c" />
+    <Content Include="Compute\Kernels\MatrixMatrixMultiplication.c" />
+    <Content Include="Compute\Kernels\MatrixVectorMultiplication.c" />
+    <Content Include="Compute\Kernels\Reduction.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Zonnon.RTL\Zonnon.RTL.csproj">
+      <Project>{C9B31FDE-EE7E-4B46-8BE3-63F384B5F760}</Project>
+      <Name>Zonnon.RTL</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="InterimKey.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

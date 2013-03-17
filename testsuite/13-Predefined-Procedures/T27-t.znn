@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The succ(x) procedure.
+ *
+ * Positive test: succ procedure for integer type value.
+ *)
+module Main;
+	var i1, i2 : integer;
+begin
+	i1 := 21;
+	i2 := succ(i1);
+	
+	if i2 = 22 
+	then halt(1) else halt(0) end;
+end Main.

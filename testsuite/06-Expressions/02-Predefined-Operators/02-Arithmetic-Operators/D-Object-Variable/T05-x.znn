@@ -1,0 +1,24 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Negative test: access boolean variables in arithmetic expression.
+ * The object is declared after its using.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	b.x := 5;
+	b.y := 3;
+	i := b.x mod b.y;
+	halt(0);
+end Main.
+
+object A.B;
+	var { public }
+		x, y : boolean;
+end B.

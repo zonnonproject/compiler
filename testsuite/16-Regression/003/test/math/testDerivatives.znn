@@ -1,0 +1,73 @@
+module {public} Main;
+
+   (* Tests the module Math.Derivatives:  f = dy(x)/dx *)
+
+   import
+      System.Int32        as Int32,
+      BelCore.Log         as L,
+      BelCore.Math        as Fn,
+      BelCore.Numbers     as N,
+      BelMath.Derivatives as D;
+
+   type
+      Y = procedure (N.Number) : N.Number;
+
+   procedure {private} Write (y : Y; x, h, f : N.Number);
+   var
+      e, g : N.Number;
+   begin
+      g := D.Differentiate(y, x, h, D.Method.forward);
+      e := Fn.Abs(f - g);
+      writeln("forward differencing:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.Differentiate(y, x, h, D.Method.central);
+      e := Fn.Abs(f - g);
+      writeln("central differencing:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.Differentiate(y, x, h, D.Method.backward);
+      e := Fn.Abs(f - g);
+      writeln("backward differencing:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset());
+      g := D.Differentiate(y, x, h, D.Method.richardson);
+      e := Fn.Abs(f - g);
+      writeln("Richardson extrapolation:");
+      writeln("  solution = " + g.Typeset());
+      writeln("  error    = " + e.Typeset())
+   end Write;
+
+   procedure {private} Sin (x : N.Number) : N.Number;
+   begin
+      return Fn.Sin(x)
+   end Sin;
+
+   procedure {private} Cos (x : N.Number) : N.Number;
+   begin
+      return Fn.Cos(x)
+   end Cos;
+
+   procedure {public} Run;
+   var
+      h, x, y : N.Number;
+      i : integer;
+      j : Int32;
+   begin
+      h := Fn.Pi/100;
+      writeln("Derivatives based on a step size of h = " + h.Typeset());
+      for i := 1 to 6 do
+         j := i;
+         x := Fn.Pi/j;
+         y := Fn.Cos(x);
+         writeln();
+         writeln("dSin(x)/dx = Cos(x):  x = pi/" + j.ToString());
+         writeln("           = " + y.Typeset());
+         Write(Sin, x, h, Cos(x))
+      end
+   end Run;
+
+begin
+   Run;
+   L.Close
+end Main.

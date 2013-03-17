@@ -1,0 +1,25 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Negative test: default implementation implements object.
+ *)
+
+(* I. The object A is declared after its default implementation A. *)
+implementation A;
+end A.
+
+object A;
+end A.
+
+(* II. The object B is declared before its default implementation B. *)
+object B;
+end B.
+
+implementation B;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

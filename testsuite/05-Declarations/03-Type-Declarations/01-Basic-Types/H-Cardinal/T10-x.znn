@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * Cardinal.
+ * cardinal type
+ *
+ * Negative test: cardinal value assignment.
+ *)
+module Main;
+	var i : cardinal;
+begin
+	i := -1;
+
+	if i = -1 
+	then halt(0) else halt(1) end;
+end Main.
+

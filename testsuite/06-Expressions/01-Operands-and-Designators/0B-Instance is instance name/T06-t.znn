@@ -1,0 +1,31 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Positive test: access to public variable.
+ * The object A.B is declared before it is used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	b.i := 1;
+	b.i := b.i + 1;
+
+	if b.i = 2 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public } 
+		i : integer;
+
+	var { public, immutable } 
+		k : integer;
+
+	var { private } 
+		j : integer;
+end B.

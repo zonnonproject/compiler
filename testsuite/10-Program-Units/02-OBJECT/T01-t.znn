@@ -1,0 +1,42 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ *
+ * Test for namespace conflict interpretation.
+ * External and nested objects with the same name exist.
+ * What object B will be used in module A: nested or external?
+ *
+ * Zonnon compiler can generate wrong code.
+ * To check wrong code each object write specific value to output stream.
+ *)
+module Main;
+	(* 
+     * What object B will be used as type of variable b?
+     * The nested object B or external object B?
+     *)
+	var b : B;
+
+	(**
+	 * Nested object with the name B.
+	 *) 
+	type B = object
+	var {public}
+		x : integer;
+	begin
+		x := 2; (* Own value 2 is used for nested object B. *)
+	end B;
+
+begin
+	if b.x = 2 
+	then halt(1) else halt(0) end;
+end Main.
+
+(**
+ * External object with the same name B.
+ *) 
+object {public} B;
+var {public}
+	x : integer;
+begin
+	x := 1; (* Own value 1 is used for external object B. *)
+end B.

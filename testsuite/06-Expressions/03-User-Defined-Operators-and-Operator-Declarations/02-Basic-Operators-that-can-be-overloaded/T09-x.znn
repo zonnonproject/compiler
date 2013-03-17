@@ -1,0 +1,25 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.2. Basic operators that can be overloaded.
+ *
+ * Negative test: implements operator overloading is impossible.
+ *)
+module Main;
+	object Point;
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator "implements" (p : Point) : boolean;
+	begin 
+		return true;
+	end "implements";
+
+	var { public } 
+		p1, p2 : Point;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,20 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: string assignment to variable that has string type.
+ * The string type is type from underlined environment.
+ *)
+module Main;
+
+var s : string;
+
+begin
+	s := "abc";
+
+	if s.StartsWith("ab")
+	then halt(1) else halt(0) end;
+end Main.
+
+

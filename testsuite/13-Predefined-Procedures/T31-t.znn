@@ -1,0 +1,29 @@
+(**
+ * 09.Predefined procedures.
+ * The copy procedure.
+ *
+ * Positive test: copy array of char ---> string.
+ *)
+module Main;
+
+const N = 100;
+
+procedure P : integer;
+var a : array N of char;
+    s, s1 : string;
+begin
+	a[0] := '1';
+	a[1] := '2';
+	a[2] := '3';
+	copy(a, s);
+(*
+	write("s = "); writeln(s);
+	readln(s1);
+*)
+	if s = "123"
+	then return 1 else return 0 end;
+end P;
+
+begin
+	halt( P() );
+end Main.

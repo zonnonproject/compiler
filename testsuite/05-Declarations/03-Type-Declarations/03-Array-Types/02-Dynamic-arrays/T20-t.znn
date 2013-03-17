@@ -1,0 +1,20 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: 1-dimensional dynamic array is used as procedure parameter.
+ *)
+module Main;
+	procedure P(v : array of integer);
+	begin
+		v[1] := 5;
+	end P;
+
+	var v : array 2 of integer;
+begin
+	P(v);
+
+	if v[1] = 5
+	then halt(1) else halt(0) end;
+end Main.

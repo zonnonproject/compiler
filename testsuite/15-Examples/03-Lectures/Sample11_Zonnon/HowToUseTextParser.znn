@@ -1,0 +1,64 @@
+(* ********* Zonnon online collection ***********
+ * Test Text Parser
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module TextParserTest;
+
+import 
+	System.IO.Path as Path,
+	System.Reflection.Assembly as Assembly,
+
+	TextParser,
+	TextParser.Scanner as Scanner;
+
+var
+	s, t : Scanner;
+	asm : Assembly;
+	loc, dir, fileName : string;
+
+begin
+	asm := Assembly.GetExecutingAssembly();
+	loc := asm.Location;
+	dir := Path.GetDirectoryName(loc);
+	fileName := Path.Combine(dir, "info.txt");
+
+	if ~TextParser.OpenScanner(s, fileName) then 
+		writeln("The file is not found: ", fileName);
+		return 
+	end;
+
+	t := s; (* It is possible to copy the scanner! => set back. *)
+	
+	repeat
+		TextParser.Scan(s);
+
+		if s.type_ = TextParser.Int then (* integer => also real & string *)
+			writeln(s.s); write("  "); write(s.r:4:1); write("  "); writeln(s.i:4) 
+		elsif s.type_ = TextParser.Real then  (* real => also string *)
+			writeln(s.s); write("  "); writeln(s.r:4:1) 
+		else 
+			writeln(s.s)  (* only string *)
+		end
+	until s.eot;
+	
+	writeln("------------------------- copied version:");
+
+	repeat
+		TextParser.Scan(t);
+
+		if t.type_ = TextParser.Int then
+			writeln(t.s); write("  "); write(t.r:4:1); write("  "); writeln(t.i:4) 
+		elsif t.type_ = TextParser.Real then
+			writeln(t.s); write("  "); writeln(t.r:4:1) 
+		else 
+			writeln(t.s)
+		end
+	until t.eot;
+
+	writeln("Done. Press Enter key");
+	readln
+end TextParserTest.

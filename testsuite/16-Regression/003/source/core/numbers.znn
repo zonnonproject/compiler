@@ -1,0 +1,2636 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The modules in CORE form a foundation for computation modeling in Zonnon.  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* This module creates a floating-point (real) number type for the framework. *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Issues : when defining a 64-bit constant, use Assign("<value>") not :=     *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : Number      - floating-point representation for a real       *)
+(*    Methods  : Initialize  - assigns the default value, i.e., 0.0           *)
+(*             : Nullify     - same as Initialize                             *)
+(*             : Clone       - returns an initialized real number             *)
+(*             : Copy        - returns an equivalent-valued real number       *)
+(*             : Load        - reads a real number from a binary file         *)
+(*             : Store       - writes a real number to a binary file          *)
+(*             : Parse       - converts a string into a real number           *)
+(*             : Typeset     - converts the real number into a default string *)
+(*             : ToString    - convert number to string at specified accuracy *)
+(*             : Get         - returns the System.Double contained within     *)
+(*             : Set         - assigns a System.Double to the real            *)
+(*             : IsFinite    - boolean test to see if real is finite valued   *)
+(*             : IsInfinite  - boolean test to see if real is +/- infinity    *)
+(*             : IsPositiveInfinity - boolean test to see if real = infinity  *)
+(*             : IsNegativeInfinity - boolean test to see if real = -infinity *)
+(*             : IsNaN       - boolean test to see if real is not-a-number    *)
+(*             : Equals             - boolean test for equality               *)
+(*             : NotEqual           - boolean test for inequality             *)
+(*             : LessThan           - boolean test for less than              *)
+(*             : LessThanOrEqual    - boolean test for less than or equal to  *)
+(*             : GreaterThan        - boolean test for greater than           *)
+(*             : GreaterThanOrEqual - boolean test for greater than or equal  *)
+(*             : Magnitude   - returns the absolute value of the number       *)
+(*             : Negative    - returns the negative of the number             *)
+(*             : Add         - returns the sum of two numbers                 *)
+(*             : Subtract    - returns the difference between two numbers     *)
+(*             : Multiply    - returns the product of two numbers             *)
+(*             : Divide      - returns the ratio of two numbers               *)
+(*             : Power       - raises 1st number to power of 2nd number       *)
+(* Constants   : Epsilon     - machine epsilon (not the Epsilon of .NET)      *)
+(*                           - smallest number such that 1 + Epsilon > 1      *)
+(*             : MaximumPositiveNumber - largest real w/full digit precision  *)
+(*             : MinimumPositiveNumber - smallest real w/full digit precision *)
+(*             : NaN                   - not-a-number, e.g., 0/0 returns NaN  *)
+(*             : NegativeInfinity      - negative infinity: handles underflow *)
+(*             : PositiveInfinity      - positive infinity: handles overflow  *)
+(* Procedures  : Card8ToNumber   - converts a System.Byte to a Number         *)
+(*             : Card16ToNumber  - converts a System.UInt16 to a Number       *)
+(*             : Card32ToNumber  - converts a System.UInt32 to a Number       *)
+(*             : Card64ToNumber  - converts a System.UInt64 to a Number       *)
+(*             : Int8ToNumber    - converts a System.SByte to a Number        *)
+(*             : Int16ToNumber   - converts a System.Int16 to a Number        *)
+(*             : Int32ToNumber   - converts a System.Int32 to a Number        *)
+(*             : Int64ToNumber   - converts a System.Int64 to a Number        *)
+(*             : Real32ToNumber  - converts a System.Single to a Number       *)
+(*             : Real64ToNumber  - converts a System.Double to a Number       *)
+(*             : StringToNumber  - converts a string to a Number              *)
+(* Operators   : :=                         - assignment                      *)
+(*             : -                          - uniary  operator                *)
+(*             : = | # | < | <= | > | >=    - logical operators               *)
+(*             : + | - | * | /              - binary arithmetic operators     *)
+(*             : **                         - exponentiation operator         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCore.Numbers;
+
+   import
+      System.Convert         as Convert,
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      System.Math            as Math,
+      System.Byte   as Card8,   (* core type of  cardinal{8}  *)
+      System.UInt16 as Card16,  (* core type of  cardinal{16} *)
+      System.UInt32 as Card32,  (* core type of  cardinal{32} *)
+      System.UInt64 as Card64,  (* core type of  cardinal{64} *)
+      System.Int16  as Int16,   (* core type of  integer{16}  *)
+      System.Int32  as Int32,   (* core type of  integer{32}  *)
+      System.Int64  as Int64,   (* core type of  integer{64}  *)
+      System.SByte  as Int8,    (* core type of  integer{8}   *)
+      System.Single as Real32,  (* core type of  real{32}     *)
+      System.Double as Real64;  (* core type of  real{64}     *)
+
+   var {private}
+      zero, one, two : Real64;
+
+   var {public, immutable}
+      Epsilon,
+      MaximumPositiveNumber, MinimumPositiveNumber,
+      NaN, NegativeInfinity, PositiveInfinity : Number;
+
+   type {private}
+      CharArray = array * of char;
+
+   type {public, value} Number = object
+
+      var {private}
+         x : Real64;
+
+      procedure {public} Initialize;
+      begin {locked}
+         x := zero
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin
+         Initialize
+      end Nullify;
+
+      procedure {public} Clone () : Number;
+      var
+         n : Number;
+      begin
+         n.Initialize;
+         return n
+      end Clone;
+
+      procedure {public} Copy () : Number;
+      var
+         n : Number;
+      begin
+         n.x := x;
+         return n
+      end Copy;
+
+      procedure {public} Load (br : BinaryReader);
+      begin {locked}
+         x := br.ReadDouble()
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      begin
+         bw.Write(x);
+         bw.Flush
+      end Store;
+
+      (* 'NaN', 'Infinity' and '-Infinity' are allowed *)
+      procedure {public} Parse (s : string);
+      var
+         a : CharArray;
+         b : array 36 of char;
+         i, j : integer;
+         y : string;
+      begin {locked}
+         a := new CharArray(len(s)+2);
+         copy(s, a);
+         (* pass over any leading white space *)
+         j := 0;
+         while a[j] = " " do
+            inc(j)
+         end;
+         (* read a contiguous array of characters *)
+         i := 0;
+         repeat
+            b[i] := a[j];
+            inc(i);
+            inc(j);
+         until (a[j] = " ") or (j = len(s));
+         (* copy this array into a string *)
+         a := new CharArray(i+1);
+         for j := 0 to i-1 do
+            a[j] := b[j]
+         end;
+         copy(a, y);
+         (* parse *)
+         if y = "NaN" then
+            x := Real64.NaN
+         elsif y = "Infinity" then
+            x := Real64.PositiveInfinity
+         elsif y = "-Infinity" then
+            x := Real64.NegativeInfinity
+         else
+            x := Real64.Parse(y)
+         end
+      end Parse;
+
+      procedure {public} Typeset () : string;
+      var
+         a : CharArray;
+         s : string;
+      begin
+         if Real64.IsInfinity(x) then
+            if Real64.IsPositiveInfinity(x) then
+               a := new CharArray(9);
+               a[0] := "I";
+               a[1] := "n";
+               a[2] := "f";
+               a[3] := "i";
+               a[4] := "n";
+               a[5] := "i";
+               a[6] := "t";
+               a[7] := "y"
+            else
+               a := new CharArray(10);
+               a[0] := "-";
+               a[1] := "I";
+               a[2] := "n";
+               a[3] := "f";
+               a[4] := "i";
+               a[5] := "n";
+               a[6] := "i";
+               a[7] := "t";
+               a[8] := "y"
+            end;
+            copy(a, s)
+         elsif Real64.IsNaN(x) then
+            a := new CharArray(4);
+            a[0] := "N";
+            a[1] := "a";
+            a[2] := "N";
+            copy(a, s)
+         else
+            s := x.ToString("E15");
+            (* add a space at the front if it is a positive number *)
+            if x.CompareTo(zero) >= 0 then
+               s := " " + s
+            end
+         end;
+         (* add a space at the end for the parser to catch *)
+         s := s + " ";
+         return s
+      end Typeset;
+
+      procedure {public} ToString (significantDigits : integer) : string;
+      var
+         a : CharArray;
+         s : string;
+      begin
+         if Real64.IsInfinity(x) then
+            if Real64.IsPositiveInfinity(x) then
+               a := new CharArray(9);
+               a[0] := "I";
+               a[1] := "n";
+               a[2] := "f";
+               a[3] := "i";
+               a[4] := "n";
+               a[5] := "i";
+               a[6] := "t";
+               a[7] := "y"
+            else
+               a := new CharArray(10);
+               a[0] := "-";
+               a[1] := "I";
+               a[2] := "n";
+               a[3] := "f";
+               a[4] := "i";
+               a[5] := "n";
+               a[6] := "i";
+               a[7] := "t";
+               a[8] := "y"
+            end;
+            copy(a, s)
+         elsif Real64.IsNaN(x) then
+            a := new CharArray(4);
+            a[0] := "N";
+            a[1] := "a";
+            a[2] := "N";
+            copy(a, s)
+         else
+            if significantDigits > 8 then
+               if significantDigits > 12 then
+                  if significantDigits = 13 then
+                     s := x.ToString("E13")
+                  elsif significantDigits = 14 then
+                     s := x.ToString("E14")
+                  else
+                     s := x.ToString("E15")
+                  end
+               else
+                  if significantDigits = 9 then
+                     s := x.ToString("E9")
+                  elsif significantDigits = 10 then
+                     s := x.ToString("E10")
+                  elsif significantDigits = 11 then
+                     s := x.ToString("E11")
+                  else
+                     s := x.ToString("E12")
+                  end
+               end
+            else
+               if significantDigits < 5 then
+                  if significantDigits = 4 then
+                     s := x.ToString("E4")
+                  elsif significantDigits = 3 then
+                     s := x.ToString("E3")
+                  else
+                     s := x.ToString("E2")
+                  end
+               else
+                  if significantDigits = 8 then
+                     s := x.ToString("E8")
+                  elsif significantDigits = 7 then
+                     s := x.ToString("E7")
+                  elsif significantDigits = 6 then
+                     s := x.ToString("E6")
+                  else
+                     s := x.ToString("E5")
+                  end
+               end
+            end;
+            (* add a space at the front if it is a positive number *)
+            if x.CompareTo(zero) >= 0 then
+               s := " " + s
+            end
+         end;
+         (* add a space at the end for the parser to catch *)
+         s := s + " ";
+         return s
+      end ToString;
+
+      procedure {public} Get () : Real64;
+      begin
+         return x
+      end Get;
+
+      procedure {public} Set (r : Real64);
+      begin {locked}
+         x := r
+      end Set;
+
+      procedure {public} IsFinite () : boolean;
+      begin
+         return (~Real64.IsInfinity(x) & ~Real64.IsNaN(x))
+      end IsFinite;
+
+      procedure {public} IsInfinite () : boolean;
+      begin
+         return Real64.IsInfinity(x)
+      end IsInfinite;
+
+      procedure {public} IsPositiveInfinity () : boolean;
+      begin
+         return Real64.IsPositiveInfinity(x)
+      end IsPositiveInfinity;
+
+      procedure {public} IsNegativeInfinity () : boolean;
+      begin
+         return Real64.IsNegativeInfinity(x)
+      end IsNegativeInfinity;
+
+      procedure {public} IsNaN () : boolean;
+      begin
+         return Real64.IsNaN(x)
+      end IsNaN;
+
+(*    boolean truths assigned to +/-infinity obey:                            *)
+(*       infinity = infinity  and  -infinity = -infinity                      *)
+(*    all boolean operators return 'false' whenever one or both arguments is  *)
+(*    a NaN, i.e., the operation is undefined. Consequently, one cannot check *)
+(*    to see if a Number is NaN by calling x.Equals(NaN); it will always      *)
+(*    return 'false'. Instead, one must call x.IsNaN() to discern if 'x' is   *)
+(*    NaN. In contrast, x.Equals(PositiveInfinity) returns 'true' if 'x' is   *)
+(*    PositiveInfinity.                                                       *)
+
+      procedure {public} Equals (r : Number) : boolean;
+      var
+         diff : Real64;
+      begin
+         if IsFinite() & r.IsFinite() then
+            diff := x - r.x;
+            if diff.CompareTo(zero) < 0 then
+               diff := zero - diff;
+            end;
+            (* Real64.Epsilon is what I call MinimumPositiveNumber *)
+            if diff.CompareTo(Real64.Epsilon) < 0 then
+               return true
+            else
+               return false
+            end
+         else
+            if IsNaN() or r.IsNaN() then
+               return false
+            end;
+            if IsPositiveInfinity() & r.IsPositiveInfinity() then
+               return true
+            elsif IsNegativeInfinity() & r.IsNegativeInfinity() then
+               return true
+            else
+               return false
+            end
+         end
+      end Equals;
+
+      procedure {public} NotEqual (r : Number) : boolean;
+      var
+         diff : Real64;
+      begin
+         if IsFinite() & r.IsFinite() then
+            diff := x - r.x;
+            if diff.CompareTo(zero) < 0 then
+               diff := zero - diff;
+            end;
+            (* Real64.Epsilon is what I call MinimumPositiveNumber *)
+            if diff.CompareTo(Real64.Epsilon) > 0 then
+               return true
+            else
+               return false
+            end
+         else
+            if IsNaN() or r.IsNaN() then
+               return false
+            end;
+            if IsPositiveInfinity() & r.IsPositiveInfinity() then
+               return false
+            elsif IsNegativeInfinity() & r.IsNegativeInfinity() then
+               return false
+            else
+               return true
+            end
+         end
+      end NotEqual;
+
+      procedure {public} LessThan (r : Number) : boolean;
+      begin
+         if IsFinite() & r.IsFinite() then
+            if x.CompareTo(r.x) < 0 then
+               return true
+            else
+               return false
+            end
+         else
+            if IsNaN() or r.IsNaN() then
+               return false
+            end;
+            if IsPositiveInfinity() then
+               return false
+            elsif r.IsNegativeInfinity() then
+               return false
+            else
+               return true
+            end
+         end
+      end LessThan;
+
+      procedure {public} LessThanOrEqual (r : Number) : boolean;
+      begin
+         if IsFinite() & r.IsFinite() then
+            if x.CompareTo(r.x) > 0 then
+               return false
+            else
+               return true
+            end
+         else
+            if IsNaN() or r.IsNaN() then
+               return false
+            end;
+            if IsNegativeInfinity() then
+               return true
+            elsif r.IsPositiveInfinity() then
+               return true
+            else
+               return false
+            end
+         end
+      end LessThanOrEqual;
+
+      procedure {public} GreaterThan (r : Number) : boolean;
+      begin
+         if IsFinite() & r.IsFinite() then
+            if x.CompareTo(r.x) > 0 then
+               return true
+            else
+               return false
+            end
+         else
+            if IsNaN() or r.IsNaN() then
+               return false
+            end;
+            if IsNegativeInfinity() then
+               return false
+            elsif r.IsPositiveInfinity() then
+               return false
+            else
+               return true
+            end
+         end
+      end GreaterThan;
+
+      procedure {public} GreaterThanOrEqual (r : Number) : boolean;
+      begin
+         if IsFinite() & r.IsFinite() then
+            if x.CompareTo(r.x) < 0 then
+               return false
+            else
+               return true
+            end
+         else
+            if IsNaN() or r.IsNaN() then
+               return false
+            end;
+            if IsPositiveInfinity() then
+               return true
+            elsif r.IsNegativeInfinity() then
+               return true
+            else
+               return false
+            end
+         end
+      end GreaterThanOrEqual;
+
+      procedure {public} Magnitude () : Number;
+      var
+         y : Number;
+      begin
+         if IsNaN() then
+            y.x := NaN.x
+         elsif IsInfinite() then
+            y.x := PositiveInfinity.x
+         else
+            if x.CompareTo(zero) < 0 then
+               y.x := zero - x
+            else
+               y.x := x
+            end
+         end;
+         return y
+      end Magnitude;
+
+      (* all arithmetic operators return 'NaN' whenever one or both *)
+      (* arguments is a NaN, i.e., such operations are undefined    *)
+
+      procedure {public} Negative () : Number;
+      var
+         y : Number;
+      begin
+        if IsFinite() then
+           y.x := zero - x
+        elsif IsNaN() then
+           y.x := NaN.x
+        elsif IsPositiveInfinity() then
+           y.x := NegativeInfinity.x
+        else
+           y.x := PositiveInfinity.x
+        end;
+        return y
+      end Negative;
+
+      (* infinities for additions and subtractions obey:            *)
+      (*    x +/- infinity      -> +/-infinity                      *)
+      (*    infinity + infinity -> infinity                         *)
+      (*    infinity - infinity -> NaN                              *)
+
+      procedure {public} Add (r : Number) : Number;
+      var
+         y : Number;
+      begin
+         if IsFinite() & r.IsFinite() then
+            y.x := x + r.x
+         elsif IsNaN() or r.IsNaN() then
+            y.x := NaN.x
+         elsif IsPositiveInfinity() then
+            if r.IsNegativeInfinity() then
+               y.x := NaN.x
+            else
+               y.x := PositiveInfinity.x
+            end
+         elsif IsNegativeInfinity() then
+            if r.IsPositiveInfinity() then
+               y.x := NaN.x
+            else
+               y.x := NegativeInfinity.x
+            end
+         else
+            y.x := r.x
+         end;
+         return y
+      end Add;
+
+      procedure {public} Subtract (r : Number) : Number;
+      var
+         y : Number;
+      begin
+         if IsFinite() & r.IsFinite() then
+            y.x := x - r.x
+         elsif IsNaN() or r.IsNaN() then
+            y.x := NaN.x
+         elsif IsPositiveInfinity() then
+            if r.IsPositiveInfinity() then
+               y.x := NaN.x
+            else
+               y.x := PositiveInfinity.x
+            end
+         elsif IsNegativeInfinity() then
+            if r.IsNegativeInfinity() then
+               y.x := NaN.x
+            else
+               y.x := NegativeInfinity.x
+            end
+         elsif r.IsPositiveInfinity() then
+            y.x := NegativeInfinity.x
+         else
+            y.x := PositiveInfinity.x
+         end;
+         return y
+      end Subtract;
+
+      (* infinities for multiplications and divisions obey: *)
+      (*    0 * +/-infinity          -> NaN                 *)
+      (*    x * +/-infinity          -> +/-infinity, x > 0  *)
+      (*    infinity * +/-infinity   -> +/-infinity         *)
+      (*    -infinity * -infinity    -> infinity            *)
+      (*    +/-infinity / x          -> +/-infinity, x > 0  *)
+      (*    +/-x / infinity          -> 0                   *)
+      (*    +/-infinity / infinity   -> NaN                 *)
+      (*    0 / 0                    -> NaN                 *)
+      (*    +/-x / 0                 -> +/-infinity         *)
+      (*    +/-infinity / 0          -> +/-infinity         *)
+
+      procedure {public} Multiply (r : Number) : Number;
+      var
+         y : Number;
+      begin
+         if IsFinite() & r.IsFinite() then
+            y.x := x * r.x
+         elsif IsNaN() or r.IsNaN() then
+            y.x := NaN.x
+         elsif IsPositiveInfinity() then
+            if r.IsInfinite() then
+               y.x := r.x
+            elsif zero.CompareTo(r.x) = 0 then
+               y.x := NaN.x
+            elsif zero.CompareTo(r.x) < 0 then
+               y.x := PositiveInfinity.x
+            else
+               y.x := NegativeInfinity.x
+            end
+         elsif IsNegativeInfinity() then
+            if r.IsNegativeInfinity() then
+               y.x := PositiveInfinity.x
+            elsif r.IsPositiveInfinity() then
+               y.x := NegativeInfinity.x
+            elsif zero.CompareTo(r.x) = 0 then
+               y.x := NaN.x
+            elsif zero.CompareTo(r.x) > 0 then
+               y.x := PositiveInfinity.x
+            else
+               y.x := NegativeInfinity.x
+            end
+         elsif r.IsPositiveInfinity() then
+            if zero.CompareTo(x) = 0 then
+               y.x := NaN.x
+            elsif zero.CompareTo(x) < 0 then
+               y.x := PositiveInfinity.x
+            else
+               y.x := NegativeInfinity.x
+            end
+         else (* r = NegativeInfinity *)
+            if zero.CompareTo(x) = 0 then
+               y.x := NaN.x
+            elsif zero.CompareTo(x) > 0 then
+               y.x := PositiveInfinity.x
+            else
+               y.x := NegativeInfinity.x
+            end
+         end;
+         return y
+      end Multiply;
+
+      procedure {public} Divide (r : Number) : Number;
+      var
+         y : Number;
+      begin
+         if IsFinite() & r.IsFinite() then
+            if zero.CompareTo(x) = 0 then
+               if zero.CompareTo(r.x) = 0 then
+                  y.x := NaN.x
+               else
+                  y.x := zero
+               end
+            elsif zero.CompareTo(r.x) = 0 then
+               if zero.CompareTo(x) < 0 then
+                  y.x := PositiveInfinity.x
+               else
+                  y.x := NegativeInfinity.x
+               end
+            else
+               y.x := x / r.x
+            end
+         elsif IsNaN() or r.IsNaN() then
+            y.x := NaN.x
+         elsif IsPositiveInfinity() then
+            if r.IsInfinite() then
+               y.x := NaN.x
+            elsif zero.CompareTo(r.x) > 0 then
+               y.x := NegativeInfinity.x
+            else
+               y.x := PositiveInfinity.x
+            end
+         elsif IsNegativeInfinity() then
+            if r.IsInfinite() then
+               y.x := NaN.x
+            elsif zero.CompareTo(r.x) > 0 then
+               y.x := PositiveInfinity.x
+            else
+               y.x := NegativeInfinity.x
+            end
+         else (* r.IsInfinite() *)
+            y.x := zero
+         end;
+         return y
+      end Divide;
+
+      (* infinities and nan's for exponentiation obey:          *)
+      (*    x ** y            -> NaN          x < 0             *)
+      (*    x ** 0            -> 1            0 < x < infinity  *)
+      (*    x ** infinity     -> infinity     0 < x <= infinity *)
+      (*    x ** -infinity    -> 0            0 < x <= infinity *)
+      (*    0 ** y            -> 0            0 < y < infinity  *)
+      (*    0 ** -y           -> infinity     0 < y < infinity  *)
+      (*    0 ** 0            -> NaN                            *)
+      (*    0 ** +/-infinity  -> NaN                            *)
+      (*    infinity ** 0     -> NaN                            *)
+      (*    infinity ** y     -> infinity     0 < y < infinity  *)
+      (*    infinity ** -y    -> 0            0 < y < infinity  *)
+
+      procedure {public} Power (r : Number) : Number;
+      var
+         y : Number;
+      begin
+         if IsFinite() & r.IsFinite() then
+            if zero.CompareTo(x) < 0 then
+               if zero.CompareTo(r.x) = 0 then
+                  y.x := one
+               else
+                  y.x := Math.Pow(x, r.x)
+               end
+            elsif zero.CompareTo(x) = 0 then
+               if zero.CompareTo(r.x) < 0 then
+                  y.x := zero
+               elsif zero.CompareTo(r.x) > 0 then
+                  y.x := PositiveInfinity.x
+               else
+                  y.x := NaN.x
+               end
+            else
+               y.x := NaN.x
+            end
+         elsif IsNaN() or r.IsNaN() then
+            y.x := NaN.x
+         elsif IsPositiveInfinity() then
+            if r.IsInfinite() then
+               if r.IsPositiveInfinity() then
+                  y.x := PositiveInfinity.x
+               else
+                  y.x := NaN.x
+               end
+            elsif zero.CompareTo(r.x) < 0 then
+               y.x := PositiveInfinity.x
+            elsif zero.CompareTo(r.x) = 0 then
+               y.x := NaN.x
+            else
+               y.x := zero
+            end
+         elsif IsNegativeInfinity() then
+            y.x := NaN.x
+         elsif r.IsPositiveInfinity() then
+            if zero.CompareTo(x) < 0 then
+               y.x := PositiveInfinity.x
+            else
+               y.x := NaN.x
+            end
+         else (* r = NegativeInfinity *)
+            if zero.CompareTo(x) < 0 then
+               y.x := zero
+            else
+               y.x := NaN.x
+            end
+         end;
+         return y
+      end Power;
+
+   begin
+      Initialize
+   end Number;
+
+   (* type conversion procedures *)
+
+   procedure {public} Card8ToNumber (x : Card8) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Card8ToNumber;
+
+   procedure {public} Card16ToNumber (x : Card16) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Card16ToNumber;
+
+   procedure {public} Card32ToNumber (x : Card32) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Card32ToNumber;
+
+   procedure {public} Card64ToNumber (x : Card64) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Card64ToNumber;
+
+   procedure {public} Int8ToNumber (x : Int8) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Int8ToNumber;
+
+   procedure {public} Int16ToNumber (x : Int16) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Int16ToNumber;
+
+   procedure {public} Int32ToNumber (x : Int32) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Int32ToNumber;
+
+   procedure {public} Int64ToNumber (x : Int64) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(Convert.ToDouble(x));
+      return n
+   end Int64ToNumber;
+
+   procedure {public} Real32ToNumber (x : Real32) : Number;
+   var
+      d : Real64;
+      n : Number;
+   begin {locked}
+      if ~Real32.IsInfinity(x) & ~Real32.IsNaN(x) then
+         (* this appends zeros to the 8 least significant digits; whereas, *)
+         (* using System.Convert.ToDouble does not, in either .NET or mono *)
+         d := Real64.Parse(x.ToString())
+      elsif Real32.IsPositiveInfinity(x) then
+         d := Real64.PositiveInfinity
+      elsif Real32.IsNegativeInfinity(x) then
+         d := Real64.NegativeInfinity
+      else
+         d := Real64.NaN
+      end;
+      n.Set(d);
+      return n
+   end Real32ToNumber;
+
+   procedure {public} Real64ToNumber (x : Real64) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Set(x);
+      return n
+   end Real64ToNumber;
+
+   procedure {public} StringToNumber (x : string) : Number;
+   var
+      n : Number;
+   begin {locked}
+      n.Parse(x);
+      return n
+   end StringToNumber;
+
+   (* OVERLOADED OPERATORS *)
+   (* places wrappers around the associated real methods *)
+
+   (* assignment *)
+
+   operator {public} ':=' (var l : Number; r : Real64);
+   begin {locked}
+      l := Real64ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Real32);
+   begin {locked}
+      l := Real32ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Card64);
+   begin {locked}
+      l := Card64ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Card32);
+   begin {locked}
+      l := Card32ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Card16);
+   begin {locked}
+      l := Card16ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Card8);
+   begin {locked}
+      l := Card8ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Int64);
+   begin {locked}
+      l := Int64ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Int32);
+   begin {locked}
+      l := Int32ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Int16);
+   begin {locked}
+      l := Int16ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : Int8);
+   begin {locked}
+      l := Int8ToNumber(r)
+   end ':=';
+
+   operator {public} ':=' (var l : Number; r : string);
+   begin {locked}
+      l := StringToNumber(r)
+   end ':=';
+
+   (* unary operator *)
+
+   operator {public} '-' (x : Number) : Number;
+   begin {locked}
+      return x.Negative()
+   end '-';
+
+   (* logic operators *)
+
+   operator {public} '=' (l, r : Number) : boolean;
+   begin {locked}
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Number; r : Real64) : boolean;
+   begin {locked}
+      return l.Equals(Real64ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Real32) : boolean;
+   begin {locked}
+      return l.Equals(Real32ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Card64) : boolean;
+   begin {locked}
+      return l.Equals(Card64ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Card32) : boolean;
+   begin {locked}
+      return l.Equals(Card32ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Card16) : boolean;
+   begin {locked}
+      return l.Equals(Card16ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Card8) : boolean;
+   begin {locked}
+      return l.Equals(Card8ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Int64) : boolean;
+   begin {locked}
+      return l.Equals(Int64ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Int32) : boolean;
+   begin {locked}
+      return l.Equals(Int32ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Int16) : boolean;
+   begin {locked}
+      return l.Equals(Int16ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : Int8) : boolean;
+   begin {locked}
+      return l.Equals(Int8ToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Number; r : string) : boolean;
+   begin {locked}
+      return l.Equals(StringToNumber(r))
+   end '=';
+
+   operator {public} '=' (l : Real64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Real32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Card64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Card32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Card16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Card8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Int64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Int32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Int16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : Int8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '=' (l : string; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.Equals(r)
+   end '=';
+
+   operator {public} '#' (l, r : Number) : boolean;
+   begin {locked}
+      return l.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Number; r : Real64) : boolean;
+   begin {locked}
+      return l.NotEqual(Real64ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Real32) : boolean;
+   begin {locked}
+      return l.NotEqual(Real32ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Card64) : boolean;
+   begin {locked}
+      return l.NotEqual(Card64ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Card32) : boolean;
+   begin {locked}
+      return l.NotEqual(Card32ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Card16) : boolean;
+   begin {locked}
+      return l.NotEqual(Card16ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Card8) : boolean;
+   begin {locked}
+      return l.NotEqual(Card8ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Int64) : boolean;
+   begin {locked}
+      return l.NotEqual(Int64ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Int32) : boolean;
+   begin {locked}
+      return l.NotEqual(Int32ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Int16) : boolean;
+   begin {locked}
+      return l.NotEqual(Int16ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : Int8) : boolean;
+   begin {locked}
+      return l.NotEqual(Int8ToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Number; r : string) : boolean;
+   begin {locked}
+      return l.NotEqual(StringToNumber(r))
+   end '#';
+
+   operator {public} '#' (l : Real64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Real32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Card64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Card32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Card16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Card8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Int64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Int32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Int16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : Int8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '#' (l : string; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.NotEqual(r)
+   end '#';
+
+   operator {public} '<' (l, r : Number) : boolean;
+   begin {locked}
+      return l.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Number; r : Real64) : boolean;
+   begin {locked}
+      return l.LessThan(Real64ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Real32) : boolean;
+   begin {locked}
+      return l.LessThan(Real32ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Card64) : boolean;
+   begin {locked}
+      return l.LessThan(Card64ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Card32) : boolean;
+   begin {locked}
+      return l.LessThan(Card32ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Card16) : boolean;
+   begin {locked}
+      return l.LessThan(Card16ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Card8) : boolean;
+   begin {locked}
+      return l.LessThan(Card8ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Int64) : boolean;
+   begin {locked}
+      return l.LessThan(Int64ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Int32) : boolean;
+   begin {locked}
+      return l.LessThan(Int32ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Int16) : boolean;
+   begin {locked}
+      return l.LessThan(Int16ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : Int8) : boolean;
+   begin {locked}
+      return l.LessThan(Int8ToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Number; r : string) : boolean;
+   begin {locked}
+      return l.LessThan(StringToNumber(r))
+   end '<';
+
+   operator {public} '<' (l : Real64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Real32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Card64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Card32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Card16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Card8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Int64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Int32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Int16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : Int8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<' (l : string; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.LessThan(r)
+   end '<';
+
+   operator {public} '<=' (l, r : Number) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Real64) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Real64ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Real32) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Real32ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Card64) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Card64ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Card32) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Card32ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Card16) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Card16ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Card8) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Card8ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Int64) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Int64ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Int32) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Int32ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Int16) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Int16ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : Int8) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(Int8ToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Number; r : string) : boolean;
+   begin {locked}
+      return l.LessThanOrEqual(StringToNumber(r))
+   end '<=';
+
+   operator {public} '<=' (l : Real64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Real32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Card64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Card32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Card16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Card8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Int64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Int32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Int16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : Int8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '<=' (l : string; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.LessThanOrEqual(r)
+   end '<=';
+
+   operator {public} '>' (l, r : Number) : boolean;
+   begin {locked}
+      return l.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Number; r : Real64) : boolean;
+   begin {locked}
+      return l.GreaterThan(Real64ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Real32) : boolean;
+   begin {locked}
+      return l.GreaterThan(Real32ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Card64) : boolean;
+   begin {locked}
+      return l.GreaterThan(Card64ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Card32) : boolean;
+   begin {locked}
+      return l.GreaterThan(Card32ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Card16) : boolean;
+   begin {locked}
+      return l.GreaterThan(Card16ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Card8) : boolean;
+   begin {locked}
+      return l.GreaterThan(Card8ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Int64) : boolean;
+   begin {locked}
+      return l.GreaterThan(Int64ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Int32) : boolean;
+   begin {locked}
+      return l.GreaterThan(Int32ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Int16) : boolean;
+   begin {locked}
+      return l.GreaterThan(Int16ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : Int8) : boolean;
+   begin {locked}
+      return l.GreaterThan(Int8ToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Number; r : string) : boolean;
+   begin {locked}
+      return l.GreaterThan(StringToNumber(r))
+   end '>';
+
+   operator {public} '>' (l : Real64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Real32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Card64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Card32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Card16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Card8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Int64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Int32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Int16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : Int8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>' (l : string; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.GreaterThan(r)
+   end '>';
+
+   operator {public} '>=' (l, r : Number) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Real64) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Real64ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Real32) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Real32ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Card64) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Card64ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Card32) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Card32ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Card16) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Card16ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Card8) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Card8ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Int64) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Int64ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Int32) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Int32ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Int16) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Int16ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : Int8) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(Int8ToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Number; r : string) : boolean;
+   begin {locked}
+      return l.GreaterThanOrEqual(StringToNumber(r))
+   end '>=';
+
+   operator {public} '>=' (l : Real64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Real32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Card64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Card32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Card16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Card8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Int64; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Int32; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Int16; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : Int8; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   operator {public} '>=' (l : string; r : Number) : boolean;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.GreaterThanOrEqual(r)
+   end '>=';
+
+   (* arithemtic operators *)
+
+   operator {public} '+' (l, r : Number) : Number;
+   begin {locked}
+      return l.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Number; r : Real64) : Number;
+   begin {locked}
+      return l.Add(Real64ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Real32) : Number;
+   begin {locked}
+      return l.Add(Real32ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Card64) : Number;
+   begin {locked}
+      return l.Add(Card64ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Card32) : Number;
+   begin {locked}
+      return l.Add(Card32ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Card16) : Number;
+   begin {locked}
+      return l.Add(Card16ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Card8) : Number;
+   begin {locked}
+      return l.Add(Card8ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Int64) : Number;
+   begin {locked}
+      return l.Add(Int64ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Int32) : Number;
+   begin {locked}
+      return l.Add(Int32ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Int16) : Number;
+   begin {locked}
+      return l.Add(Int16ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : Int8) : Number;
+   begin {locked}
+      return l.Add(Int8ToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Number; r : string) : Number;
+   begin {locked}
+      return l.Add(StringToNumber(r))
+   end '+';
+
+   operator {public} '+' (l : Real64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Real32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Card64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Card32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Card16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Card8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Int64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Int32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Int16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : Int8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '+' (l : string; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.Add(r)
+   end '+';
+
+   operator {public} '-' (l, r : Number) : Number;
+   begin {locked}
+      return l.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Number; r : Real64): Number;
+   begin {locked}
+      return l.Subtract(Real64ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Real32): Number;
+   begin {locked}
+      return l.Subtract(Real32ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Card64) : Number;
+   begin {locked}
+      return l.Subtract(Card64ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Card32) : Number;
+   begin {locked}
+      return l.Subtract(Card32ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Card16) : Number;
+   begin {locked}
+      return l.Subtract(Card16ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Card8) : Number;
+   begin {locked}
+      return l.Subtract(Card8ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Int64) : Number;
+   begin {locked}
+      return l.Subtract(Int64ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Int32) : Number;
+   begin {locked}
+      return l.Subtract(Int32ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Int16) : Number;
+   begin {locked}
+      return l.Subtract(Int16ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : Int8) : Number;
+   begin {locked}
+      return l.Subtract(Int8ToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Number; r : string) : Number;
+   begin {locked}
+      return l.Subtract(StringToNumber(r))
+   end '-';
+
+   operator {public} '-' (l : Real64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Real32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Card64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Card32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Card16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Card8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Int64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Int32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Int16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : Int8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '-' (l : string; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.Subtract(r)
+   end '-';
+
+   operator {public} '*' (l, r : Number) : Number;
+   begin {locked}
+      return l.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Number; r : Real64) : Number;
+   begin {locked}
+      return l.Multiply(Real64ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Real32) : Number;
+   begin {locked}
+      return l.Multiply(Real32ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Card64) : Number;
+   begin {locked}
+      return l.Multiply(Card64ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Card32) : Number;
+   begin {locked}
+      return l.Multiply(Card32ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Card16) : Number;
+   begin {locked}
+      return l.Multiply(Card16ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Card8) : Number;
+   begin {locked}
+      return l.Multiply(Card8ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Int64) : Number;
+   begin {locked}
+      return l.Multiply(Int64ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Int32) : Number;
+   begin {locked}
+      return l.Multiply(Int32ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Int16) : Number;
+   begin {locked}
+      return l.Multiply(Int16ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : Int8) : Number;
+   begin {locked}
+      return l.Multiply(Int8ToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Number; r : string) : Number;
+   begin {locked}
+      return l.Multiply(StringToNumber(r))
+   end '*';
+
+   operator {public} '*' (l : Real64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Real32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Card64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Card32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Card16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Card8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Int64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Int32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Int16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : Int8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '*' (l : string; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.Multiply(r)
+   end '*';
+
+   operator {public} '/' (l, r : Number) : Number;
+   begin {locked}
+      return l.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Number; r : Real64) : Number;
+   begin {locked}
+      return l.Divide(Real64ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Real32) : Number;
+   begin {locked}
+      return l.Divide(Real32ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Card64) : Number;
+   begin {locked}
+      return l.Divide(Card64ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Card32) : Number;
+   begin {locked}
+      return l.Divide(Card32ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Card16) : Number;
+   begin {locked}
+      return l.Divide(Card16ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Card8) : Number;
+   begin {locked}
+      return l.Divide(Card8ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Int64) : Number;
+   begin {locked}
+      return l.Divide(Int64ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Int32) : Number;
+   begin {locked}
+      return l.Divide(Int32ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Int16) : Number;
+   begin {locked}
+      return l.Divide(Int16ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : Int8) : Number;
+   begin {locked}
+      return l.Divide(Int8ToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Number; r : string) : Number;
+   begin {locked}
+      return l.Divide(StringToNumber(r))
+   end '/';
+
+   operator {public} '/' (l : Real64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Real32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Card64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Card32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Card16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Card8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Int64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Int32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Int16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : Int8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '/' (l : string; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.Divide(r)
+   end '/';
+
+   operator {public} '**' (l, r : Number) : Number;
+   begin {locked}
+      return l.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Number; r : Real64) : Number;
+   begin {locked}
+      return l.Power(Real64ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Real32) : Number;
+   begin {locked}
+      return l.Power(Real32ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Card64) : Number;
+   begin {locked}
+      return l.Power(Card64ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Card32) : Number;
+   begin {locked}
+      return l.Power(Card32ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Card16) : Number;
+   begin {locked}
+      return l.Power(Card16ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Card8) : Number;
+   begin {locked}
+      return l.Power(Card8ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Int64) : Number;
+   begin {locked}
+      return l.Power(Int64ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Int32) : Number;
+   begin {locked}
+      return l.Power(Int32ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Int16) : Number;
+   begin {locked}
+      return l.Power(Int16ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : Int8) : Number;
+   begin {locked}
+      return l.Power(Int8ToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Number; r : string) : Number;
+   begin {locked}
+      return l.Power(StringToNumber(r))
+   end '**';
+
+   operator {public} '**' (l : Real64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real64ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Real32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Real32ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Card64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card64ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Card32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card32ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Card16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card16ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Card8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Card8ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Int64; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int64ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Int32; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int32ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Int16; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int16ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : Int8; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := Int8ToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   operator {public} '**' (l : string; r : Number) : Number;
+   var
+      y : Number;
+   begin {locked}
+      y := StringToNumber(l);
+      return y.Power(r)
+   end '**';
+
+   (* local function *)
+
+   procedure {private} EvalMachineEpsilon () : Real64;
+   var
+      epsilon, onePlus : Real64;
+   begin
+      (* assumes a radix of 2 - the mantissa will be 52 bits +/- a bit *)
+      epsilon := one;
+      repeat
+         epsilon := epsilon / two;
+         onePlus := one + epsilon;
+      until onePlus.CompareTo(one) = 0;
+      epsilon := two * epsilon;
+      return epsilon
+   end EvalMachineEpsilon;
+
+   procedure {private} SetConstants;
+   var
+      e, r : Real64;
+   begin
+      e := EvalMachineEpsilon();
+      Epsilon.Set(e);
+      r := Real64.MaxValue * e;
+      MaximumPositiveNumber.Set(r);
+      r := Real64.Epsilon / e;
+      MinimumPositiveNumber.Set(r);
+      r := Real64.NaN;
+      NaN.Set(r);
+      r := Real64.NegativeInfinity;
+      NegativeInfinity.Set(r);
+      r := Real64.PositiveInfinity;
+      PositiveInfinity.Set(r)
+   end SetConstants;
+
+begin
+   zero := Real64.Parse("0.0E+0");
+   one  := Real64.Parse("1.0E+0");
+   two  := Real64.Parse("2.0E+0");
+   SetConstants
+end Numbers.

@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * real type
+ *
+ * Positive test: real value assignment to real variable.
+ *)
+module Main;
+	var r : real ;
+begin
+	r := 1.28;
+
+	if r = 1.28 
+	then halt(1) else halt(0) end;
+end Main.

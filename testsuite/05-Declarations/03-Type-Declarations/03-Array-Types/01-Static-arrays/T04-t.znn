@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: the 1-dimesional array element assignment.
+ *)
+module Main;
+	type T = array 2 of char;
+	var x : T;
+begin
+	x[1] := 'c';
+	
+	if x[1] = 'c' 
+	then halt(1) else halt(0) end;
+end Main.

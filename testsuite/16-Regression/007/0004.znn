@@ -1,0 +1,30 @@
+module run;
+
+const
+	NofPhilo = 5;  (* number of philosophers *)
+
+var
+	philo: array NofPhilo of Philosopher;
+
+
+type {public, ref} Philosopher = object(id : integer)
+
+	activity {public} Live;
+	begin
+	end Live;
+
+begin
+end Philosopher;
+
+var i:integer;
+    p:Philosopher.Live;
+begin
+
+	for i := 0 to NofPhilo-1 do
+		philo[i] := new Philosopher(i)
+	end;
+
+	for i := 0 to NofPhilo-1 do
+		p := new philo[i].Live();
+	end;
+end run.

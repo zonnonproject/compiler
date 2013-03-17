@@ -1,0 +1,19 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * Definition name
+ * 
+ * Negative tests:
+ * a) wrong simple name F at definition B.E end.
+ * b) the simple name C is absent at definition A.B.C end.
+ *)
+definition {public} B.E;
+end F. (* Wrong simple name *)
+
+definition {public} A.B.C;
+end. (* The simple name C is absent. *)
+
+module Main;
+begin
+	halt(0);
+end Main.

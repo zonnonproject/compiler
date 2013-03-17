@@ -1,0 +1,111 @@
+(* ********* Zonnon online collection ***********
+ * The Dining Philosophers problem (classic solution)
+ *
+ * This example is a part of Concurrency examples
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*
+  The Dining Philosophers problem is a classic multi-process synchronization 
+  problem. The problem consists of five philosophers sitting at a table who 
+  do nothing but think and eat. Between each philosopher, there is a single 
+  stick. In order to eat, a philosopher must have both sticks. 
+  A problem can arise if each philosopher grabs the stick on the right, then 
+  waits for the stick on the left. In this- case a deadlock has occurred, 
+  and all philosophers will starve. Also, the philosophers should be fair. 
+  Each philosopher should be able to eat as much as the rest. 
+*)
+
+module Main;
+import System.Threading;
+
+const
+	NofPhilo = 5;  (* number of philosophers *)
+	EatingTime = 400; 
+	ThinkingTime = 300; 
+
+var
+	philo: array NofPhilo of Philosopher;
+	mutex: System.Threading.Mutex;
+
+type	{public} PhilState = (HUNGRY, THINKING, EATING);
+
+type {public, ref} Philosopher = object(id : integer)
+   	var (* Forks used by this philosopher. *)
+		left, right : Philosopher;
+	var {public}
+		state: PhilState;
+		s: System.Threading.ManualResetEvent;
+        
+	procedure think;
+	begin
+		writeln(id," is thinking");
+		System.Threading.Thread.Sleep(ThinkingTime);
+	end think;
+
+	procedure eat;
+	begin
+		writeln(id," is eating");
+		System.Threading.Thread.Sleep(EatingTime);
+	end eat;
+
+	procedure takeForks;
+	begin
+		mutex.WaitOne();
+		state := PhilState.HUNGRY;
+		test(self);
+		mutex.ReleaseMutex();
+		s.WaitOne();
+	end takeForks;
+
+	procedure test(phil: Philosopher);
+	begin
+		if (phil.state = PhilState.HUNGRY) & 
+		   (phil.left.state # PhilState.EATING) &
+		   (phil.right.state # PhilState.EATING) then
+			phil.state := PhilState.EATING;
+			phil.s.Set()
+		end
+	end test;
+
+	procedure putForks;
+	begin
+		mutex.WaitOne();
+		state := PhilState.THINKING;
+		test(left);	
+		test(right);
+		mutex.ReleaseMutex;
+	end putForks;
+
+	activity {public} Live;
+	begin
+		left := philo[(NofPhilo+id-1) mod NofPhilo];
+		right := philo[(id+1) mod NofPhilo];
+		loop
+			think();
+			takeForks();
+			eat();
+			putForks();
+		end
+	end Live;
+
+begin
+	s := new System.Threading.ManualResetEvent(false);
+	state := PhilState.THINKING;
+end Philosopher;
+
+var i:integer;
+    p:Philosopher;
+begin
+	mutex := new System.Threading.Mutex();
+
+	for i := 0 to NofPhilo-1 do
+		philo[i] := new Philosopher(i)
+	end;
+
+	for i := 0 to NofPhilo-1 do
+	        p := philo[i];
+		new p.Live();
+	end;
+end Main.

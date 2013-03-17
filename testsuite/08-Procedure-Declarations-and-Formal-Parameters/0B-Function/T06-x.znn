@@ -1,0 +1,14 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the procedure A uses not declared variable in return construct.
+ *)
+module Main;
+	procedure A : integer;
+	begin
+		return k;
+	end A;
+begin
+	A;
+	halt(0);
+end Main.

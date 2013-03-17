@@ -1,0 +1,18 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * char type
+ *
+ * Negative test: wrong char variable assignment.
+ *)
+module Main;
+	var c8  : char {  8 };
+	var c16 : char { 16 };
+begin
+	c8  := 'A'{8};
+	c16 := 'B';
+
+	c8 := c16; (* c8 variable has less width then c16 variable. *)
+	halt(0);
+end Main.

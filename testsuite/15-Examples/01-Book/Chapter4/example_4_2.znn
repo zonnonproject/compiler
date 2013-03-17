@@ -1,0 +1,83 @@
+(* ********* Zonnon online collection ***********
+ * TopSort (Chapter 4, Example 4.2)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module TopSort;
+
+type PTrailer = Trailer;
+
+object {public, ref} Leader;
+var {public}
+   key, count: integer;
+   trail: PTrailer;
+   next: Leader;
+end Leader;
+
+
+object {public, ref} Trailer;
+var {public}
+   id: Leader;
+   next:Trailer;
+end Trailer;
+
+var p, q, head, tail: Leader;
+    t: Trailer;
+    x, y, n: integer;
+   
+procedure find(w: integer): Leader;
+var h: Leader;
+begin
+    h := head;
+    tail.key := w;
+    while h.key # w do h := h.next end;
+    if h = tail then 
+       tail := new Leader; n := n + 1;
+       h.count := 0; h.trail := nil; h.next := tail;
+    end;
+    return h;
+end find;
+
+begin
+   writeln("Example 4.2 (Searches)");   
+   writeln("Enter pairs of numbers numbers ( first element 0 - to finish ): ");   
+
+   head := new Leader; tail := head; n := 0;
+   read(x);
+   while x # 0 do
+      readln(y);
+      p := find(x); q:= find(y);
+      t := new Trailer;
+      t.id := q; t.next := p.trail;
+      p.trail := t; q.count := q.count+1;
+      read(x);
+   end;
+
+   p := head; head := nil;
+   while p # tail do 
+      q := p; p := q.next;
+      if q.count = 0 then
+         q.next := head; head := q;
+      end;
+   end;
+
+   q := head;
+   while q # nil do
+     writeln; write(q.key:8); n := n-1;
+     t := q.trail; q := q.next;
+     while t# nil do
+        p := t.id; p.count := p.count - 1;
+        if p.count = 0 then
+           p.next := q; q := p;
+        end;
+        t := t.next;
+     end;
+   end;
+   writeln;
+   if n # 0 then writeln("This set is not partially ordered") end;
+   writeln;
+   writeln("Type 'q' to exit");	
+end TopSort.

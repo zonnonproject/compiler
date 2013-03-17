@@ -1,0 +1,33 @@
+(** 
+ * 6. Expression.
+ * 6.3. User Defined Operators and Operator Declaration.
+ * 6.3.3. New operator declaration.
+ *
+ * Positive test: binary operator is used with two value parameters.
+ * Predefined integer parameter is second parameter.
+ *)
+module Main;
+	type Point = object
+		var { public } x, y : integer;
+	begin 
+		x := 0;
+		y := 0;
+	end Point;
+
+	operator "*" (p : Point; k : integer) : Point;
+		var pr : Point;
+	begin 
+		pr.x := k * p.x;
+		pr.y := k * p.y;
+
+		return pr; 
+	end "*";
+
+	var p1, p2 : Point;
+begin
+	p1.x := 3;
+	p1.y := 2;
+
+	p2 := p1 * 3;
+	if (p2.x = 9) & (p2.y = 6) then halt(1) else halt(0) end;
+end Main.

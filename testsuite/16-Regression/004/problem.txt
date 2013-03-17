@@ -1,0 +1,56 @@
+Hi,
+
+if myrecA module defined in an external file, building the following myrectest module with zonnonbuilder gives errors.
+
+if type definition order in swapped,
+
+   ELine=RTE.Line;     (* 2 *)
+   EPoint=RTE.Point; (* 1 *)
+
+ module is build without error.
+
+if myrecA module is defined in myrectest file no error is given while building with zonnonbuilder.
+
+
+(*************************)
+module myrecA;
+
+type {public} Point=record
+      x, y,z: real;
+   end Point;
+   
+
+type {public} Line=record
+    s: Point;
+    e: Point;
+ end Line;
+ 
+end myrecA.
+
+
+(* main/entry module *)
+module myrectest;
+import myrecA as RTE;
+
+   
+type
+   EPoint=RTE.Point; (* 1 *)
+   ELine=RTE.Line;     (* 2 *)
+
+begin
+end myrectest.
+
+
+
+when built with zonnonbuilder following error is given.
+
+Zonnon Compiler, Version 1.1.11.0, Monday, June 15, 2009, 12:20:04 PM
+(c) 2003-2009 ETH Zurich
+D:\zonnon\myrecA.znn
+    [14,1] [2008] System error in OBJECT_DECL.convert function: type of a component of a value object was not resolved
+    [14,1] [2008] System error in OBJECT_DECL.convert function: type of a component of a value object was not resolved
+
+
+No error when command line compiled:
+zc /entry:myrectest myrecA.znn myrectest.znn /out:myrectest.exe
+ 

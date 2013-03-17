@@ -1,0 +1,84 @@
+(* ********* Zonnon online collection ***********
+ * Sorting: StraightMerge k (Chapter 2, Example 2.13)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Sorting;
+    const MAX_SIZE = 20;
+
+    type ElementOfArray = integer;
+    type DefaultArray = array 2*MAX_SIZE + 1 of ElementOfArray;
+    var MyArray: DefaultArray;
+
+    (***** Implementation *****)
+    
+    procedure StraightMerge(var a: DefaultArray; n:integer);
+    var i,j,k,L,t,h,m,p,q,r: integer; up:boolean;
+    begin up := true; p := 1;
+       repeat
+          h := 1; m := n;
+          if up then 
+		i := 1; j := n; k := n+1; L := 2*n;
+	  else 
+		k := 1; L := n; i := n+1; j := 2*n;
+	  end;
+	  repeat
+	     if m >= p then q := p else q := m; end;
+	     m := m - q;
+	     if m >= p then r := p; else r := m; end;
+             m := m - r;
+             while (q # 0) & (r # 0) do
+                if a[i] < a[j] then
+                   a[k] := a[i]; k := k + h; i := i + 1; q := q - 1;
+                else
+                   a[k] := a[j]; k := k + h; j := j - 1; r := r - 1;
+                end;
+             end;
+             while r > 0 do
+                a[k] := a[j]; k := k + h; j := j - 1; r := r - 1;
+             end;
+             while q > 0 do
+                a[k] := a[i]; k := k + h; i := i + 1; q := q - 1;
+             end;
+             h := -h; t := k; k := L; L := t;
+          until m = 0;
+          up := ~up; p := 2 * p;
+       until p >= n;
+       if ~up then 
+          for i := 1 to n do a[i] := a[i + n] end;
+       end;
+    end StraightMerge;
+
+    (***** Example support *****)
+
+    procedure FillTheArray;
+    var i:integer;
+    begin
+      for i := 1 to MAX_SIZE do 
+        MyArray[i] := abs( 10 - i ); 
+      end; 
+    end FillTheArray;
+ 
+    procedure PrintTheArray;
+    var i:integer;
+    begin
+       writeln("Array:");
+       for i := 1 to MAX_SIZE do
+          write( MyArray[i]:2, ', ' ); 
+       end; 
+       writeln;
+    end PrintTheArray;
+    
+    procedure Execute;
+    begin
+       StraightMerge(MyArray, MAX_SIZE); 
+    end Execute;
+begin
+ writeln("Example 2.12 (Find k)");
+ FillTheArray;
+ PrintTheArray;
+ Execute;
+ PrintTheArray;
+end Sorting.

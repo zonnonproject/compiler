@@ -1,0 +1,17 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Definition
+ * 
+ *
+ * Negative test: dynamic math array creation: incorrect syntax
+ *)
+
+module Main;
+
+type v = array {m} * of integer;
+
+var
+	a : v;
+begin	
+	halt(0);
+end Main.

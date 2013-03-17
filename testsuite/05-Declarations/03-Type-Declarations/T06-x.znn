@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Negative test: the not declared name B is used as type name for type T.
+ *)
+module A;
+	import B;
+
+	type {public} 
+		T = B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

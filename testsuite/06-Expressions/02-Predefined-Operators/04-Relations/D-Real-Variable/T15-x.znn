@@ -1,0 +1,13 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ *
+ * Negative test: integer assignment to real.
+ *)
+module Main;
+	var x : real;
+begin
+	x := 2;
+	halt(0);
+end Main.

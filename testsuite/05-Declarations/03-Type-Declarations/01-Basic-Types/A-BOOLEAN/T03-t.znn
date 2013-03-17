@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * A-boolean
+ *
+ * Positive test: wrong boolean type width.
+ * Warning from compiler.
+ *)
+module Main;
+var 
+	b : boolean {1};
+begin
+	halt(1);
+end Main.

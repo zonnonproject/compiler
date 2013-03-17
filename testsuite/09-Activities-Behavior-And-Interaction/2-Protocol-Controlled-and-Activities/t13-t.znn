@@ -1,0 +1,38 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Using protocol name as an enumeration type
+ *)
+module {protected} Main;
+
+protocol P = (
+    A, B, C, dialog = ( A | B | C )
+);
+
+var ok: boolean;
+
+activity A implements P;
+var p : P;
+begin 
+	accept p;
+	ok := false;
+	if p = P.A then
+		(* Command A *)
+		
+	elsif p = P.B then
+		(* Command B *)
+        ok := true;
+	else 
+		(* Command C *)
+		
+	end
+end A;
+
+var a : A;
+begin
+	do {barrier}
+	a := new A;
+	a(P.B);
+	end;
+	if ok then halt(1) else halt(0) end	
+end Main.

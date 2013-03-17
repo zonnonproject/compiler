@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ *
+ * Negative test: not declared type of variable X.
+ *)
+module A;
+	var X : B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

@@ -1,0 +1,12 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Negative text: too long string assignment to character array.
+ *)
+module Main;
+	var	s : array 3 of char;
+begin
+	s := "1234567890";
+	halt(0);
+end Main.

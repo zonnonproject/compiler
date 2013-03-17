@@ -1,0 +1,20 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: The string type is type from underlined environment.
+ * Test for string copy to char array by predefined procedure copy.
+ *)
+module Main;
+
+var s : string;
+	v : array 80 of char;
+
+begin
+	s := "abc";
+	copy(s, v);
+
+	if v[0] = 'a'
+	then halt(1) else halt(0) end;
+end Main.

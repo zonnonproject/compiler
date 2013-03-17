@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.5. WHILE statement.
+ *
+ * Positive test: while condition is false.
+ *)
+module Main;
+	var i, j : integer;
+begin
+	i := 10;
+	j :=  3;
+
+	while i > 10 do
+		i := i - 1;
+		j := j - 1;
+	end;
+
+	if j = 3 then halt(1) else halt(0) end;
+end Main.

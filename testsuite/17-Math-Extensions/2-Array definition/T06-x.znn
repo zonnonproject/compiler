@@ -1,0 +1,13 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Definition
+ * 
+ * Negative test: incorrect static math array creation.
+ *)
+
+module Main;
+var
+	a : array {math} 3, * of integer;
+begin
+	halt(0);
+end Main.

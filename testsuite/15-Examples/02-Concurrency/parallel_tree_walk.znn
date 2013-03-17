@@ -1,0 +1,79 @@
+(* ********* Zonnon online collection ***********
+ * Parallel tree walk (demonstration of an activities tree)
+ *
+ * This example is a part of Concurrency examples
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(** 
+ * Example 4 - Zonnon Version
+ * Description:
+ *    Concurrent tree-walk after binary tree is created. 
+ *)
+
+module Main;
+
+type {ref, public} Node = object
+var {public}
+   key: integer;
+   left, right: Node;
+end Node;
+
+var root: Node; n,k: integer;
+
+procedure tree(n:integer): Node;
+var 
+   newnode: Node;
+   x, nl, nr: integer;
+begin
+   if n = 0 then newnode := nil;
+   else nl := n div 2; nr := n - nl-1;
+      newnode := new Node;
+      newnode.key := k; inc(k);
+      newnode.left:= tree(nl);
+      newnode.right:= tree(nr)
+   end;
+   return newnode
+end tree;
+
+
+
+procedure Print(t: Node; h: integer);
+begin
+   if t # nil then
+      writeln(t.key:6, " at level ",h);
+      Print(t.left, h+1);
+      Print(t.right, h+1);
+   end
+end Print;
+
+
+activity TreeWalk();
+var t: Node;
+    h: integer;
+    a: TreeWalk;
+begin
+   accept t;
+   accept h;
+   if t # nil then
+      writeln(t.key:6, " at level ",h);
+      a:=new TreeWalk();
+      a(t.left, h+1);
+      a:=new TreeWalk();
+      a(t.right, h+1);
+   end
+end TreeWalk;
+
+var a: TreeWalk;
+begin
+   writeln("Example 4 - Tree-Walk");   
+   n := 10;
+   k := 0;
+   root := tree(n);
+   writeln("Tree: ");
+   Print(root, 0);
+   writeln("Rsult of concurrent tree-walk: ");
+   a := new TreeWalk();
+   a(root, integer(0));
+end Main.

@@ -1,0 +1,19 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Negative text: Te and Tv are incompatible types.
+ *)
+module Main;
+	type Tv = (one, two);
+	type Te = (one, two);
+
+	var	
+		v : Tv;
+		e : Te;
+begin
+	v := Tv.one;
+	e := Te.one;
+	e := v;
+	halt(0);
+end Main.

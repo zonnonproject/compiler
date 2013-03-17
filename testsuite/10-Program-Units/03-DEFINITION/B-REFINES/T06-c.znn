@@ -1,0 +1,22 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Positive test: correct definition name B.C is used in refines clause.
+ *
+ * The definition B.C is declared _after_ it is used.
+ *)
+definition {public} A refines B.C;
+end A.
+
+module {public} B;
+ 	definition {public} C;
+	end C;
+end B.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

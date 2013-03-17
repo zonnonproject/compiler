@@ -1,0 +1,25 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.1. Static arrays
+ *
+ * Positive test: index of array element is object variable.
+ *)
+module Main;
+
+type { value } A = object
+	var { public } 
+		i : integer;
+begin
+	i := 1;
+end A;
+
+var v : array 2 of integer;
+	a : array 2 of A;
+begin
+	v[1] := 5;
+	a[0].i := 1;
+	
+	if v[a[0].i] = 5
+	then halt(1) else halt(0) end;
+end Main.

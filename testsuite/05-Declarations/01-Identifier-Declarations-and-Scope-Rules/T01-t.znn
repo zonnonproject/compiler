@@ -1,0 +1,28 @@
+(** 
+ * 5. Declarations.
+ * 5.1. Identifier Declarations and Scope Rules.
+ *
+ * Positive test: the name inc is name of predefined procedure.
+ * But it can be declared again in any namespace!
+ *)
+module A;
+	procedure { public } inc(var x : integer);
+	begin
+		x := x + 1;
+	end inc;
+end A.
+
+module Main;
+	import A;
+
+	var i, j : integer;
+begin
+	i := 1;
+	j := 1;
+
+	inc(j);
+	A.inc(i);
+	
+	if i = j 
+	then halt(1) else halt(0) end;
+end Main.

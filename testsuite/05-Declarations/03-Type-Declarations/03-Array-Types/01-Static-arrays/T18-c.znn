@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: array of objects.
+ *)
+module Main;
+    type A = array *,* of integer;
+
+    var a : A;  
+    var b : array 2,8 of integer;
+begin
+    a := b; 
+    a := new A(7,77); 
+end Main.

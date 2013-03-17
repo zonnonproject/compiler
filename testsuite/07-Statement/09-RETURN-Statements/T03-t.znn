@@ -1,0 +1,23 @@
+(** 
+ * 7. Statement 
+ * 7.9. return statement.
+ *
+ * Positive test: the first function return is used.
+ *)
+module Main;
+	procedure p(i : integer) : integer;
+	begin 
+		if i > 0 then
+			return 1;
+		end;
+
+		return -1;
+	end p;
+
+	var k : integer;
+begin
+	k := p(3);
+
+	if k = 1 
+	then halt(1) else halt(0) end;
+end Main.

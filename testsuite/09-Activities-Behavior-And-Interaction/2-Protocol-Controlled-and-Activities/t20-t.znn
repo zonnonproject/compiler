@@ -1,0 +1,44 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Wrong sequence of accept / return instructions
+ *)
+
+module {protected} Main;
+
+var success :integer;
+
+protocol P = (
+	dialog = ?integer integer
+);
+
+activity A implements P;
+begin 
+	do
+		return integer(10);
+		accept unused
+	on exception do
+		success := 1; (* Success! an accept should be before the return *)	
+	end;
+	go := true;
+
+end A;
+
+var 
+	a : activity {P};
+	i : integer;
+        go: boolean;
+begin
+	a := new A;
+	go := false;
+	do
+	  i := a( integer(10) )
+	on exception do
+	  await go;
+	end;
+	if success = 1 then
+	   halt(1) (* success *)
+        else
+	   halt(0) (* failure *)
+        end
+end Main.

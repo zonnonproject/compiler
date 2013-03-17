@@ -1,0 +1,12 @@
+(** 
+ * 12. Reflection.
+ * The sample from Zonnon Report.
+
+THIS PART IS REMOVED
+ *)
+
+
+module Main;
+begin
+	halt(1);
+end Main.

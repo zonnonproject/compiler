@@ -1,0 +1,27 @@
+(** 
+ * 11.Program Units. 
+ * 11.3. Definition
+ *
+ * Negative test: the procedure F is NOT declared in definition A.
+ * The procedure is called before definition A declaration amd implementation. 
+ *)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.F() = 5
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, value } B implements A;
+	procedure { public } P : integer;
+	begin
+		return 5
+	end P;
+begin
+end B.
+
+definition {public} A;
+	procedure P : integer;
+end A.

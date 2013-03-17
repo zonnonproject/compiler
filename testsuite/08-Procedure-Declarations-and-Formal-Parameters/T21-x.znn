@@ -1,0 +1,11 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: undeclared parameter type.
+ *)
+module Main;
+	procedure P(p : A);
+	begin end P;
+begin
+end Main.
+

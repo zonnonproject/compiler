@@ -1,0 +1,13 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the procedure end has not simple procedure name.
+ *)
+module Main;
+	procedure A;
+	begin
+	end;
+begin
+	A;
+	halt(0);
+end Main.

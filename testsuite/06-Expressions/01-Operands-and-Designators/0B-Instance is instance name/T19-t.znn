@@ -1,0 +1,31 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Positive test: public procedure call.
+ * The object A.B is declared before it is used.
+ *)
+object A.B;
+	procedure { public } p1 : integer;
+	begin 
+		return 5 
+	end p1;
+
+	procedure { private } p2 : integer;
+	begin 
+		return 5 
+	end p2;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	i := b.p1();
+
+	if i = 5 
+	then halt(1) else halt(0) end;
+end Main.

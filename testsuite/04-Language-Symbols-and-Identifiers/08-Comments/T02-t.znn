@@ -1,0 +1,14 @@
+(* 
+4. Language symbols and identifiers.
+4.8 Comments
+(* This is nested comment
+module Main;
+begin
+	halt(0);
+end Main.
+*)
+*)
+module Main;
+begin
+	halt(1);
+end Main.

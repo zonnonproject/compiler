@@ -1,0 +1,25 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.1. The-Granularity-of-Concurrency
+ *
+ *	Positive test: Activity execution in an object
+ *)
+
+module Main;
+
+type {public, protected} O = object
+
+	activity A;
+	begin
+
+	end A;
+
+begin
+end O;
+
+var o:O;
+    a:O.A;
+begin
+	a := new o.A;
+	halt(1)  (* success *)
+end Main.

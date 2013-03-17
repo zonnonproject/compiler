@@ -1,0 +1,15 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Simplest assignment test.
+ *)
+module Main;
+var
+	x : integer;
+begin
+	x := 2;
+
+	if x = 2 
+	then halt(1) else halt(0) end;
+end Main.

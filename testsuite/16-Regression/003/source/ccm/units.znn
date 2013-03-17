@@ -1,0 +1,1031 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Ccm was written to model in-plane biaxial experiments run in my laboratory *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Handles physical units, viz. SI, associated with fields for the framework  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* SI Base Units:                                                             *)
+(*   QUANTITY                  NAME         PRINTED SYMBOL                    *)
+(*   -----------------------------------------------------                    *)
+(*   dimensionless                          ~                                 *)
+(*   electric current          ampere       A                                 *)
+(*   luminous intensity        candela      cd                                *)
+(*   thermodynamic temperature kelvin       K                                 *)
+(*   mass                      kilogram     kg                                *)
+(*   length                    meter        m                                 *)
+(*   amount of substance       mole         mol                               *)
+(*   time                      second       s                                 *)
+(*   -----------------------------------------------------                    *)
+(*   Supply a '~' to assign dimensionless units.  Units in the numerator and  *)
+(*   denominator must appear in alphebetical order, viz., A cd K kg m mol s.  *)
+(*   Use a caret '^' to denote a superscript whenever exponents are other     *)
+(*   than 1.  Use a period '.' to represent multiplication of base units in   *)
+(*   either the numerator or denominator, and use a slash '/' between the     *)
+(*   numerator and denominator.                                               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Constants   : Ampere      - fundamental SI unit for electric current       *)
+(*             : Candela     - fundamental SI unit for luminous intensity     *)
+(*             : Kelvin      - fundamental SI unit for thermodyn. temperature *)
+(*             : Kilogram    - fundamental SI unit for mass                   *)
+(*             : Meter       - fundamental SI unit for length                 *)
+(*             : Mole        - fundamental SI unit for amount of substance    *)
+(*             : Second      - fundamental SI unit for time                   *)
+(*    (# physically based unit names #)                                       *)
+(*             : Time        - s                                              *)
+(*             : Rate        - 1/s                                            *)
+(*             : Velocity    - m/s                                            *)
+(*             : Acceleration - m/s^2                                         *)
+(*             : Momentum    - kg.m/s                                         *)
+(*             : Force       - kg.m/s^2                                       *)
+(*             : Work        - kg.m^2/s^2                                     *)
+(*             : Power       - kg.m^2/s^3                                     *)
+(*    (# mechanics based unit names #)                                        *)
+(*             : Strain      - ~                                              *)
+(*             : StrainRate  - 1/s                                            *)
+(*             : Stress      - kg/m.s^2                                       *)
+(*             : StressRate  - kg/m.s^3                                       *)
+(*    (# named SI units #)                                                    *)
+(*             : Hertz       - 1/s          - frequency                       *)
+(*             : Newton      - kg.m/s^2     - units of force                  *)
+(*             : Pascal      - kg/m.s^2     - units of stress                 *)
+(*             : Joule       - kg.m^2/s^2   - units of work and energy        *)
+(*             : Watt        - kg.m^2/s^3   - units of power                  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Object      : Units.Si    - an object for describing SI units              *)
+(*    methods  : Initialize  - sets value to that of a dimensionless unit     *)
+(*             : Nullify     - same as Initialize for Units.Si                *)
+(*             : Clone       - returns an initialized instance of Si          *)
+(*             : Copy        - returns a copy of the SI units                 *)
+(*             : Load        - retrieve a set of units from a binary file     *)
+(*             : Store       - write a set of units to a binary file          *)
+(*             : Parse       - convert a string into a set of units           *)
+(*             : Typeset     - write a set of units out to a string           *)
+(*    (# the integer returned is the exponent, e.g.,  n  in  kg^n #)          *)
+(*             : GetAmpere   - returns the exponent for current in Amperes    *)
+(*             : GetCandela  - returns the exponent for light in Candela      *)
+(*             : GetKelvin   - returns the exponent for degrees Kelvin        *)
+(*             : GetKilogram - returns the exponent for mass in kilograms     *)
+(*             : GetMeter    - returns the exponent for length in meters      *)
+(*             : GetMole     - returns the exponent for moles of substance    *)
+(*             : GetSecond   - returns the exponent for seconds of time       *)
+(*    (# supply an exponent, e.g.,  n  in  kg^n, where -10 < n < 10 #)        *)
+(*             : SetAmpere   - assign an exponent to current in Amperes       *)
+(*             : SetCandela  - assign an exponent to light in Candela         *)
+(*             : SetKelvin   - assign an exponent to degrees Kelvin           *)
+(*             : SetKilogram - assign an exponent to mass in kilograms        *)
+(*             : SetMeter    - assign an exponent to length in meters         *)
+(*             : SetMole     - assign an exponent to moles of substance       *)
+(*             : SetSecond   - assign an exponent to seconds of time          *)
+(*    (# arithmetic applies to the exponents #)                               *)
+(*             : IsDimensionless - check to see if units are dimensionless    *)
+(*             : Equals      - test two sets of units for equality            *)
+(*             : IncBy       - augment units, adding like exponents           *)
+(*             : DecBy       - augment units, subtracting like exponents      *)
+(*             : Add         - adds exponents from two sets of units          *)
+(*             : Subtract    - subtracts exponents from two sets of units     *)
+(* Operators   : =, #        - boolean operators                              *)
+(*               +, -        - binary arithmetic operators                    *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCcm.Units;
+
+   import
+      System.Int32           as Int32,
+      System.IO.BinaryReader as BinaryReader,
+      System.IO.BinaryWriter as BinaryWriter,
+      BelCore.Log            as L;
+
+   type {private}
+      CharArray = array * of char{16};
+
+   var {public}
+      Acceleration, Ampere, Candela, Force, Hertz, Joule, Kelvin, Kilogram,
+      Meter, Mole, Momentum, Newton, Pascal, Power, Rate, Second, Strain,
+      StrainRate, Stress, StressRate, Time, Velocity, Watt, Work : Si;
+
+   type {public, value} Si = object
+      (* stores the exponents of all unit types in a compressed format *)
+      (* each integer exponent must belong to the interval [-9,9]      *)
+
+      var {private}
+         units : Int32;
+
+      procedure {public} Initialize;
+      begin {locked}
+         (* sets the units to their dimensionless value *)
+         units := 673684210
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin
+         Initialize
+      end Nullify;
+
+      procedure {public} Clone () : Si;
+      var
+         si : Si;
+      begin
+         si.Initialize;
+         return si
+      end Clone;
+
+      procedure {public} Copy () : Si;
+      var
+         si : Si;
+      begin
+         si.units := units;
+         return si
+      end Copy;
+
+      procedure {public} Load (br : BinaryReader);
+      begin {locked}
+         units := br.ReadInt32()
+      end Load;
+
+      procedure {public} Store (bw : BinaryWriter);
+      begin {locked}
+         bw.Write(units);
+         bw.Flush
+      end Store;
+
+      procedure {private} ToNumber (c : char) : integer;
+      var
+         n : integer;
+      begin
+         if c = "2" then
+            n := 2
+         elsif c = "3" then
+            n := 3
+         elsif c = "4" then
+            n := 4
+         elsif c = "5" then
+            n := 5
+         elsif c = "6" then
+            n := 6
+         elsif c = "7" then
+            n := 7
+         elsif c = "8" then
+            n := 8
+         elsif c = "9" then
+            n := 9
+         else  (* handle input errors *)
+            n := 0;
+            L.WarningMessage(15,-1, "BelCcm.Units.Si.Parse")
+         end;
+         return n
+      end ToNumber;
+
+      (* Supply '~' to assign dimensionless units.  Units in the numerator *)
+      (* and denominator must be in alphebetical order: A cd K kg m mol s. *)
+      procedure {public} Parse (s : string);
+      var
+         a : CharArray;
+         b : array 36 of char;
+         i, j, n : integer;
+      begin {locked}
+         Initialize;
+         a := new CharArray(len(s)+2);
+         copy(s, a);
+         j := 0;
+         (* pass over any leading white space and tabs *)
+         while ((a[j] = " ") or (a[j] = 09X)) do
+            inc(j)
+         end;
+         (* read a contiguous array of characters *)
+         i := 0;
+         repeat
+            b[i] := a[j];
+            inc(i);
+            inc(j);
+         until (a[j] = " ") or (j = len(s));
+         (* recreate the array with no leading and one trailing white space *)
+         a := new CharArray(i+2);
+         for j := 0 to i-1 do
+            a[j] := b[j]
+         end;
+         a[i] := " ";
+         i := 0;
+         (* convert the string to an SI unit set *)
+         if (a[i] = "~") or (a[i] < 20X) then
+            (* the unit set is dimensionless - done *)
+         else
+            (* determine those units present in the numerator *)
+            if a[i] = "A" then
+               inc(i);
+               if a[i] = "^" then
+                  inc(i);
+                  n := ToNumber(a[i]);
+                  inc(i)
+               else
+                  n := 1
+               end;
+               SetAmpere(n)
+            end;
+            if a[i] = "." then
+               inc(i)
+            end;
+            if a[i] = "c" then
+               inc(i, 2);
+               if a[i] = "^" then
+                  inc(i);
+                  n := ToNumber(a[i]);
+                  inc(i)
+               else
+                  n := 1
+               end;
+               SetCandela(n)
+            end;
+            if a[i] = "." then
+               inc(i)
+            end;
+            if a[i] = "K" then
+               inc(i);
+               if a[i] = "^" then
+                  inc(i);
+                  n := ToNumber(a[i]);
+                  inc(i)
+               else
+                  n := 1
+               end;
+               SetKelvin(n)
+            end;
+            if a[i] = "." then
+               inc(i)
+            end;
+            if a[i] = "k" then
+               inc(i, 2);
+               if a[i] = "^" then
+                  inc(i);
+                  n := ToNumber(a[i]);
+                  inc(i)
+               else
+                  n := 1
+               end;
+               SetKilogram(n)
+            end;
+            if a[i] = "." then
+               inc(i)
+            end;
+            if a[i] = "m" then
+               inc(i);
+               if a[i] = "^" then
+                  inc(i);
+                  n := ToNumber(a[i]);
+                  SetMeter(n);
+                  inc(i)
+               elsif a[i] = "o" then
+                  inc(i, 2);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := ToNumber(a[i]);
+                     inc(i)
+                  else
+                     n := 1
+                  end;
+                  SetMole(n)
+               else
+                  SetMeter(1)
+               end
+            end;
+            if a[i] = "." then
+               inc(i)
+            end;
+            if a[i] = "m" then
+               inc(i, 3);
+               if a[i] = "^" then
+                  inc(i);
+                  n := ToNumber(a[i]);
+                  inc(i)
+               else
+                  n := 1
+               end;
+               SetMole(n)
+            end;
+            if a[i] = "." then
+               inc(i)
+            end;
+            if a[i] = "s" then
+               inc(i);
+               if a[i] = "^" then
+                  inc(i);
+                  n := ToNumber(a[i]);
+                  inc(i)
+                  else
+                  n := 1
+               end;
+               SetSecond(n)
+            end;
+            if a[i] = "1" then
+               inc(i)
+            end;
+            (* determine those units present in the denominator *)
+            if a[i] = "/" then
+               inc(i);
+               if a[i] = "A" then
+                  inc(i);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := -ToNumber(a[i]);
+                     inc(i)
+                  else
+                     n := -1
+                  end;
+                  SetAmpere(n)
+               end;
+               if a[i] = "." then
+                  inc(i)
+               end;
+               if a[i] = "c" then
+                  inc(i, 2);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := -ToNumber(a[i]);
+                     inc(i)
+                  else
+                     n := -1
+                  end;
+                  SetCandela(n)
+               end;
+               if a[i] = "." then
+                  inc(i)
+               end;
+               if a[i] = "K" then
+                  inc(i);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := -ToNumber(a[i]);
+                     inc(i)
+                  else
+                     n := -1
+                  end;
+                  SetKelvin(n)
+               end;
+               if a[i] = "." then
+                  inc(i)
+               end;
+               if a[i] = "k" then
+                  inc(i, 2);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := -ToNumber(a[i]);
+                     inc(i)
+                  else
+                     n := -1
+                  end;
+                  SetKilogram(n)
+               end;
+               if a[i] = "." then
+                  inc(i)
+               end;
+               if a[i] = "m" then
+                  inc(i);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := -ToNumber(a[i]);
+                     SetMeter(n);
+                     inc(i)
+                  elsif a[i] = "o" then
+                     inc(i, 2);
+                     if a[i] = "^" then
+                        inc(i);
+                        n := -ToNumber(a[i]);
+                        inc(i)
+                     else
+                        n := -1
+                     end;
+                     SetMole(n)
+                  else
+                     SetMeter(-1)
+                  end
+               end;
+               if a[i] = "." then
+                  inc(i)
+               end;
+               if a[i] = "m" then
+                  inc(i, 3);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := -ToNumber(a[i]);
+                     inc(i)
+                  else
+                     n := -1
+                  end;
+                  SetMole(n)
+               end;
+               if a[i] = "." then
+                  inc(i)
+               end;
+               if a[i] = "s" then
+                  inc(i);
+                  if a[i] = "^" then
+                     inc(i);
+                     n := -ToNumber(a[i]);
+                     inc(i)
+                  else
+                     n := -1
+                  end;
+                  SetSecond(n)
+               end
+            end
+         end
+      end Parse;
+
+      procedure {private} ToChar (n : Int32) : char;
+      var
+         c : char{16};
+      begin
+         if n = 2 then
+            c := "2"
+         elsif n = 3 then
+            c := "3"
+         elsif n = 4 then
+            c := "4"
+         elsif n = 5 then
+            c := "5"
+         elsif n = 6 then
+            c := "6"
+         elsif n = 7 then
+            c := "7"
+         elsif n = 8 then
+            c := "8"
+         elsif n = 9 then
+            c := "9"
+         else (* handle input error *)
+            c := "?";
+            L.WarningMessage(15,5, "BelCcm.Units.Si.Typeset")
+         end;
+         return c
+      end ToChar;
+
+      (* a '~' is returned in the case of dimensionless units *)
+      procedure {public} Typeset () : string;
+      var
+         a : array 72 of char{16};
+         amp, can, kel, kgr, met, mol, sec : Int32;
+         an, ad : array 36 of char{16};
+         ca : CharArray;
+         i, j, k, l : integer;
+         s : string;
+      begin {locked}
+         amp :=  units div 64000000;
+         can := (units div 3200000) mod 20;
+         kel := (units div 160000) mod 20;
+         kgr := (units div 8000) mod 20;
+         met := (units div 400) mod 20;
+         mol := (units div 20) mod 20;
+         sec :=  units mod 20;
+         (* determine those units present in the numerator *)
+         i := 0;
+         if amp > 10 then
+            an[i] := "A";
+            inc(i);
+            if amp > 11 then
+               an[i] := "^";
+               inc(i);
+               an[i] := ToChar(amp - 10);
+               inc(i)
+            end
+         end;
+         if can > 10 then
+            if i > 0 then
+               an[i] := ".";
+               inc(i)
+            end;
+            an[i] := "c";
+            inc(i);
+            an[i] := "d";
+            inc(i);
+            if can > 11 then
+               an[i] := "^";
+               inc(i);
+               an[i] := ToChar(can - 10);
+               inc(i)
+            end
+         end;
+         if kel > 10 then
+            if i > 0 then
+               an[i] := ".";
+               inc(i)
+            end;
+            an[i] := "K";
+            inc(i);
+            if kel > 11 then
+               an[i] := "^";
+               inc(i);
+               an[i] := ToChar(kel - 10);
+               inc(i)
+            end
+         end;
+         if kgr > 10 then
+            if i > 0 then
+               an[i] := ".";
+               inc(i)
+            end;
+            an[i] := "k";
+            inc(i);
+            an[i] := "g";
+            inc(i);
+            if kgr > 11 then
+               an[i] := "^";
+               inc(i);
+               an[i] := ToChar(kgr - 10);
+               inc(i)
+            end
+         end;
+         if met > 10 then
+            if i > 0 then
+               an[i] := ".";
+               inc(i)
+            end;
+            an[i] := "m";
+            inc(i);
+            if met > 11 then
+               an[i] := "^";
+               inc(i);
+               an[i] := ToChar(met - 10);
+               inc(i)
+            end
+         end;
+         if mol > 10 then
+            if i > 0 then
+               an[i] := ".";
+               inc(i)
+            end;
+            an[i] := "m";
+            inc(i);
+            an[i] := "o";
+            inc(i);
+            an[i] := "l";
+            inc(i);
+            if mol > 11 then
+               an[i] := "^";
+               inc(i);
+               an[i] := ToChar(mol - 10);
+               inc(i)
+            end
+         end;
+         if sec > 10 then
+            if i > 0 then
+               an[i] := ".";
+               inc(i)
+            end;
+            an[i] := "s";
+            inc(i);
+            if sec > 11 then
+               an[i] := "^";
+               inc(i);
+               an[i] := ToChar(sec - 10);
+               inc(i)
+            end
+         end;
+         an[i] := 00X;
+         (* determine those units present in the denominator *)
+         j := 0;
+         if amp < 10 then
+            ad[j] := "A";
+            inc(j);
+            if amp < 9 then
+               ad[j] := "^";
+               inc(j);
+               ad[j] := ToChar(10 - amp);
+               inc(j)
+            end
+         end;
+         if can < 10 then
+            if j > 0 then
+               ad[j] := ".";
+               inc(j)
+            end;
+            ad[j] := "c";
+            inc(j);
+            ad[j] := "d";
+            inc(j);
+            if can < 9 then
+               ad[j] := "^";
+               inc(j);
+               ad[j] := ToChar(10 - can);
+               inc(j)
+            end
+         end;
+         if kel < 10 then
+            if j > 0 then
+               ad[j] := ".";
+               inc(j)
+            end;
+            ad[j] := "K";
+            inc(j);
+            if kel < 9 then
+               ad[j] := "^";
+               inc(j);
+               ad[j] := ToChar(10 - kel);
+               inc(j)
+            end
+         end;
+         if kgr < 10 then
+            if j > 0 then
+               ad[j] := ".";
+               inc(j)
+            end;
+            ad[j] := "k";
+            inc(j);
+            ad[j] := "g";
+            inc(j);
+            if kgr < 9 then
+               ad[j] := "^";
+               inc(j);
+               ad[j] := ToChar(10 - kgr);
+               inc(j)
+            end
+         end;
+         if met < 10 then
+            if j > 0 then
+               ad[j] := ".";
+               inc(j)
+            end;
+            ad[j] := "m";
+            inc(j);
+            if met < 9 then
+               ad[j] := "^";
+               inc(j);
+               ad[j] := ToChar(10 - met);
+               inc(j)
+            end
+         end;
+         if mol < 10 then
+            if j > 0 then
+               ad[j] := ".";
+               inc(j)
+            end;
+            ad[j] := "m";
+            inc(j);
+            ad[j] := "o";
+            inc(j);
+            ad[j] := "l";
+            inc(j);
+            if mol < 9 then
+               ad[j] := "^";
+               inc(j);
+               ad[j] := ToChar(10 - mol);
+               inc(j)
+            end
+         end;
+         if sec < 10 then
+            if j > 0 then
+               ad[j] := ".";
+               inc(j)
+            end;
+            ad[j] := "s";
+            inc(j);
+            if sec < 9 then
+               ad[j] := "^";
+               inc(j);
+               ad[j] := ToChar(10 - sec);
+               inc(j)
+            end
+         end;
+         ad[j] := 00X;
+         (* combine numerator and denominator into a single string *)
+         k := 0;
+         if i > 0 then
+            while k < i do
+               a[k] := an[k];
+               inc(k)
+            end;
+            if j > 0 then
+               a[k] := "/";
+               inc(k);
+               l := 0;
+               while l < j do
+                  a[k] := ad[l];
+                  inc(k);
+                  inc(l)
+               end
+            end
+         else
+            if j > 0 then
+               a[k] := "1";
+               inc(k);
+               a[k] := "/";
+               inc(k);
+               l := 0;
+               while l < j do
+                  a[k] := ad[l];
+                  inc(k);
+                  inc(l)
+               end
+            else
+               a[k] := "~";
+               inc(k)
+            end
+         end;
+         ca := new CharArray(k+1);
+         for i := 0 to k-1 do
+            ca[i] := a[i]
+         end;
+         copy(ca, s);
+         (* add a space for the parser to catch *)
+         s := s + " ";
+         return s
+      end Typeset;
+
+      procedure {public} GetAmpere () : integer;
+      var
+         i, u : integer{32};
+      begin
+         u := units;
+         i := (u div 64000000) - 10;
+         return i
+      end GetAmpere;
+
+      procedure {public} GetCandela () : integer;
+      var
+         i, u : integer{32};
+      begin
+         u := units;
+         i := ((u div 3200000) mod 20) - 10;
+         return i
+      end GetCandela;
+
+      procedure {public} GetKelvin () : integer;
+      var
+         i, u : integer{32};
+      begin
+         u := units;
+         i := ((u div 160000) mod 20) - 10;
+         return i
+      end GetKelvin;
+
+      procedure {public} GetKilogram () : integer;
+      var
+         i, u : integer{32};
+      begin
+         u := units;
+         i := ((u div 8000) mod 20) - 10;
+         return i
+      end GetKilogram;
+
+      procedure {public} GetMeter () : integer;
+      var
+         i, u : integer{32};
+      begin
+         u := units;
+         i := ((u div 400) mod 20) - 10;
+         return i
+      end GetMeter;
+
+      procedure {public} GetMole () : integer;
+      var
+         i, u : integer{32};
+      begin
+         u := units;
+         i := ((u div 20) mod 20) - 10;
+         return i
+      end GetMole;
+
+      procedure {public} GetSecond () : integer;
+      var
+         i, u : integer{32};
+      begin
+         u := units;
+         i := (u mod 20) - 10;
+         return i
+      end GetSecond;
+
+      procedure {private} Error (s : string; n : integer);
+      var
+         t : string;
+      begin
+         t := "Ccm.Units.Si." + s;
+         L.WarningMessage(15,-1, t)
+      end Error;
+
+      procedure {public} SetAmpere (n : integer);
+      var
+         i, j, k : Int32;
+      begin {locked}
+         if (n > -10) & (n < 10) then
+            i := integer((units div 64000000) * 64000000, 32);
+            j := units - i;
+            k := n;
+            units := integer(j + 64000000 * (10 + k), 32)
+         else
+            Error("SetAmpere", n)
+         end
+      end SetAmpere;
+
+      procedure {public} SetCandela (n : integer);
+      var
+         i, j, k : Int32;
+      begin {locked}
+         if (n > -10) & (n < 10) then
+            i := integer(((units div 3200000) mod 20) * 3200000, 32);
+            j := units - i;
+            k := n;
+            units := integer(j + 3200000 * (10 + k), 32)
+         else
+            Error("SetCandela", n)
+         end
+      end SetCandela;
+
+      procedure {public} SetKelvin (n : integer);
+      var
+         i, j, k : Int32;
+      begin {locked}
+         if (n > -10) & (n < 10) then
+            i := integer(((units div 160000) mod 20) * 160000, 32);
+            j := units - i;
+            k := n;
+            units := integer(j + 160000 * (10 + k), 32)
+         else
+            Error("SetKelvin", n)
+         end
+      end SetKelvin;
+
+      procedure {public} SetKilogram (n : integer);
+      var
+         i, j, k : Int32;
+      begin {locked}
+         if (n > -10) & (n < 10) then
+            i := ((units div 8000) mod 20) * 8000;
+            j := units - i;
+            k := n;
+            units := j + 8000 * (10 + k)
+         else
+            Error("SetKilogram", n)
+         end
+      end SetKilogram;
+
+      procedure {public} SetMeter (n : integer);
+      var
+         i, j, k : Int32;
+      begin {locked}
+         if (n > -10) & (n < 10) then
+            i := ((units div 400) mod 20) * 400;
+            j := units - i;
+            k := n;
+            units := j + 400 * (10 + k)
+         else
+            Error("SetMeter", n)
+         end
+      end SetMeter;
+
+      procedure {public} SetMole (n : integer);
+      var
+         i, j, k : Int32;
+      begin {locked}
+         if (n > -10) & (n < 10) then
+            i := ((units div 20) mod 20) * 20;
+            j := units - i;
+            k := n;
+            units := j + 20 * (10 + k)
+         else
+            Error("SetMole", n)
+         end
+      end SetMole;
+
+      procedure {public} SetSecond (n : integer);
+      var
+         i, k : Int32;
+      begin {locked}
+         if (n > -10) & (n < 10) then
+            i := units - (units mod 20);
+            k := n;
+            units := i + 10 + k
+         else
+            Error("SetSecond", n)
+         end
+      end SetSecond;
+
+      procedure {public} IsDimensionless () : boolean;
+      var
+         val, zer : integer{32};
+      begin
+         zer := 673684210;
+         val := units;
+         return (zer = val)
+      end IsDimensionless;
+
+      procedure {public} Equals (u : Si) : boolean;
+      var
+         lft, rgt : integer{32};
+      begin
+         lft := units;
+         rgt := u.units;
+         return (lft = rgt)
+      end Equals;
+
+      (* although these arithemtic procedures are efficient, they are not *)
+      (* capable of detecting overflows in their present implementations  *)
+      procedure {public} IncBy (u : Si);
+      var
+         i : Int32;
+      begin {locked}
+         i := u.units - 673684210;
+         units := units + i
+      end IncBy;
+
+      procedure {public} DecBy (u : Si);
+      var
+         i : Int32;
+      begin {locked}
+         i := u.units - 673684210;
+         units := units - i
+      end DecBy;
+
+      procedure {public} Add (u : Si) : Si;
+      var
+         sum : Si;
+         i : Int32;
+      begin
+         i := u.units - 673684210;
+         sum.units := units + i;
+         return sum
+      end Add;
+
+      procedure {public} Subtract (u : Si) : Si;
+      var
+         diff : Si;
+         i : Int32;
+      begin
+         i := u.units - 673684210;
+         diff.units := units - i;
+         return diff
+      end Subtract;
+
+   begin
+      Initialize
+   end Si;
+
+
+   operator {public} '=' (l, r : Si) : boolean;
+   begin
+      return l.Equals(r)
+   end '=';
+
+   operator {public} '#' (l, r : Si) : boolean;
+   begin
+      return ~l.Equals(r)
+   end '#';
+
+   operator {public} '+' (l, r : Si) : Si;
+   begin
+      return l.Add(r)
+   end '+';
+
+   operator {public} '-' (l, r : Si) : Si;
+   begin
+      return l.Subtract(r)
+   end '-';
+
+begin
+   (* fundamental SI units *)
+   Ampere.Parse("A");
+   Candela.Parse("cd");
+   Kelvin.Parse("K");
+   Kilogram.Parse("kg");
+   Meter.Parse("m");
+   Mole.Parse("mol");
+   Second.Parse("s");
+   (* physically based unit names *)
+   Time.Parse("s");
+   Rate.Parse("1/s");
+   Velocity.Parse("m/s");
+   Acceleration.Parse("m/s^2");
+   Momentum.Parse("kg.m/s");
+   Force.Parse("kg.m/s^2");
+   Work.Parse("kg.m^2/s^2");
+   Power.Parse("kg.m^2/s^3");
+   (* mechanics based unit names *)
+   Strain.Initialize;
+   StrainRate.Parse("1/s");
+   Stress.Parse("kg/m.s^2");
+   StressRate.Parse("kg/m.s^3");
+   (* named SI units *)
+   Hertz.Parse("1/s");
+   Newton.Parse("kg.m/s^2");
+   Pascal.Parse("kg/m.s^2");
+   Joule.Parse("kg.m^2/s^2");
+   Watt.Parse("kg.m^2/s^3")
+end Units.

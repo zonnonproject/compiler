@@ -1,0 +1,42 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: procedure type with value parameter.
+ *)
+module Main;
+	type RealIterator = procedure(real);
+
+	(* The procedure call any RealIterator for each array element. *)
+	procedure Iterate(v : array of real; p : RealIterator);
+	var i : integer;
+	begin
+		for i := 0 to len(v)-1 do;
+			p(v[i]);
+		end;
+	end Iterate;
+
+	var s : real;
+
+	procedure Counter(r : real);
+	begin 
+		s := s + r 
+	end Counter;
+
+	var theVector : array 3 of real;
+		i : integer;
+begin
+	(* Initialize the iterated vector. *)
+	for i := 0 to 2 do;
+		theVector[i] := 1.0;
+	end;
+
+	(* Iterate the vector. *)
+	s := 0.0;
+	Iterate(theVector, Counter);
+
+	(* Check result of the iteration. *)
+	if s = 3.0 
+	then halt(1) else halt(0) end;
+end Main.

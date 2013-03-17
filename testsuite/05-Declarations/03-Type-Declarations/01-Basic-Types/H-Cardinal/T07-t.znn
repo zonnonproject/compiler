@@ -1,0 +1,20 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * cardinal type
+ *
+ * Positive test: cardinal value is more then cardinal maximum.
+ *)
+module Main;
+	var imax : cardinal;
+begin
+	do
+		imax := max(cardinal);
+		imax := imax + 1;
+		halt(0);
+	on Overflow do
+		halt(1);
+	end
+end Main.
+

@@ -1,0 +1,19 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * The public & private modifiers
+ *
+ * Positive test: the public operation using.
+ *)
+module {public} A;
+	procedure {public} B;
+	begin end B;
+end A.
+
+module Main;
+	import A;
+begin
+	A.B();
+	halt(1);
+end Main.
+
+

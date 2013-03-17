@@ -1,0 +1,42 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Positive test: the object D is nested into module C.
+ *
+ * The object A.B used D as type of parameters.
+ * The object C.D is declared before it is used.
+ *)
+
+module C;
+	type { public } D = object
+	var { public } 
+		j : integer;
+	end D;
+end C.
+
+object {public, ref } A.B(p1 : C.D; p2 : C.D);
+import C;
+var { public }
+	i : integer;	
+begin
+    writeln("p1.j + p2.j", p1.j, p2.j);
+	i := p1.j + p2.j;
+end B.
+
+module Main;
+	import A.B as B, C.D as D;
+
+	var 
+		d1, d2 : D;
+		b : B;
+begin
+	d1.j := 1;
+	d2.j := 4;
+	writeln(d1.j, d2.j);
+	b := new B(d1, d2);
+	writeln(b.i);
+	if b.i = 5 
+	then halt(1) else halt(0) end; 
+end Main.

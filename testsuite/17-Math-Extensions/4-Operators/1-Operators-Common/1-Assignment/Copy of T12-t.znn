@@ -1,0 +1,28 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Assignment
+ * 
+ * Positive test
+ * dynamic := math dynamic
+ *)
+
+module Main;
+
+type v = array *, *, * of integer;
+type v1 = array {math} *, *, * of integer;
+
+var
+	a : v;
+	b : v1;
+	
+begin	
+	b := new v1(4, 2, 6);
+	a := b;
+	a[0, 0, 0] := 3;
+	if b[0, 0, 0] = 3
+	then
+		halt(0);
+	end;
+	halt(1);
+end Main.

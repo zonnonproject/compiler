@@ -1,0 +1,30 @@
+module Main;
+
+type t1 = array {sparse} *,* of integer;
+
+var
+	a, b, c : t1;
+	i : array {math} 3 of integer;
+	j : array {math} 3 of integer;
+	s : array {math} 3 of integer;
+  
+begin
+	i := [1, 1, 0];
+	j := [2, 0, 1];
+	s := [3, 7, 11];	
+	a := new t1(i, j, s, 3, 3);
+	i := [1, 1, 0];
+	j := [2, 0, 0];
+	s := [5, 2, 9];	
+	b := new t1(i, j, s, 3, 3);
+	
+	c := a + b;
+	
+	if (c[0, 0] = 9) & (c[1, 2] = 8)
+		& (len(c, 0) = 3) & (len(c, 1) = 3)
+		then halt(1);
+	end;
+
+	halt(0);
+	
+end Main.

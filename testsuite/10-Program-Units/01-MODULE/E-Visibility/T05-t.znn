@@ -1,0 +1,30 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * Module visibility
+ *
+ * Positive test: private module A.B is used in its namespace A.
+ * The module is declared before its using.
+ *)
+module { private } A.B;
+	var { public } 
+		j : integer;
+begin 
+	j := 3;
+end B.
+
+module { public } A.C;
+	import A.B;
+
+	var { public }
+		i : integer;
+begin
+	i := A.B.j;
+end C.
+
+module Main;
+	import A.C;
+begin
+	if A.C.i = 3 
+	then halt(1) else halt(0) end;
+end Main.

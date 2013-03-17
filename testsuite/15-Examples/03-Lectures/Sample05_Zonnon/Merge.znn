@@ -1,0 +1,139 @@
+(* ********* Zonnon online collection ***********
+ * Sorts array from start to end-1 using merge sort.
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Merge; 
+
+import System.Random;
+
+const N = 32;
+
+type longreal = real{64};
+
+var testArray : array N of longreal; (* Globales Array mit Testdaten. *)
+    aux : array N of longreal; (* Hilfsarray. *)
+    randomgenerator : System.Random;
+
+procedure MergeIt(var my_data : array of longreal; start, middle, end_ : integer);
+var 
+	left, right, index, fillIndex : integer;
+begin
+    (* The merge goes as follows: 
+       [-----++++++-------+++++]
+        ^    ^     ^      ^    ^
+     start left  middle right end
+
+       The left half runs from start to middle-1.
+       The right half runs from middle to end-1.
+
+       [---------++++++++++++++]
+                 ^
+               fillIndex (start..end-1)
+    *)
+    fillIndex := start;
+    left := start;
+    right := middle;
+    while (left < middle) & (right < end_) do
+        (* Invariant: both sub-arrays still have elements left to merge. *)
+        (* Invariant: element which is copied to new array is always
+           less than or equal to other element. *)
+        if (my_data[left] < my_data[right]) then
+            (* Fill in element from left part. *) 
+            aux[fillIndex] := my_data[left];
+            inc(left);
+        else
+            (* Fill in element from right part. *) 
+            aux[fillIndex] := my_data[right];
+            inc(right);
+        end;
+        inc(fillIndex);
+    end;
+
+    (* Fill in remaining elements. *)
+    while left < middle do
+        aux[fillIndex] := my_data[left]; 
+        inc(left);
+        inc(fillIndex);
+    end;
+    while right < end_ do
+        aux[fillIndex] := my_data[right];  
+        inc(right); 
+        inc(fillIndex);
+    end;
+
+    (* Copy aux array to my_data array. *)  
+    index := start;
+    while index < end_ do
+        my_data[index] := aux[index];
+        inc(index);
+    end;
+end MergeIt;
+
+(* Sorts array from start to end-1 using merge sort. *)
+procedure { public } Sort (var my_data : array of longreal; start, end_ : integer);
+var 
+	middle : integer;
+begin
+    (* Split *)
+    middle := start + (end_ - start) div 2;
+
+    if start < middle-1 then
+        (* At least two more elements to sort. *)
+        Sort(my_data, start, middle);
+    end;
+
+    if middle < end_-1 then
+        (* At least two more elements to sort. *) 
+        Sort(my_data, middle, end_);
+    end;
+
+    (* Merge *)
+    MergeIt(my_data, start, middle, end_);
+end Sort;
+
+procedure SortAll();
+begin
+    Sort(testArray, 0, N);
+end SortAll;
+
+procedure Show();
+var 
+	i : integer;
+	s : string;
+begin
+    i := 0;
+    while i < N do
+        writeln(testArray[i]);
+        inc(i);
+    end;
+	writeln("Press the Enter key");
+	readln(s);	
+end Show;
+
+procedure Init();
+var 
+	i : integer;
+begin 
+    randomgenerator := new System.Random();
+    i := 0;
+    while i < N do
+        testArray[i] := randomgenerator.NextDouble(); 
+        inc(i);
+    end;
+    writeln("array initialized");
+end Init;
+
+begin
+	Init();
+
+	writeln("unsorted: "); 
+	Show();
+
+	writeln("sorted: ");
+	SortAll();
+	Show();
+end Merge.

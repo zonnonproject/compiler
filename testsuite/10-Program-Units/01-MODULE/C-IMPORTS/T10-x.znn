@@ -1,0 +1,17 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports clause
+ *
+ * Negative test: it is impossible to import enumeration.
+ *)
+module A;
+	type { public }
+		B = ( one, two );
+end A.
+
+module Main;
+	import A.B;
+begin
+    halt(0);
+end Main.

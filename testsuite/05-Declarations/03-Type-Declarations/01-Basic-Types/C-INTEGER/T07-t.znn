@@ -1,0 +1,20 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * integer type
+ *
+ * Positive test: integer value is more then integer maximum.
+ *)
+module Main;
+	var imax : integer;
+begin
+	do
+		imax := max(integer);
+		imax := imax + 1;
+		halt(0);
+	on Overflow do
+		halt(1);
+	end
+end Main.
+

@@ -1,0 +1,22 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call.
+ *
+ * Positive test: string type as procedure call result.
+ *)
+module Main;
+	const s = "1234";
+
+	procedure P(sp : string) : string;
+	begin
+		return sp
+	end P;
+
+	var
+		s1, ss : string;	
+begin
+	ss := P(s);
+
+	if ss = "1234"
+	then halt(1) else halt(0) end;
+end Main.

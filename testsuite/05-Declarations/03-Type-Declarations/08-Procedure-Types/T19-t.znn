@@ -1,0 +1,43 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.7. Procedure types.
+ *
+ * Positive test: the procedure from the object
+ * is used as procedure call parameter. 
+ *)
+module Main;
+
+	type PType = procedure;
+
+	type {public, ref} A = object
+		var {public}
+			res : boolean;
+
+		procedure {public} F;
+		begin
+			res := true;
+		end F;
+	begin 
+		res := false;
+	end A;
+
+	procedure P(p : PType);
+	begin
+		p();
+	end P;
+
+	procedure Q;
+	begin end Q;
+
+	var a : A;
+		pt : PType;
+begin
+	a := new A;
+	P(a.F);
+
+	writeln("F executed."); 
+
+	if a.res 
+	then halt(1) else halt(0) end;
+end Main.

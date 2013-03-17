@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * set type
+ *
+ * Negative test: wrong set type variables assignment.
+ * Const expression is used for set type width.
+ *)
+module Main;
+	const N = 2;
+	var s32 : set { N + 30   };
+	var s64 : set { abs(-64) };
+begin
+	s32 := { 1 };
+	s64 := { 2 };
+
+	s32 := s64;
+
+	halt(0);
+end Main.

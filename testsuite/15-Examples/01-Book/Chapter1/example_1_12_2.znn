@@ -1,0 +1,48 @@
+(* ********* Zonnon online collection ***********
+ * Binary search (Chapter 1, Example 1.12.2)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Main;
+	const N = 16;
+	var a: array N of integer;
+
+
+procedure Search(x, n: integer): integer;
+	var l, r, m: integer;
+begin l := 0; r := n-1;
+	while l < r do
+		m := (l + r) div 2;
+		writeln(l:5,r:5);
+		if a[m] < x then l := m+1 else r := m end
+	end ;
+	return r
+end Search;
+
+
+var x, n, i: integer;
+
+procedure Binary;
+begin
+	i := Search(x, N);
+	if a[i] = x then
+		writeln('Result is ',i: 5); 
+	else
+		writeln('No entry.');
+	end;
+end Binary;
+
+begin n := 0;
+    writeln("Example 1.12.2: Binary search");	
+    write("Element to search: "); readln(x);
+	writeln("Enter numbers in ascending order: ");
+	write('a[',n:2,'] = '); readln(a[n]);
+	while a[n] # 0 do
+		 inc(n); write('a[',n:2,'] = '); readln(a[n]);
+	end;
+	writeln("Use commands: Searches.Binary");
+    writeln("Type 'q' to exit");
+end Main. 
+

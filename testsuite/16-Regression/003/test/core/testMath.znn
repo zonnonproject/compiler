@@ -1,0 +1,244 @@
+module {public} Main;
+	import
+		System.Double   as Double,
+		System.Int32    as Int32,
+      BelCore.Log     as L,
+      BelCore.Math    as M,
+      BelCore.Numbers as N;
+
+	procedure {public} ExpFns;
+	var
+		s : string;
+		x, y, z : N.Number;
+	begin
+		x := M.Random();
+		y := M.Sqrt(x);
+		z := y.Multiply(y);
+		s := "Sqrt( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "   " + y.Typeset() + "* ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "      = " + z.Typeset();
+		writeln(s);
+		x := M.Random();
+		y := M.Ln(x);
+		z := M.Exp(y);
+		s := "Ln( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "Exp( " + y.Typeset() + ") = ";
+		s := s + z.Typeset();
+		writeln(s);
+		x := M.Random();
+		y := M.Log(x);
+		s := "Log( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		x := 10;
+		z := x.Power(y);
+		s := "10^{ " + y.Typeset() + "} = ";
+		s := s + z.Typeset();
+		writeln(s)
+	end ExpFns;
+
+	procedure {public} TrigFns;
+	var
+		s : string;
+		h, x, x2, y, y2, z : N.Number;
+	begin
+		x := M.Random();
+		y := M.Cos(x);
+		z := M.ArcCos(y);
+		s := "   Cos( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "ArcCos( " + y.Typeset() + ") = ";
+		s := s + z.Typeset();
+		writeln(s);
+		x := M.Random();
+		y := M.Sin(x);
+		z := M.ArcSin(y);
+		s := "   Sin( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "ArcSin( " + y.Typeset() + ") = ";
+		s := s + z.Typeset();
+		writeln(s);
+		x := M.Random();
+		y := M.Tan(x);
+		z := M.ArcTan(y);
+		s := "   Tan( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "ArcTan( " + y.Typeset() + ") = ";
+		s := s + z.Typeset();
+		writeln(s);
+		x := M.Random();
+		y := M.Random();
+		z := M.ArcTan2(x,y);
+		s := "ArcTan2( " + y.Typeset() + "/ ";
+		s := s + x.Typeset() + ")";
+		writeln(s);
+		s := "   = " + z.Typeset();
+		writeln(s);
+		writeln("which should equal");
+		x2 := x.Multiply(x);
+		y2 := y.Multiply(y);
+		h := M.Sqrt(x2.Add(y2));
+		s := "ArcSin( " + x.Typeset() + "/ ";
+		s := s + h.Typeset() + ")";
+		writeln(s);
+		z := M.ArcSin(x.Divide(h));
+		s := "   = " + z.Typeset();
+		writeln(s)
+	end TrigFns;
+
+	procedure {public} HyperbolicFns;
+	var
+		s : string;
+		x, y, z : N.Number;
+	begin
+		x := M.Random();
+		y := M.Cosh(x);
+		z := M.ArcCosh(y);
+		s := "   Cosh( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "ArcCosh( " + y.Typeset() + ") = ";
+		s := s + z.Typeset();
+		writeln(s);
+		x := M.Random();
+		y := M.Sinh(x);
+		z := M.ArcSinh(y);
+		s := "   Sinh( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "ArcSinh( " + y.Typeset() + ") = ";
+		s := s + z.Typeset();
+		writeln(s);
+		x := M.Random();
+		y := M.Tanh(x);
+		z := M.ArcTanh(y);
+		s := "   Tanh( " + x.Typeset() + ") = ";
+		s := s + y.Typeset();
+		writeln(s);
+		s := "ArcTanh( " + y.Typeset() + ") = ";
+		s := s + z.Typeset();
+		writeln(s);
+	end HyperbolicFns;
+
+		procedure {private} Compute (arg, ans : N.Number);
+		var
+			err, dif, y : N.Number;
+			s : string;
+		begin
+			y := M.Gamma(arg);
+			s := "Gamma( " + arg.Typeset() + ") = ";
+			s := s + y.Typeset() + "with error ";
+			dif := y.Subtract(ans);
+			err := dif.Divide(ans);
+         err := err.Magnitude();
+			s := s + err.Typeset();
+			writeln(s)
+		end Compute;
+	procedure {public} Gamma;
+	var
+		sqrtPi : Double;
+		ans, arg, x : N.Number;
+	begin
+		x := M.Sqrt(M.Pi);
+		sqrtPi := x.Get();
+		arg := -1.5;
+		ans := 4.0*sqrtPi/3.0;
+		Compute(arg, ans);
+		arg := -0.5;
+		ans := -2.0*sqrtPi;
+		Compute(arg, ans);
+		arg := 0.5;
+		ans := 0.0+sqrtPi;
+		Compute(arg, ans);
+		arg := 1.0;
+		ans := 1.0;
+		Compute(arg, ans);
+		arg := 1.5;
+		ans := sqrtPi/2.0;
+		Compute(arg, ans);
+		arg := 2.0;
+		ans := 1.0;
+		Compute(arg, ans);
+		arg := 2.5;
+		ans := 3.0*sqrtPi/4.0;
+		Compute(arg, ans);
+		arg := 3.0;
+		ans := 2.0;
+		Compute(arg, ans);
+		arg := 3.5;
+		ans := 15.0*sqrtPi/8.0;
+		Compute(arg, ans);
+		arg := 4.0;
+		ans := 6.0;
+		Compute(arg, ans)
+	end Gamma;
+
+	procedure {public} OtherFns;
+	var
+		i : integer;
+		s, t : string;
+		x, y, z : N.Number;
+	begin
+		x := 2.0;
+		y := M.Sqrt(x);
+		y := y.Divide(x);
+		x := y;
+		s := "Pythag(Sqrt(2)/2, Sqrt(2)/2) should be 1.";
+		writeln(s);
+		z := M.Pythag(x, y);
+		s := "   the value computed was: " + z.Typeset();
+		writeln(s);
+		writeln;
+		writeln("Enter two reals to test this for yourself.");
+		s := "";
+		readln(s);
+		x.Parse(s);
+		s := "";
+		readln(s);
+		y.Parse(s);
+		s := "The distance to ( " + x.Typeset() + ", ";
+		s := s + y.Typeset() + ") = ";
+		z := M.Pythag(x, y);
+		s := s + z.Typeset();
+		writeln(s);
+		writeln;
+		s := "   Max( " + x.Typeset() + ", ";
+		s := s + y.Typeset() + ") = ";
+		z := M.Max(x, y);
+		s := s + z.Typeset();
+		writeln(s);
+		writeln;
+		s := "   Min( " + x.Typeset() + ", ";
+		s := s + y.Typeset() + ") = ";
+		z := M.Min(x, y);
+		s := s + z.Typeset();
+		writeln(s)
+	end OtherFns;
+
+begin
+	writeln("Randomly generated numbers are used");
+	writeln("to test the various math function.");
+	writeln;
+	ExpFns;
+	writeln;
+	TrigFns;
+	writeln;
+	HyperbolicFns;
+	writeln;
+	Gamma;
+	writeln;
+	OtherFns;
+	writeln;
+	writeln("Press 'Enter' to quit.");
+	readln;
+   L.Close
+end Main.

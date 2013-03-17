@@ -1,0 +1,17 @@
+(** 
+ * 7. Statement 
+ * 7.7. FOR statement.
+ *
+ * Negative test: for statement has 0 step.
+ *)
+module Main;
+	const N = 10;
+	var	s, i : integer;
+begin
+	s := 1;
+	for i := 1 to 10 by N-N do;
+		s := i;
+	end;
+
+	halt(0);
+end Main.

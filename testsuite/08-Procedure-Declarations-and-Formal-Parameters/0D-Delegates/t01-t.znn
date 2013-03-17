@@ -1,0 +1,54 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.D Delegates
+ *
+ * Positive test: various delegates
+ *)
+
+
+module Main;
+import System;
+
+procedure Test : integer{64};
+begin
+	return 1005;
+end Test;
+
+type del = procedure: integer{64};
+
+type del2 = procedure: char;
+
+procedure AcceptDelegate(d: del);
+begin
+	writeln(d);	
+end AcceptDelegate;
+
+procedure AcceptDelegate2(d: del2);
+begin
+	writeln(d);	
+	writeln(d);		
+end AcceptDelegate2;
+
+var
+	r : System.IO.BinaryReader;
+	w : System.IO.BinaryWriter;
+	c : char;
+begin
+	w := new System.IO.BinaryWriter(System.IO.File.Open("1.txt", System.IO.FileMode.Create));
+	w.Write(char("E"));
+	w.Write(char("F"));
+	w.Write(char("H"));
+	w.Close;
+	r := new System.IO.BinaryReader(System.IO.File.Open("1.txt", System.IO.FileMode.Open));
+	c := char(r.ReadChar);	
+	writeln(c);
+	AcceptDelegate2(r.ReadChar); 
+	AcceptDelegate(Test); 
+	writeln(Test);
+	r.Close;
+	if c = "E" then
+		halt(1)
+	else
+		halt(0)
+	end
+end Main.

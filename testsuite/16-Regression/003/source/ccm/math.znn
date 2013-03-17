@@ -1,0 +1,394 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Ccm was written to model in-plane biaxial experiments run in my laboratory *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Defines math functions for scalar fields.                                  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*    (# functions that apply to scalars independent of their units #)        *)
+(* Functions   : Abs         - returns the absolute value of a real number    *)
+(*             : Sign        - returns the sign of a real number              *)
+(*             : Ceiling     - returns smallest integer >= argument           *)
+(*             : Floor       - returns greatest integer <= argument           *)
+(*             : Round       - returns the nearest integer to a real argument *)
+(*    (# functions that apply to any two scalar fields with the same units #) *)
+(*             : Max         - returns the greater of the two arguments       *)
+(*             : Min         - returns the lesser of the two arguments        *)
+(*             : Pythag      - returns Pythagorean distance Sqrt(x^2 + y^2)   *)
+(*             : ArcTan2     - returns quadrant correct arcus tangent of y/x  *)
+(*    (# functions that apply only to dimensionless scalar fields #)          *)
+(*             : Sqrt        - returns the square root of a scalar field      *)
+(*             : Log         - returns the base 10 log of a scalar field      *)
+(*             : Ln          - returns the base e log of a scalar field       *)
+(*             : Exp         - returns the exponential of a scalar field      *)
+(*             : Sin         - returns the sine of a scalar field             *)
+(*             : Cos         - returns the cosine of a scalar field           *)
+(*             : Tan         - returns the tangent of a scalar field          *)
+(*             : ArcSin      - returns the arcus sine of a scalar field       *)
+(*             : ArcCos      - returns the arcus cosine of a scalar field     *)
+(*             : ArcTan      - returns the arcus tangent of a scalar field    *)
+(*             : Sinh        - returns the hyperbolic sine of a scalar field  *)
+(*             : Cosh        - returns the hyperbolic cosine of a scalar      *)
+(*             : Tanh        - returns the hyperbolic tangent of a scalar     *)
+(*             : ArcSinh     - returns the arcus hyperbolic sine of a scalar  *)
+(*             : ArcCosh     - returns the arcus hyperbolic cosine of scalar  *)
+(*             : ArcTanh     - returns the arcus hyperbolic tangent of scalar *)
+(*             : Gamma       - returns the gamma function of a scalar field   *)
+(*             : Beta        - Beta(x,y) = Gamma(x)*Gamma(y)/Gamma(x+y)       *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelCcm.Math;
+
+   import
+      BelCore.Log     as L,
+      BelCore.Math    as M,
+      BelCore.Numbers as N,
+      BelCcm.Scalars  as S,
+      BelCcm.Units    as U;
+
+   (* functions that apply to all scalar fields *)
+
+   procedure {public} Abs (s : S.Scalar) : S.Scalar;
+   begin
+      return s.Magnitude()
+   end Abs;
+
+   procedure {public} Sign (s : S.Scalar) : N.Number;
+   begin
+      return M.Sign(s.Get())
+   end Sign;
+
+   procedure {public} Ceiling (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      y.Set(M.Ceiling(s.Get()));
+      y.SetUnits(s.GetUnits());
+      return y
+   end Ceiling;
+
+   procedure {public} Floor (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      y.Set(M.Floor(s.Get()));
+      y.SetUnits(s.GetUnits());
+      return y
+   end Floor;
+
+   procedure {public} Round (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      y.Set(M.Round(s.Get()));
+      y.SetUnits(s.GetUnits());
+      return y
+   end Round;
+
+   (* functions that apply to any two scalar fields with the same units *)
+
+   procedure {public} Max (l, r : S.Scalar) : S.Scalar;
+   var
+      ul, ur : U.Si;
+      y : S.Scalar;
+   begin
+      ul := l.GetUnits();
+      ur := r.GetUnits();
+      if ul = ur then
+         y.Set(M.Max(l.Get(), r.Get()));
+         y.SetUnits(ul)
+      else
+         L.WarningMessage(101,428, "BelCcm.Math.Max")
+      end;
+      return y
+   end Max;
+
+   procedure {public} Min (l, r : S.Scalar) : S.Scalar;
+   var
+      ul, ur : U.Si;
+      y : S.Scalar;
+   begin
+      ul := l.GetUnits();
+      ur := r.GetUnits();
+      if ul = ur then
+         y.Set(M.Min(l.Get(), r.Get()));
+         y.SetUnits(ul)
+      else
+         L.WarningMessage(101,428, "BelCcm.Math.Min")
+      end;
+      return y
+   end Min;
+
+   procedure {public} Pythag (l, r : S.Scalar) : S.Scalar;
+   var
+      ul, ur : U.Si;
+      y : S.Scalar;
+   begin
+      ul := l.GetUnits();
+      ur := r.GetUnits();
+      if ul = ur then
+         y.Set(M.Pythag(l.Get(), r.Get()));
+         y.SetUnits(ul)
+      else
+         L.WarningMessage(101,428, "BelCcm.Math.Pythag")
+      end;
+      return y
+   end Pythag;
+
+   (* the quadrant-correct arcus tangent for y/x *)
+   procedure {public} ArcTan2 (y, x : S.Scalar) : S.Scalar;
+   var
+      xu, yu : U.Si;
+      z : S.Scalar;
+   begin
+      xu := x.GetUnits();
+      yu := y.GetUnits();
+      if xu = yu then
+         z.Set(M.ArcTan2(y.Get(), x.Get()))
+      else
+         L.WarningMessage(101,428, "BelCcm.Math.ArcTan2")
+      end;
+      return z
+   end ArcTan2;
+
+   (* the following functions only apply to dimensionless scalar fields *)
+
+   procedure {public} Sqrt (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Sqrt(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Sqrt")
+      end;
+      return y
+   end Sqrt;
+
+   procedure {public} Log (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Log(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Log")
+      end;
+      return y
+   end Log;
+
+   procedure {public} Ln (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Ln(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Ln")
+      end;
+      return y
+   end Ln;
+
+   procedure {public} Exp (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Exp(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Exp")
+      end;
+      return y
+   end Exp;
+
+   procedure {public} Sin (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Sin(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Sin")
+      end;
+      return y
+   end Sin;
+
+   procedure {public} Cos (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Cos(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Cos")
+      end;
+      return y
+   end Cos;
+
+   procedure {public} Tan (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Tan(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Tan")
+      end;
+      return y
+   end Tan;
+
+   procedure {public} ArcSin (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.ArcSin(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.ArcSin")
+      end;
+      return y
+   end ArcSin;
+
+   procedure {public} ArcCos (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.ArcCos(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.ArcCos")
+      end;
+      return y
+   end ArcCos;
+
+   procedure {public} ArcTan (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.ArcTan(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.ArcTan")
+      end;
+      return y
+   end ArcTan;
+
+   procedure {public} Sinh (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Sinh(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Sinh")
+      end;
+      return y
+   end Sinh;
+
+   procedure {public} Cosh (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Cosh(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Cosh")
+      end;
+      return y
+   end Cosh;
+
+   procedure {public} Tanh (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Tanh(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Tanh")
+      end;
+      return y
+   end Tanh;
+
+   procedure {public} ArcSinh (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.ArcSinh(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.ArcSinh")
+      end;
+      return y
+   end ArcSinh;
+
+   procedure {public} ArcCosh (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.ArcCosh(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.ArcCosh")
+      end;
+      return y
+   end ArcCosh;
+
+   procedure {public} ArcTanh (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.ArcTanh(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.ArcTanh")
+      end;
+      return y
+   end ArcTanh;
+
+   procedure {public} Gamma (s : S.Scalar) : S.Scalar;
+   var
+      y : S.Scalar;
+   begin
+      if s.IsDimensionless() then
+         y.Set(M.Gamma(s.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Gamma")
+      end;
+      return y
+   end Gamma;
+
+   procedure {public} Beta (x, y : S.Scalar) : S.Scalar;
+   var
+      z : S.Scalar;
+   begin
+      if x.IsDimensionless() & y.IsDimensionless() then
+         z.Set(M.Beta(x.Get(), y.Get()))
+      else
+         L.WarningMessage(406,428, "BelCcm.Math.Beta")
+      end;
+      return y
+   end Beta;
+
+begin
+end Math.

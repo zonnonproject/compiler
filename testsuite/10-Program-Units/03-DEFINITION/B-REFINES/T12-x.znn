@@ -1,0 +1,17 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Negative test: definition refines itself.
+ *)
+definition {public} A refines A;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.
+
+
+

@@ -1,0 +1,18 @@
+module Main;
+
+procedure InitializeMatrix(var mat: array *, * of real);
+var i, j: integer;
+begin
+	for i := 0 to len(mat, 0)-1 do
+		for j := 0 to len(mat, 1)-1 do
+			mat[i, j] := 0.0
+		end
+	end
+end InitializeMatrix;
+
+var a: array 10,10 of real;
+
+begin
+  InitializeMatrix(a);
+  halt(1)
+end Main.

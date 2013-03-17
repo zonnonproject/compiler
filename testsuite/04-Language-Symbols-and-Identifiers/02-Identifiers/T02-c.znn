@@ -1,0 +1,11 @@
+(* 
+	4. Language symbols and identifiers.
+	4.2 Identifiers
+	Positive test: the underline symbol _ in identifier _1_e_t_t_e_r_.
+*)
+module Main;
+var _1_e_t_t_e_r_ : char;
+	
+begin
+	halt(1);
+end Main.

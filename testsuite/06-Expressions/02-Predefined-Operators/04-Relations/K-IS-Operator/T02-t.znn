@@ -1,0 +1,15 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * is operator.
+ *
+ * Positive test: IS operator is used to check real variable.
+ * The result is false.
+ *)
+module Main;
+	var r : real;
+begin
+	if r is integer
+	then halt(0) else halt(1) end;
+end Main.

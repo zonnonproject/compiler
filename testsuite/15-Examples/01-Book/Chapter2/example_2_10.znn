@@ -1,0 +1,63 @@
+(* ********* Zonnon online collection ***********
+ * Sorting: QuickSort (Chapter 2, Example 2.10)
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Sorting;
+    const MAX_SIZE = 20;
+
+    type ElementOfArray = integer;
+    type DefaultArray = array MAX_SIZE of ElementOfArray;
+    var MyArray: DefaultArray;
+
+    (***** Implementation *****)
+    
+    procedure QuickSort(var a: DefaultArray; L, R: integer);
+    var i,j: integer; w,x: ElementOfArray;
+    begin i := L; j := R;
+       x := a[(L + R) div 2];
+       repeat
+          while a[i] < x do i := i + 1; end;
+          while x < a[j] do j := j - 1; end;
+          if i <= j then
+             w := a[i]; a[i] := a[j]; a[j] := w; i := i + 1; j := j - 1;
+          end;
+       until i > j;
+       if L < j then QuickSort(a, L, j) end;
+       if i < R then QuickSort(a, i, R) end;
+    end QuickSort;
+
+    (***** Example support *****)
+
+    procedure FillTheArray;
+    var i:integer;
+    begin
+      for i := 0 to MAX_SIZE - 1 do 
+        MyArray[i] := abs( 10 - i ); 
+      end; 
+    end FillTheArray;
+ 
+    procedure PrintTheArray;
+    var i:integer;
+    begin
+       writeln("Array:");
+       for i := 0 to MAX_SIZE - 1 do
+          write( MyArray[i]:2, ', ' ); 
+       end; 
+       writeln;
+    end PrintTheArray;
+    
+    procedure Execute;
+    begin
+       QuickSort(MyArray, 0, MAX_SIZE - 1); 
+    end Execute;
+begin
+ writeln("Example 2.10 (Quick sort)");
+ FillTheArray;
+ PrintTheArray;
+ Execute;
+ PrintTheArray;
+ writeln("Type 'q' to exit");	
+end Sorting.

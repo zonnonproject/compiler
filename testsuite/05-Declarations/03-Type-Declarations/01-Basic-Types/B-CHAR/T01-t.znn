@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * char type
+ *
+ * Positive test: char value assignment.
+ *)
+module Main;
+	var c : char;
+begin
+	c := 'c';
+
+	if c = 'c' 
+	then halt(1) else halt(0) end;
+end Main.

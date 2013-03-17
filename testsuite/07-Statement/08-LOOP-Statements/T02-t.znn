@@ -1,0 +1,23 @@
+(** 
+ * 7. Statement 
+ * 7.7. loop statement.
+ *
+ * Positive test: loop statement without exit clause.
+ *)
+module Main;
+	var	s, i : integer;
+begin
+	s := 0;
+	i := 0;
+	do
+		loop
+			s := s + 1000000;
+			inc(i);
+			if i = 10000000 then halt(0) end
+		end;
+	on Overflow do
+		halt(1);
+	end;
+
+	halt(0);
+end Main.

@@ -1,0 +1,24 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the type of procedure P parameters and result 
+ * is declared before the procedure P declaration.
+ * The type B.C has qualified name. It is not declared in the module B.
+ *)
+module B;
+	(* The nested type C is not declared!!! *)
+end B.
+
+module A;
+	import B;
+
+	procedure { public } P(var p1 : B.C; p2 : B.C) : B.C;
+	begin 
+		return nil 
+	end P;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Positive test: the object name B is used as type name of type T.
+ * The object is declared before it is used.
+ *)
+module A;
+	type B = object
+	end B;
+
+	type T = B;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

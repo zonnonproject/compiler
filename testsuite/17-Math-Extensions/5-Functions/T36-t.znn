@@ -1,0 +1,31 @@
+(** 
+ * 17. Math extensions.
+ * 17.5. Additional functions
+ * 
+ * Positive test: min, max
+ * with scalar
+ *)
+
+module Main;
+
+type mc = array {math} *,* of cardinal;
+
+var
+	Ac : mc;
+	qc : cardinal;
+ 
+begin
+	  
+	Ac := [[1, 2, 4], [6, 1, 7]];  
+
+	qc := max(Ac);
+	
+	if qc # 7
+	then
+		halt(0);
+	end;
+	
+	halt(1);
+	
+end Main.
+

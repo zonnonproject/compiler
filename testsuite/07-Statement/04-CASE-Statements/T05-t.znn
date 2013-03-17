@@ -1,0 +1,21 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Positive test: character in case expression.
+ *)
+module Main;
+	var j : integer;
+		c : char;
+begin
+	c := 'a';
+	j := 2;
+
+	case c of
+		  'a' : j := 3;
+		| 'b' : j := 4;
+	end;
+
+	if j = 3 
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,51 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Unary
+ * 
+ * Positive test: type conversion
+ * array + array
+ *)
+
+module Main;
+
+type vi = array {math} *,* of integer;
+type vr = array {math} *,* of real;
+type vc = array {math} *,* of cardinal;
+
+type iind = array {math} * of integer;
+type bind = array {math} * of boolean;
+
+var
+	ai1 : array {math} 2, 3 of integer;
+	ai2, ai3 : vi;
+	ar1 : array {math} 2, 3 of real;
+	ar2, ar3, ar4 : vr;
+	ac1 : array {math} 2, 3 of cardinal;
+	ac2, ac3 : vc;
+	
+	bi1, bi2 : iind;
+	bb1, bb2 : bind;
+	
+	i, j : integer;
+	
+begin	
+	
+	ar1 := [[1.3, -2.1, 3.4], [-4.1, 5.2, -6.7]];
+	
+	ai3 := integer(ar1[..0, ..1]);
+		
+	for i := 0 to len(ai3, 0) - 1
+	do
+		for j := 0 to len(ai3, 1) - 1
+		do
+			if ai3[i, j] # integer(ar1[i, j]) 
+			then 
+				halt(0);
+			end;
+		end;
+	end;
+		
+	halt(1);
+	
+end Main.

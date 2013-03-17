@@ -1,0 +1,28 @@
+(** 
+ * 11.Program Units.
+ * 13.3. definition
+ * Definition visibility
+ *
+ * Positive test: private definition A.B is used outside its namespace.
+ * The definition A.B is declared before its using.
+ *)
+
+module Main;
+	definition {private} B;
+		var i : integer;
+	end B;
+	
+	type {private, ref} C = object implements B
+	begin 
+		i := 3; 
+	end C;
+
+	var {private} 
+	    b : object { B };
+		c : C;
+begin
+	b := c;
+
+	halt(1);
+end Main.
+

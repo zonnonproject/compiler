@@ -1,0 +1,37 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.1. The-Granularity-of-Concurrency
+ *
+ * Positive test: Execution oriented example
+ *)
+
+module  {protected} Main;
+	import System.Threading;
+	var 	a, b, c, stop : integer;
+
+activity Summator;
+begin
+	while stop = 0 do
+		c := a + b;
+		await 1
+	end
+end Summator;
+
+begin
+	c := 0;
+	a := 10;
+	b := 5;
+	stop := 0;
+	new Summator;
+
+       	await 5;
+
+	(* Activity has been activated. Sum is a+b. *)
+	stop := 1;
+
+	if c = a + b then (* it is OK *)
+ 		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end;
+end Main.

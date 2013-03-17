@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * set type
+ *
+ * Positive test: set minimum value is more then set maximum value.
+ * This is empty set.
+ *)
+module Main;
+	var s : set;
+begin
+	s := { max(set) .. min(set) };
+
+	halt(1);
+end Main.

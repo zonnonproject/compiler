@@ -1,0 +1,35 @@
+definition {public} Number;
+	import Number;
+	procedure {public} Copy () : object{Number};
+	procedure {public} Add (n : object{Number}) : object{Number};
+end Number.
+
+object {public} Integer implements Number;
+	import Integer;
+
+	var {private} i : integer;
+
+	procedure {public} Copy () : object{Number} 
+		implements Number.Copy;
+	var c : Integer;
+	begin
+		c := new Integer;
+		c.i := self.i;
+		return c
+	end Copy;
+
+	procedure {public} Add (n : object{Number}) : object{Number} 
+		implements Number.Add;
+	var sum, x : Integer;
+	begin
+		if n is Integer then
+			x := Integer(n);
+			sum := new Integer;
+			sum.i := self.i + x.i;
+			return sum
+		else
+			(* report an error message *)
+		end
+	end Add;
+begin
+end Integer.

@@ -1,0 +1,61 @@
+(* ********* Zonnon online collection ***********
+ * KnightsTour	(Chapter 3, Example 3.3)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module KnightsTour;
+
+var n, Nsqr: integer; ex: boolean;
+    dx: array 8 of integer;
+    dy: array 8 of integer;
+    h: array 8, 8 of integer;
+    i,j :integer;
+
+    procedure Try(l,x,y: integer; var q: boolean);
+    var k,u,v: integer; q1: boolean;
+    begin
+       for k:=0 to 7 do
+          q1 := false;
+          u := x + dx[k]; v := y + dy[k];
+          if (0 <= u) & (u < n) & (0 <= v) & (v < n) & (h[u,v] = 0) then
+             h[u,v] := l;
+             if l < Nsqr then Try(l+1, u, v, q1);
+                if ~q1 then h[u,v] := 0 end; 
+             else q1 := true;
+             end;
+          end;
+          if q1 then exit; end;
+       end;
+       q := q1;
+    end Try;
+
+begin
+   writeln("Example 3.3 (Knights Tour)");
+   dx[0] := 2;   dx[1] := 1;  dx[2] := -1; dx[3] := -2;
+   dy[0] := 1;   dy[1] := 2;  dy[2] := 2;  dy[3] := 1;
+   dx[4] := -2;  dx[5] := -1; dx[6] := 1;  dx[7] := 2;
+   dy[4] := -1;  dy[5] := -2; dy[6] := -2; dy[7] := -1;
+   loop 
+      write('Size of desk (0 - quit): '); readln(n);
+      if n = 0 then exit end;
+
+      for i := 0 to n - 1 do
+         for j := 0 to n - 1 do h[i,j]:=0; end;
+      end;
+
+      write('X start position (1..',n:1,'): '); readln(i); 
+	  write('Y start position (1..',n:1,'): '); readln(j); writeln;
+      Nsqr := n*n; h[i-1,j-1]:=1; Try(2,i-1,j-1,ex);
+      if ex then
+         for i := 0 to n - 1 do
+            for j := 0 to n - 1 do write(h[i,j]: 5); end;
+            writeln;
+         end;
+      else writeln("nopath");
+      end;
+   end;
+ writeln("Type 'q' to exit");	
+end KnightsTour.

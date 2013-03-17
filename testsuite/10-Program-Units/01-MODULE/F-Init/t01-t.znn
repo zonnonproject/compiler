@@ -1,0 +1,13 @@
+module Main;
+const N = 100;
+type Rec = record
+	arr: array N of integer;
+end Rec;
+
+var rar: array N of Rec;
+
+begin
+	rar[3].arr[1] := 5;
+	writeln(rar[3].arr[1]); 
+	halt(1)
+end Main.

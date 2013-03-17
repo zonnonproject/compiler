@@ -1,0 +1,675 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The MATH modules provide advanced math functions and operations for Zonnon *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* For reference, see the papers by Levenberg:                                *)
+(*    Levenberg, K., "A method for the solution of certain non-linear         *)
+(*    problems in least squares," Q. Appl. Math., Vol. 2, 1944, 164-168.      *)
+(* and Marquardt:                                                             *)
+(*    Marquardt, D. W., "An algorithm for least-squares estimation of non-    *)
+(*    linear paramters," J. Soc. Indust. Appl. Math., Vol. 11, 1963, 431-441. *)
+(* and the textbook by Bard:                                                  *)
+(*    Bard, Y., "Nonlinear Parameter Estimation," Academic Press, 1974.       *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Module NewtonRaphson employs the Levenberg-Marquart algorithm to solve:    *)
+(*    H.p = -q  for  p  via iteration  p_{i+1} = p_i - H^{-1}.q               *)
+(* until convergence, where  p_0  is user supplied.  In accordance with Bard, *)
+(*    q_n = -2B_n^T.G.r_n  :  gradient term in Taylor expansion of solution   *)
+(*    H_n =  2B_n^T.G.B_n  :  Gauss approximation to Hessian in Taylor series *)
+(* at DataPts point n, 1 <= n <= N, where                                       *)
+(*    r_n = yExperiment_n - Y(x_n,p)    :  a vector of residual errors        *)
+(*    B_n = dY(x_n,p)/dp                :  gradient of model  Y  wrt  p       *)
+(*    G = dMeritFunction(p)/dM          :  metric for the merit function      *)
+(* where                                                                      *)
+(*    H = sum_{n=1}^N H_n                        :  the Hessian               *)
+(*    q = sum_{n=1}^N q_n                        :  the gradient vector       *)
+(*    M = sum_{n=1}^N M.VectorProduct(r_n, r_n)  :  the moment of residuals   *)
+(* Iteration is required becuase, in general,  r_n(p), B_n(p) and G(p),  and  *)
+(* therefore,  p_{i+1} = p_i - H^{-1}(p_i).q(p_i)                             *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* procedure types                                                            *)
+(*    DataPts    :  use to supply the experimental or observed data to be fit   *)
+(*       integer  -  supply the DataPts at this index location:  1, 2, ..., N   *)
+(*       number   -  returns the control or independent variable              *)
+(*       array    -  returns the response or dependent variables              *)
+(*    Model    :  use to supply a mathematical model to be fit to the data    *)
+(*       array    -  supply the parameters of the model that is being fit     *)
+(*       number   -  supply the control or independent variable               *)
+(*       array    -  returns the response or dependent variables              *)
+(*    BMatrix  :  use to supply the B matrix that appears in the Hessian      *)
+(*       integer  -  supply the index location where B is to be quantified    *)
+(*       array    -  supply the parameters of the model that is being fit     *)
+(*    MeritFn  :  use to supply the merit or objective function               *)
+(*       array    -  supply the parameters of the model that is being fit     *)
+(*    GMatrix  :  use to supply the metric associated with the merit fn       *)
+(*       matrix   -  supply the moment of the residuals                       *)
+(* object                                                                     *)
+(*   Marquardt :  Newton-Raphson iteration with Marquardt stability scheme    *)
+(*      Initialize  :  initailizes internal data that are used by algorithm   *)
+(*      Nullify     :  nullifies dynamically allocated data structures        *)
+(*      Solve       :  preforms Newton-Raphson iteration to get a solution    *)
+(*         n           -  number of DataPts points or sets to be fit against    *)
+(*         tol         -  error tolerance for convergence:  [0.00000001, 0.1] *)
+(*         data        -  instance of procedure type:  DataPts                  *)
+(*         model       -  instance of procedure type:  Model                  *)
+(*         bMtx        -  instance of procedure type:  BMatrix                *)
+(*         objFn       -  instance of procedure type:  MeritFn                *)
+(*         gMtx        -  instance of procedure type:  GMatrix                *)
+(*         parameters  -  supply  p_0, returns final (converged) value for  p *)
+(*         converged   -  indicates whether the solution converged or not     *)
+(*      RSquared    :  a goodness of fit statistic                            *)
+(*         n           -  number of DataPts points or sets to be fit against    *)
+(*         data        -  instance of procedure type:  DataPts                  *)
+(*         parameters  -  a converged estimate for the model's parameters     *)
+(*         model       -  instance of procedure type:  Model                  *)
+(*      CovarianceMatrixForResiduals  :                                       *)
+(*         n           -  number of DataPts points or sets to be fit against    *)
+(*         data        -  instance of procedure type:  DataPts                  *)
+(*         parameters  -  a converged estimate for the model's parameters     *)
+(*         model       -  instance of procedure type:  Model                  *)
+(*      OrthogonolResiduals  :  a statistical test of orthogonality           *)
+(*         certainty   -  a certainty exported from Math.Distributions        *)
+(*         covMtxRes   -  a result from CovarianceMatrixForResiduals          *)
+(*      CovarianceMatrixForParameters  :                                      *)
+(*         n           -  number of DataPts points or sets to be fit against    *)
+(*         parameters  -  a converged estimate for the model's parameters     *)
+(*         bMtx        -  instance of procedure type:  BMatrix                *)
+(*         covMtxRes   -  a result from CovarianceMatrixForResiduals          *)
+(*      OrthogonalParameters :  a statistical test of orthogonality           *)
+(*         certainty   -  a certainty exported from Math.Distributions        *)
+(*         covMtxPar   -  a result from CovarianceMatrixForParameters         *)
+(*      ConfidenceIntervals  :  a +- variation for each determined parameter  *)
+(*         certainty   -  a certainty exported from Math.Distributions        *)
+(*         covMtxPar   -  a result from CovarianceMatrixForParameters         *)
+(*      Statisitics :  writes to a writer some run results from iteration     *)
+(*         sw          -  instance of a stream writer                         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*   The two methods that test orthogonality will, ideally, return boolean    *)
+(*   matrices that are true everywhere except along the diagonal              *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelMath.NewtonRaphson;
+
+   import
+      System.IO.StreamWriter as StreamWriter,
+      System.Int32           as Int32,
+      BelCore.Arrays        as A,
+      BelCore.Boolean       as B,
+      BelCore.Log           as L,
+      BelCore.LinearAlgebra as LA,
+      BelCore.Math          as Fn,
+      BelCore.Matrices      as M,
+      BelCore.Numbers       as N,
+      BelMath.Distributions as P;
+
+   const
+      maxSteps = 100;
+
+   type {public}
+      (* arguments : data indexer, control, responses *)
+      DataPts = procedure (integer; var N.Number; var A.Array);
+      (* arguments : parameters, control, responses *)
+      Model = procedure (A.Array; N.Number; var A.Array);
+      (* arguments : data indexer, parameters *)
+      BMatrix = procedure (integer; A.Array) : M.Matrix;
+      (* arguments : parameters *)
+      MeritFn = procedure (A.Array) : N.Number;
+      (* arguments : moment of residuals *)
+      GMatrix = procedure (M.Matrix) : M.Matrix;
+
+   type {public, value} Marquardt = object
+
+      var {private}
+         lambda, nu : N.Number;
+         objFnHist : array maxSteps+1 of N.Number;
+         repeatedSteps, steps : integer;
+
+      procedure {public} Initialize;
+      var
+         i : integer;
+      begin
+         lambda := 0.01;
+         nu := 10;
+         steps := 0;
+         repeatedSteps := 0;
+         for i := 0 to maxSteps do
+            objFnHist[i] := 0
+         end
+      end Initialize;
+
+      procedure {public} Nullify;
+      begin
+         Initialize
+      end Nullify;
+
+      procedure {private} ResidualVector (i : integer;
+                                          data : DataPts;
+                                          parameters : A.Array;
+                                          model : Model) : A.Array;
+      var
+         exp, res, thy : A.Array;
+         x : N.Number;
+      begin
+         (* implements the standard model for residuals *)
+         data(i, x, exp);
+         model(parameters, x, thy);
+         res := exp - thy;
+         return res
+      end ResidualVector;
+
+      procedure {private} MomentOfResiduals (n : integer;
+                                             data : DataPts;
+                                             parameters : A.Array;
+                                             model : Model) : M.Matrix;
+      var
+         i : integer;
+         mor : M.Matrix;
+         res : A.Array;
+      begin
+         res := ResidualVector(1, data, parameters, model);
+         mor := M.VectorProduct(res, res);
+         for i := 2 to n do
+            res := ResidualVector(i, data, parameters, model);
+            mor.IncBy(M.VectorProduct(res, res))
+         end;
+         return mor
+      end MomentOfResiduals;
+
+      procedure {public} Solve (n     : integer;
+                                tol   : N.Number;
+                                data  : DataPts;
+                                model : Model;
+                                bMtx  : BMatrix;
+                                objFn : MeritFn;
+                                gMtx  : GMatrix;
+                                var parameters : A.Array;
+                                var converged  : boolean);
+      var
+         arr, corCoef, delta, dp, p, q, r, vec : A.Array;
+         b, g, h, mtx : M.Matrix;
+         dim, i, j : integer;
+         finished : boolean;
+         int : Int32;
+         length, minObj : N.Number;
+         lu : LA.Lu;
+         s : string;
+      begin {locked}
+         if n <= 0 then
+            L.ErrorMessage(3,-1, "BelMath.NewtonRaphson.Marquardt.Solve");
+            int := n;
+            s := "The assigned value for 'n' was " + int.ToString() + ".";
+            L.Message(s)
+         end;
+         if tol > 0.1 then
+            tol := 0.1;
+            L.Message("The assigned 'tol' was pulled back to the maximum");
+            L.Message("   allowed tolerance of 0.1 in a call to");
+            L.Message("   BelMath.NewtonRaphson.Marquardt.Solve.")
+         elsif tol < 1.0E-8 then
+            tol := 1.0E-8;
+            L.Message("The assigned 'tol' was pushed up to the mimimum");
+            L.Message("   allowed tolerance of 1.0E-8 in a call to");
+            L.Message("   BelMath.NewtonRaphson.Marquardt.Solve.")
+         else
+            (* the assigned tolerance is admissible *)
+         end;
+         if data = nil then
+            L.ErrorMessage(55,-1, "BelMath.NewtonRaphson.Marquardt.Solve");
+            L.Message("   The supplied 'data' function was nil.")
+         end;
+         if model = nil then
+            L.ErrorMessage(55,-1, "BelMath.NewtonRaphson.Marquardt.Solve");
+            L.Message("   The supplied 'model' function was nil.")
+         end;
+         if bMtx = nil then
+            L.ErrorMessage(55,-1, "BelMath.NewtonRaphson.Marquardt.Solve");
+            L.Message("   The supplied 'bMtx' function was nil.")
+         end;
+         if objFn = nil then
+            L.ErrorMessage(55,-1, "BelMath.NewtonRaphson.Marquardt.Solve");
+            L.Message("   The supplied 'objFn' function was nil.")
+         end;
+         if gMtx = nil then
+            L.ErrorMessage(55,-1, "BelMath.NewtonRaphson.Marquardt.Solve");
+            L.Message("   The supplied 'gMtx' function was nil.")
+         end;
+         (* prepare for iteration *)
+         g := gMtx(MomentOfResiduals(n, data, parameters, model));
+         dim := parameters.Length();
+         q.Initialize(dim);
+         h.Initialize(dim,dim);
+         for i := 1 to n do
+            b := bMtx(i,parameters);
+            r := ResidualVector(i, data, parameters, model);
+            q.DecBy(b.TransposeContract(g.Contract(r)));
+            h.IncBy(b.TransposeDot(g.Dot(b)));
+         end;
+         q := 2*q;
+         h := 2*h;
+         (* normalize the working arrays with correlation coefficients *)
+         corCoef.Initialize(dim);
+         for i := 1 to dim do
+            if h[i,i] > 0 then
+               corCoef[i] := Fn.Sqrt(h[i,i])
+            else
+               L.ErrorMessage(56,-1, "BelMath.NewtonRaphson.Marquardt.Solve")
+            end
+         end;
+         arr.Initialize(dim);
+         vec.Initialize(dim);
+         mtx.Initialize(dim,dim);
+         for i := 1 to dim do
+            vec[i] := q[i]/corCoef[i];
+            for j := 1 to dim do
+               mtx[i,j] := h[i,j]/(corCoef[i]*corCoef[j])
+            end;
+            arr[i] := mtx[i,i]
+         end;
+         objFnHist[0] := objFn(parameters);
+         minObj := objFnHist[0];
+         steps := 0;
+         finished := false;
+         converged := false;
+         p := parameters;
+         dp.Initialize(dim);
+         repeat
+           (* Newton-Raphson iteration with Marquardt's stabilizing scheme *)
+            inc(steps);
+            for i := 1 to dim do
+               mtx[i,i] := arr[i] + lambda
+            end;
+            lu.Initialize;
+            lu.Factorize(mtx);
+            delta := lu.Solve(vec);
+            for i := 1 to dim do
+               dp[i] := delta[i]/corCoef[i]
+            end;
+            p := p - dp;
+            objFnHist[steps] := objFn(p);
+            if objFnHist[steps] < minObj then
+               (* move solution strategy more towards Newton's methods *)
+               minObj := objFnHist[steps];
+               length := A.TwoNorm(p);
+               if length > dim*N.Epsilon/tol then
+                  if A.TwoNorm(dp)/length < tol then
+                     finished := true;
+                     converged := true
+                  end
+               else
+                  if A.TwoNorm(dp) < dim*N.Epsilon then
+                     finished := true;
+                     converged := true
+                  end
+               end;
+               if ~converged then
+                  g := gMtx(MomentOfResiduals(n, data, p, model));
+                  q.Initialize(dim);
+                  h.Initialize(dim,dim);
+                  for i := 1 to n do
+                     b := bMtx(i,p);
+                     r := ResidualVector(i, data, p, model);
+                     q.DecBy(b.TransposeContract(g.Contract(r)));
+                     h.IncBy(b.TransposeDot(g.Dot(b)));
+                  end;
+                  q := 2*q;
+                  h := 2*h;
+                  for i := 1 to dim do
+                     if h[i,i] > 0 then
+                        corCoef[i] := Fn.Sqrt(h[i,i])
+                     else
+                        L.ErrorMessage(56,-1,
+                           "BelMath.NewtonRaphson.Marquardt.Solve")
+                     end
+                  end;
+                  for i := 1 to dim do
+                     vec[i] := q[i]/corCoef[i];
+                     for j := 1 to dim do
+                        mtx[i,j] := h[i,j]/(corCoef[i]*corCoef[j])
+                     end;
+                     arr[i] := mtx[i,i]
+                  end;
+                  lambda := Fn.Max(2*lambda/nu, N.Epsilon)
+               end
+            else
+               (* move solution stratagey more towards steepest decent *)
+               repeat
+                  inc(steps);
+                  inc(repeatedSteps);
+                  p := p + dp;
+                  if steps < maxSteps then
+                     lambda := lambda*nu;
+                     for i := 1 to dim do
+                        mtx[i,i] := arr[i] + lambda
+                     end;
+                     lu.Initialize;
+                     lu.Factorize(mtx);
+                     delta := lu.Solve(vec);
+                     for i := 1 to dim do
+                        dp[i] := delta[i]/corCoef[i]
+                     end;
+                     p := p - dp
+                  end;
+                  objFnHist[steps] := objFn(p)
+               until (objFnHist[steps] < minObj) or (steps = maxSteps);
+               if steps < maxSteps then
+                  minObj := objFnHist[steps];
+                  g := gMtx(MomentOfResiduals(n, data, p, model));
+                  q.Initialize(dim);
+                  h.Initialize(dim,dim);
+                  for i := 1 to n do
+                     b := bMtx(i,p);
+                     r := ResidualVector(i, data, p, model);
+                     q.DecBy(b.TransposeContract(g.Contract(r)));
+                     h.IncBy(b.TransposeDot(g.Dot(b)));
+                  end;
+                  q := 2*q;
+                  h := 2*h;
+                  for i := 1 to dim do
+                     if h[i,i] > 0 then
+                        corCoef[i] := Fn.Sqrt(h[i,i])
+                     else
+                        L.ErrorMessage(56,-1,
+                           "BelMath.NewtonRaphson.Marquardt.Solve")
+                     end
+                  end;
+                  for i := 1 to dim do
+                     vec[i] := q[i]/corCoef[i];
+                     for j := 1 to dim do
+                        mtx[i,j] := h[i,j]/(corCoef[i]*corCoef[j])
+                     end;
+                     arr[i] := mtx[i,i]
+                  end
+               end
+            end;
+            if steps >= maxSteps then
+               finished := true;
+               L.WarningMessage(36,-1, "BelMath.NewtonRaphson.Marquardt.Solve")
+            end
+         until finished;
+         parameters := p
+      end Solve;
+
+      procedure {public} RSquared (n : integer;
+                                   data : DataPts;
+                                   parameters : A.Array;
+                                   model : Model) : N.Number;
+      var
+         avg, err, res, y : A.Array;
+         denom, numer, rSquared, x : N.Number;
+         i : integer;
+         invM, mor : M.Matrix;
+         lu : LA.Lu;
+      begin
+         (* Implements the R^2 statistic of:                          *)
+         (* Buse, A., "Goodness of fit in generalized least squares   *)
+         (* estimation," American Statistician, Vol. 27, 1973, 106-8. *)
+         mor := MomentOfResiduals(n, data, parameters, model);
+         lu.Factorize(mor);
+         invM := lu.Inverse();
+         LA.RefineInverse(mor, invM);
+         data(1, x, avg);
+         for i := 2 to n do
+            data(i, x, y);
+            avg.IncBy(y)
+         end;
+         x := n;
+         avg.DivBy(x);
+         for i := 1 to n do
+            res := ResidualVector(i, data, parameters, model);
+            numer := numer + res.Dot(invM.Contract(res));
+            data(i, x, err);
+            err.DecBy(avg);
+            denom := denom + err.Dot(invM.Contract(err))
+         end;
+         rSquared := 1 - numer/denom;
+         return rSquared
+      end RSquared;
+
+      procedure {public} CovarianceMatrixForResiduals
+                                           (n : integer;
+                                            data : DataPts;
+                                            parameters : A.Array;
+                                            model : Model) : M.Matrix;
+      var
+         coef, dimP, dimY : N.Number;
+         mor, vr : M.Matrix;
+      begin
+         mor := MomentOfResiduals(n, data, parameters, model);
+         dimY := mor.Rows();
+         dimP := parameters.Length();
+         if n*dimY > dimP then
+            coef := dimY/(n*dimY - dimP)
+         else
+            coef := real(1,64)/real(n,64)
+         end;
+         vr := coef*mor;
+         return vr
+      end CovarianceMatrixForResiduals;
+
+      procedure {public} OrthogonalResiduals (certainty : P.Certainty;
+                                              covMtxRes : M.Matrix) : B.Matrix;
+      var
+         bm : B.Matrix;
+         cc, statistic, studentT : N.Number;
+         dof, i, ii, j : integer;
+         sqrtDiag : A.Array;
+      begin
+         ii := covMtxRes.Rows();
+         bm.Initialize(ii,ii);
+         if ii = 1 then
+            (* nothing to do *)
+         elsif ii = 2 then
+            bm[1,2] := true;
+            bm[2,1] := true
+         else
+            dof := ii - 2;
+            studentT  := P.StudentT(certainty, dof);
+            statistic := studentT/Fn.Sqrt(studentT*studentT + dof);
+            (* construct elements of correlation matrix *)
+            sqrtDiag.Initialize(ii);
+            for i := 1 to ii do
+               sqrtDiag[i] := Fn.Sqrt(covMtxRes[i,i])
+            end;
+            for i := 1 to ii-1 do
+               for j := i+1 to ii do
+                  cc := covMtxRes[i,j]/(sqrtDiag[i]*sqrtDiag[j]);
+                  (* test for orthogonality *)
+                  if cc < statistic then
+                     bm[i,j] := true;
+                     bm[j,i] := true
+                  end
+               end
+            end
+         end;
+         return bm
+      end OrthogonalResiduals;
+
+      procedure {public} CovarianceMatrixForParameters
+                                           (n : integer;
+                                            parameters : A.Array;
+                                            bMtx : BMatrix;
+                                            covMtxRes : M.Matrix) : M.Matrix;
+      var
+         b, vp, vpInv, vrInv : M.Matrix;
+         i : integer;
+         lu : LA.Lu;
+      begin
+         lu.Factorize(covMtxRes);
+         vrInv := lu.Inverse();
+         LA.RefineInverse(covMtxRes, vrInv);
+         vpInv.Initialize(parameters.Length(), parameters.Length());
+         for i := 1 to n do
+            b := bMtx(i, parameters);
+            vpInv.IncBy(b.TransposeDot(vrInv.Dot(b)))
+         end;
+         vpInv := 2*vpInv;
+         lu.Initialize;
+         lu.Factorize(vpInv);
+         vp := lu.Inverse();
+         LA.RefineInverse(vpInv, vp);
+         return vp
+      end CovarianceMatrixForParameters;
+
+      procedure {public} OrthogonalParameters (certainty : P.Certainty;
+                                               covMtxPar : M.Matrix) : B.Matrix;
+      var
+         bm : B.Matrix;
+         cc, n, statistic, studentT : N.Number;
+         dof, i, kk, j : integer;
+         sqrtDiag : A.Array;
+      begin
+         kk := covMtxPar.Rows();
+         bm.Initialize(kk,kk);
+         if kk = 1 then
+            (* nothing to do *)
+         elsif kk = 2 then
+            bm[1,2] := true;
+            bm[2,1] := true
+         else
+            dof := kk - 2;
+            studentT  := P.StudentT(certainty, dof);
+            statistic := studentT/Fn.Sqrt(studentT*studentT + dof);
+            (* construct elements of correlation matrix *)
+            sqrtDiag.Initialize(kk);
+            for i := 1 to kk do
+               n := covMtxPar[i,i];
+               sqrtDiag[i] := Fn.Sqrt(n)
+            end;
+            for i := 1 to kk-1 do
+               for j := i+1 to kk do
+                  cc := covMtxPar[i,j]/(sqrtDiag[i]*sqrtDiag[j]);
+                  (* test for orthogonality *)
+                  if cc < statistic then
+                     bm[i,j] := true;
+                     bm[j,i] := true
+                  end
+               end
+            end
+         end;
+         return bm
+      end OrthogonalParameters;
+
+      procedure {public} ConfidenceIntervals (certainty : P.Certainty;
+                                              covMtxPar : M.Matrix) : A.Array;
+      var
+         chiSq : N.Number;
+         ci : A.Array;
+         dof, i : integer;
+      begin
+         dof := covMtxPar.Rows();
+         chiSq := P.ChiSquared(certainty, dof);
+         ci.Initialize(dof);
+         for i := 1 to dof do
+            ci[i] := Fn.Sqrt(chiSq*covMtxPar[i,i])
+         end;
+         return ci
+      end ConfidenceIntervals;
+
+      procedure {public} Statistics (sw : StreamWriter);
+      var
+         i, k : integer;
+         j : Int32;
+         n : N.Number;
+         s : string;
+      begin
+         j := steps;
+         s := "It took  " + j.ToString() + " iteration steps";
+         sw.WriteLine(s);
+         j := repeatedSteps;
+         s := "of which " + j.ToString() + " were repeats.";
+         sw.WriteLine(s);
+         s := "The objective function history was:";
+         sw.WriteLine(s);
+         s := "step   objective function";
+         sw.WriteLine(s);
+         sw.Flush;
+         if steps > 9 then
+            for i := 0 to 9 do
+               j := i;
+               s := "   " + j.ToString() + "     ";
+               n := objFnHist[i];
+               s := s + n.Typeset();
+               sw.WriteLine(s)
+            end;
+            sw.Flush;
+            if steps > 99 then
+               k := 0;
+               for i := 10 to 99 do
+                  j := i;
+                  s := "  " + j.ToString() + "     ";
+                  n := objFnHist[i];
+                  s := s + n.Typeset();
+                  sw.WriteLine(s);
+                  inc(k);
+                  if k = 10 then
+                     k := 0;
+                     sw.Flush
+                  end
+               end;
+               for i := 100 to steps do
+                  j := i;
+                  s := " " + j.ToString() + "     ";
+                  n := objFnHist[i];
+                  s := s + n.Typeset();
+                  sw.WriteLine(s);
+                  inc(k);
+                  if k = 10 then
+                     k := 0;
+                     sw.Flush
+                  end
+               end
+            else
+               k := 0;
+               for i := 10 to steps do
+                  j := i;
+                  s := "  " + j.ToString() + "     ";
+                  n := objFnHist[i];
+                  s := s + n.Typeset();
+                  sw.WriteLine(s);
+                  inc(k);
+                  if k = 10 then
+                     k := 0;
+                     sw.Flush
+                  end
+               end
+            end
+         else
+            for i := 0 to steps do
+               j := i;
+               s := "   " + j.ToString() + "     ";
+               n := objFnHist[i];
+               s := s + n.Typeset();
+               sw.WriteLine(s)
+            end;
+            sw.Flush
+         end
+      end Statistics;
+
+   begin
+      Initialize
+   end Marquardt;
+
+begin
+end NewtonRaphson.

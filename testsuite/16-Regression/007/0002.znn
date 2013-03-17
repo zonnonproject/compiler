@@ -1,0 +1,4 @@
+object {ref, public} Test.TreeNode;
+	var {public}
+		left, right : TreeNode;
+end TreeNode.

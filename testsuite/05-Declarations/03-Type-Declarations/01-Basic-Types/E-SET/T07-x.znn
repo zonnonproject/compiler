@@ -1,0 +1,18 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * set type
+ *
+ * Positive test: set value does not accept min(set)-1 value.
+ *)
+module Main;
+	var s : set;
+begin
+	begin
+		s := { min(set) - 1 };
+		halt(0);
+	on OutOfRange do
+		halt(1);
+	end
+end Main.

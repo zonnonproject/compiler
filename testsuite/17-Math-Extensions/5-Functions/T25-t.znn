@@ -1,0 +1,46 @@
+(** 
+ * 17. Math extensions.
+ * 17.5. Additional functions
+ * 
+ * Positive test: all, any
+ * with scalar
+ *)
+
+module Main;
+
+type vi = array {math} * of integer;
+type vr = array {math} * of real;
+type mi = array {math} *,* of integer;
+type mr = array {math} *,* of real;
+type mb = array {math} *,* of boolean;
+type vb = array {math} * of boolean;
+
+var
+	Ab : mb;
+	ii, ji : vi;
+	ib : vb;
+	
+	i, j : integer;
+	qb : boolean;
+	r : range;
+  
+begin
+	Ab := [[true, false, true], [false, false, true]];  
+	
+	ii := [1, 2, 1];
+	ji := [0, 0];
+	ib := [true, true];
+	
+	r := 0..1;
+	
+	qb := any(Ab);
+
+	if qb # true
+	then
+		halt(0);
+	end;
+	
+	halt(1);
+	
+end Main.
+

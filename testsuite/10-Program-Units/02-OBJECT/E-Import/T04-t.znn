@@ -1,0 +1,50 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * 11.2.E Import
+ *
+ * Positive test: 
+ *)
+
+definition A.N;
+procedure P;
+end N.
+
+implementation A.N;
+procedure P implements A.N.P;
+begin
+	writeln("A.N.P");
+end P;
+end N.
+
+definition B.N;
+procedure R;
+end N.
+
+implementation B.N;
+procedure R implements B.N.R;
+begin
+	writeln("B.N.R");
+end R;
+end N.
+
+object O implements A.N, B.N;
+begin
+
+end O.
+
+
+module Main;
+import System.Random,
+	   O;
+
+var o:O;
+var d: System.Random;
+
+begin
+ d := new System.Random;
+ o.P;
+ o.R; 
+ halt(1)
+end Main.
+

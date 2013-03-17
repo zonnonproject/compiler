@@ -1,0 +1,12 @@
+(** 
+ *	4. Language symbols and identifiers. 
+ *	4.4. Numeric Constants
+ *
+ *	Positive test: wrong constant width.
+ *)
+module Main;
+	var i : integer;
+begin
+	i := 0DH { 24 };
+	halt(1);
+end Main.

@@ -1,0 +1,23 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Parameters of the object.
+ *
+ * Negative test: the wrong object parameter type C.D.
+ * The variavle C.D is declared before its name is used as type name.
+ *)
+module {public} C;
+	var { public } 
+		D : integer;
+	(* The variable D is declared instead type D!!!
+	   The module C is declared before it is used. *)
+end C.
+
+object {public, ref} A.B(p1 : C.D; p2 : C.D);
+begin
+end B.
+
+module Main;
+begin
+	halt(0); 
+end Main.

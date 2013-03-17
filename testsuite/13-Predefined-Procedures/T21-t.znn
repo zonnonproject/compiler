@@ -1,0 +1,14 @@
+(**
+ * 09.Predefined procedures.
+ * The min(T) procedure.
+ *
+ * Positive test: min value for set type.
+ *)
+module Main;
+	var i : integer;
+begin
+	i := min( set{8} );
+
+	if i = 0 
+	then halt(1) else halt(0) end;
+end Main.

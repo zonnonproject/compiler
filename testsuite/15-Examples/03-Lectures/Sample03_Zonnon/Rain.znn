@@ -1,0 +1,235 @@
+(* ********* Zonnon online collection ***********
+ * Rain
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Rain; (* sh, 11-17-01, mg 11-14-02(.net) *)
+
+import System.Random; 
+
+type longreal = real {64};
+
+const 
+	MaxDays = 10000;
+
+var
+	days : array MaxDays of longreal;        (* Every day's rainamount. *)
+	accumulated : array MaxDays of longreal; (* The accumulated amounts for ex. c *)
+	randomgenerator : System.Random;
+
+(* Ex 3a ....................................................................*)
+(*
+	Fill the array days with randomnumbers.
+	Establish: accumulated[i] := days[0] + days[1] + ... + days[i-1], i>0;
+*)
+procedure InitArrays;
+var
+	i : integer;
+	acc : longreal;
+begin
+	acc := 0.0;
+
+	for i := 0 to MaxDays - 1 do
+		days[i] := randomgenerator.NextDouble();
+		accumulated[i] := acc;
+		acc := acc + days[i];
+	end;
+end InitArrays;
+
+procedure CountRecords;
+var
+	i, count : integer;
+	currentrecord : longreal;
+begin
+	currentrecord := days[0]; (* The first element is always a record. *)
+	count := 1;
+
+	for i := 0 to MaxDays - 1 do
+		if currentrecord < days[i] then
+			currentrecord := days[i]; (* Adjust the new maximum. *)
+			inc(count)
+		end
+	end;
+
+	write(count);
+	writeln(" records.")
+end CountRecords;
+
+(* Ex 3b ...................................................................*)
+(* Calculate the theoretical value. See seperate sheet for more information *)
+procedure TheoreticalValue;
+var
+	i : integer;
+	v : real;
+begin 
+	v := 0.0;
+	(* Decreasing loop variable to get higher numberical precision.
+	   Try increasing to see! *)
+	for i := MaxDays to 1 by -1 do
+		v := v + 1.0 / i; (* 1.0 is important to do computation in real.
+                            1 would do it in int *)
+	end;
+	write("The expected value is ");
+	write(v);
+	writeln(" records.")
+end TheoreticalValue;
+
+
+(* Ex 3c ....................................................................*)
+(*
+	Searching a certain sum "sum" from a day "since" is equivalent to searching
+	the sum "sum+accumulated[since]" from day 0.
+   	Return value: The number of days in between.
+*)
+procedure RainSumSince(sum : longreal; since : integer) : integer;
+var
+	i, j, m, result: integer;
+begin
+	sum := sum + accumulated[since];
+
+	(* Do binary search. *)
+	i := -1;
+	j := MaxDays;
+
+	while j # i+1 do
+		m := (i + j) div 2;
+		if accumulated[m] <= sum then
+			i := m
+		else
+			j := m
+		end;
+	end;
+
+	(* Binary search has terminated. Has the exact sum been found? *)
+	if (i >= 0) & (accumulated[i] = sum) then
+		result := i - since; (* yes, found *)
+	else
+		result := j - since; (* no, not found, acc[j] is larger than sum *)
+	end;
+
+	return result
+end RainSumSince;
+
+procedure Inquiry;
+var
+	sum : longreal;
+	since, result : integer;
+begin
+	write("please enter the sum to reach (real): ");
+	readln(sum);
+	writeln("pleas enter the day you want to start (integer): ");
+	readln(since);
+
+	result := RainSumSince(sum, since);
+	if (result + since) = MaxDays then
+		writeln("not reached")
+	else
+		write(result);
+		writeln(" day(s) in between.")
+	end;
+end Inquiry;
+
+(* Ex 3d ....................................................................*)
+(*
+	Insert a day in a sorted data structure.
+	To avoid swapping through whole array, establish a second data
+	structure which is a index chain.
+	Eg:
+	Values:      27    39   18    24
+	Chain:         1    -1    3       0
+	Entry point: 2.
+	Go to the entry point (index 2, value 18.)
+	The chain now points to index 3, value 24.
+	The chain there points to index 0, value 27.
+	The last (and largest) element points to -1 to indicate end of chain.
+*)
+procedure InsertDay(rainamount : longreal; 
+						day : integer; 
+						var statdays : array of longreal;
+						var indexchain : array of integer; 
+						var first : integer);
+var
+	previous, current : integer;
+begin
+	statdays[day] := rainamount;
+	indexchain[day] := -1;
+
+	previous := -1;
+	current := first;
+
+	while (current > -1) & (statdays[current] < rainamount) do
+		previous := current;
+		current := indexchain[current]
+	end;
+
+	if previous > -1 then
+		indexchain[day] := current;
+		indexchain[previous] := day;
+	else
+		if first > -1 then
+			indexchain[day] := first
+		end;
+		first := day;
+	end
+end InsertDay;
+
+procedure PrintDays(var statdays : array of longreal; 
+                    var indexchain : array of integer; 
+                    first : integer);
+var
+	i : integer;
+begin
+	i := first;
+	while i > -1 do
+		write("Amount: ");
+		write(statdays[i]);
+		write(" on day: ");
+		writeln(i);
+		i := indexchain[i];
+	end;
+end PrintDays;
+
+(*
+	Adds days sorted to an array with chained indizes.
+    For every day, generate a random rain amount and insert it into the list.
+    Why I did not use the same array "days" as above:
+    I wanted to avoid clashes when calling this routine between calls of the
+	routines above.
+*)
+procedure AddDays;
+var
+	i, first, number : integer;
+	r : longreal;
+	indexchain : array MaxDays of integer;
+	statdays : array MaxDays of longreal;
+begin
+	first := -1;
+	write("please enter the number of days to add (integer): ");
+	read(number);
+
+	for i := 0 to number - 1 do
+		r := randomgenerator.NextDouble();
+		InsertDay(r, i, statdays, indexchain, first);
+	end;
+	PrintDays(statdays, indexchain, first);
+end AddDays;
+
+var s : string;
+
+begin
+ 	randomgenerator := new System.Random();
+	InitArrays(); 
+	writeln("exercise 3a: ");
+	CountRecords();
+	writeln("exercise 3b: ");
+	TheoreticalValue();
+	writeln("exercise 3c: ");
+	Inquiry();
+	writeln("exercise 3d: ");
+	AddDays();
+	writeln("exercise done, bye");
+	read(s);	
+end Rain.

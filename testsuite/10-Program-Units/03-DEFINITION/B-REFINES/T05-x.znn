@@ -1,0 +1,15 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * refines clause
+ * 
+ * Negative test: the name B.C is used in refines clause,
+ * but is not declared anywhere.
+ *)
+definition {public} A refines B.C;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

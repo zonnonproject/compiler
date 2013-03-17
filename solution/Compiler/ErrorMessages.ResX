@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Success" xml:space="preserve">
+    <value>Compilation completed successfully</value>
+  </data>
+  <data name="EndOfMessages" xml:space="preserve">
+    <value>End of messages</value>
+  </data>
+  <data name="ExtraEqual" xml:space="preserve">
+    <value>Use '=' equality sign in Zonnon</value>
+    <comment>warning</comment>
+  </data>
+  <data name="ObsoleteParamName" xml:space="preserve">
+    <value>Obsolete parameter name '{0}' in procedure type</value>
+    <comment>warning</comment>
+  </data>
+  <data name="MaxTypeSize" xml:space="preserve">
+    <value>maximal size of {0} type is {1}</value>
+    <comment>warning</comment>
+  </data>
+  <data name="SuperfluousSize" xml:space="preserve">
+    <value>width specification for type '{0}' is superfluous</value>
+    <comment>warning</comment>
+  </data>
+  <data name="CompilerCalculatedResult" xml:space="preserve">
+    <value>result of '{0}' is always {1}</value>
+  </data>
+  <data name="CompilerCalculatedValue" xml:space="preserve">
+    <value>{0} is always {1}</value>
+  </data>
+  <data name="DifferentSignatures" xml:space="preserve">
+    <value>The signature of {0} in implementation differs from that in definition</value>
+  </data>
+  <data name="ImmutableIsPrivate" xml:space="preserve">
+    <value>Variable declared 'immutable' should be 'public'</value>
+  </data>
+  <data name="SimpleComparison" xml:space="preserve">
+    <value>A value of a procedure type is compared to a procedure or to another value</value>
+  </data>
+  <data name="OldObjectSyntax" xml:space="preserve">
+    <value>Local object/record types should be declared as 'type T=object...'</value>
+  </data>
+  <data name="UnexpectedEndOfSource" xml:space="preserve">
+    <value>Unexpected end of the source</value>
+  </data>
+  <data name="LexemExpected" xml:space="preserve">
+    <value>Lexem '{0}' expected</value>
+  </data>
+  <data name="IntegerLiteralIsTooBig" xml:space="preserve">
+    <value>Integer literal '{0}' is too big</value>
+  </data>
+  <data name="RealLiteralIsTooBig" xml:space="preserve">
+    <value>Real literal '{0}' is too big</value>
+  </data>
+  <data name="IllegalCharacter" xml:space="preserve">
+    <value>Illegal character '{0}' ({1})</value>
+  </data>
+  <data name="SystemErrorIn" xml:space="preserve">
+    <value>System error in {0} function: {1}</value>
+  </data>
+  <data name="TerminatorDoesntMatchTypeName" xml:space="preserve">
+    <value>Terminator {1} doesn't match the name of compilation unit {0}</value>
+  </data>
+  <data name="SyntaxErrorIn" xml:space="preserve">
+    <value>Syntax error in {0}: {1}</value>
+  </data>
+  <data name="NoUnitName" xml:space="preserve">
+    <value>No name for {0} is given</value>
+  </data>
+  <data name="DuplicateUnit" xml:space="preserve">
+    <value>Duplicate declaration of {0} '{1}'</value>
+  </data>
+  <data name="WrongUnitName" xml:space="preserve">
+    <value>Name {0} from qualified-name {1} doesn't denote a namespace</value>
+  </data>
+  <data name="IncorrectUnitName" xml:space="preserve">
+    <value>Cannot declare {0} {1}: there is {2} with the same name in the current scope</value>
+  </data>
+  <data name="DuplicateDeclaration" xml:space="preserve">
+    <value>Duplicate declaration with the name '{0}' in the current scope</value>
+  </data>
+  <data name="IllegalModifier" xml:space="preserve">
+    <value>Illegal modifier '{0}'</value>
+  </data>
+  <data name="WrongDefinitionName" xml:space="preserve">
+    <value>Name '{0}' does not denote a definition as expected</value>
+  </data>
+  <data name="WrongProtocolName" xml:space="preserve">
+    <value>Name '{0}' does not denote a protocol as expected</value>
+  </data>
+  <data name="WrongImportName" xml:space="preserve">
+    <value>Cannot import '{0}'. If it is an external name check if you have referenced the library</value>
+  </data>
+  <data name="WrongTypeName" xml:space="preserve">
+    <value>Name '{0}' does not denote a type as expected. </value>
+  </data>
+  <data name="WrongProcedureName" xml:space="preserve">
+    <value>Name '{0}' does not denote a procedure as expected</value>
+  </data>
+  <data name="WrongActivityName" xml:space="preserve">
+    <value>Designator after new doesn't denote an activity as expected</value>
+  </data>
+  <data name="UndeclaredProcedure" xml:space="preserve">
+    <value>Procedure '{1}' is not declared in definition '{0}'</value>
+  </data>
+  <data name="UndeclaredEntity" xml:space="preserve">
+    <value>Could not find '{0}' qualified by '{1}'</value>
+  </data>
+  <data name="QualIdInNestedUnit" xml:space="preserve">
+    <value>Cannot use qualified name ('{0}') in nested unit declarations</value>
+  </data>
+  <data name="ImportInDeclaration" xml:space="preserve">
+    <value>Cannot use import name '{0}' in unit declaration. Probably need to reference an external Library?</value>
+  </data>
+  <data name="IllegalNesting" xml:space="preserve">
+    <value>Cannot declare {0}</value>
+  </data>
+  <data name="UndeclaredSimpleEntity" xml:space="preserve">
+    <value>Could not find '{0}'</value>
+  </data>
+  <data name="WrongQualification" xml:space="preserve">
+    <value>Illegal qualification '{0}'</value>
+  </data>
+  <data name="UndeclaredUnit" xml:space="preserve">
+    <value>Cannot find compilation unit '{0}'; is it an external unreferenced unit?</value>
+  </data>
+  <data name="UndeclaredLocalUnit" xml:space="preserve">
+    <value>Cannot find compilation unit '{0}'</value>
+  </data>
+  <data name="IllegalTypeForBinOperator" xml:space="preserve">
+    <value>Illegal operand types '{1}' and '{2}' for '{0}' operator</value>
+  </data>
+  <data name="IllegalTypeForUnOperator" xml:space="preserve">
+    <value>Illegal operand type '{1}' for '{0}' operator</value>
+  </data>
+  <data name="WrongUnitKeyword" xml:space="preserve">
+    <value>Unknown unit keyword '{0}'</value>
+  </data>
+  <data name="UndeclaredLocal" xml:space="preserve">
+    <value>Entity '{0}' is not declared</value>
+  </data>
+  <data name="IncorrectImport" xml:space="preserve">
+    <value>Name '{0}' does not denote a program unit or a namespace as expected</value>
+  </data>
+  <data name="NoType" xml:space="preserve">
+    <value>Neither type nor type name is given in {0}.</value>
+  </data>
+  <data name="WrongThis" xml:space="preserve">
+    <value>Cannot use 'self' outside object declaration</value>
+  </data>
+  <data name="NonConstant" xml:space="preserve">
+    <value>Constant expression required in {0}</value>
+  </data>
+  <data name="NegativeConst" xml:space="preserve">
+    <value>Cannot specify negative constant {0}</value>
+  </data>
+  <data name="ZeroConstant" xml:space="preserve">
+    <value>Cannot use zero constant as array dimension</value>
+  </data>
+  <data name="ZeroStepValue" xml:space="preserve">
+    <value>Cannot use zero constant as step specification in for statement</value>
+  </data>
+  <data name="ZeroDivisor" xml:space="preserve">
+    <value>Attempt to divide by zero</value>
+  </data>
+  <data name="IllegalProcedureCall" xml:space="preserve">
+    <value>Procedure '{0}' in the left part of the selector does not return object type</value>
+  </data>
+  <data name="IllegalLeftPart" xml:space="preserve">
+    <value>Illegal type of selector's left part '{0}'</value>
+  </data>
+  <data name="WrongNumberOfArgs" xml:space="preserve">
+    <value>Illegal number of arguments in the predeclared procedure '{0}'</value>
+  </data>
+  <data name="WrongPredeclaredCall" xml:space="preserve">
+    <value>Illegal argument in the predeclared procedure '{0}'</value>
+  </data>
+  <data name="PredeclaredCallInConstantExpr" xml:space="preserve">
+    <value>Cannot call predeclared procedure '{0}' in constant expressions</value>
+  </data>
+  <data name="NotImplemented" xml:space="preserve">
+    <value>Sorry, {0} not implemented yet</value>
+  </data>
+  <data name="IllegalTypeOf" xml:space="preserve">
+    <value>Illegal type {0} of {1}</value>
+  </data>
+  <data name="AssignmentWithReturn" xml:space="preserve">
+    <value>Assignment operator cannot return a value</value>
+  </data>
+  <data name="OperatorShouldReturn" xml:space="preserve">
+    <value>Operator should return a value</value>
+  </data>
+  <data name="NoOperatorName" xml:space="preserve">
+    <value>No operator name is given</value>
+  </data>
+  <data name="WrongPlaceForOperator" xml:space="preserve">
+    <value>Operators can be declared only in modules</value>
+  </data>
+  <data name="IllegalOperator" xml:space="preserve">
+    <value>Illegal operator sign '{0}'</value>
+  </data>
+  <data name="IllegalPartOfOperator" xml:space="preserve">
+    <value>Character {0} cannot be a part of operator sign</value>
+  </data>
+  <data name="OperatorTooLong" xml:space="preserve">
+    <value>Operator sign {0} is too long (should be of 1..3 characters)</value>
+  </data>
+  <data name="NoOperator" xml:space="preserve">
+    <value>Operator sign cannot be empty</value>
+  </data>
+  <data name="UserDefinedOperatorParam" xml:space="preserve">
+    <value>At least one of operator parameters should be of a user-defined type</value>
+  </data>
+  <data name="IllegalNumOfParams" xml:space="preserve">
+    <value>User-defined operator should have one or two parameters</value>
+  </data>
+  <data name="IllegalBinaryOperator" xml:space="preserve">
+    <value>Overloaded binary operator {0} should have exactly 2 parameters</value>
+  </data>
+  <data name="IllegalUnaryOperator" xml:space="preserve">
+    <value>Overloaded unary operator {0} should have exactly 1 parameter</value>
+  </data>
+  <data name="FirstParInAssignment" xml:space="preserve">
+    <value>First parameter in assignment operator should be passed by reference</value>
+  </data>
+  <data name="SameTypeInAssignment" xml:space="preserve">
+    <value>Both left and right parts of assignment operator are of the same type '{0}'"</value>
+  </data>
+  <data name="VarParamInObject" xml:space="preserve">
+    <value>Cannot pass parameters to objects by reference</value>
+  </data>
+  <data name="WrongFinalIdentifier" xml:space="preserve">
+    <value>Wrong final identifier for {0} {1}. It should repeat the name.</value>
+  </data>
+  <data name="UnknownType" xml:space="preserve">
+    <value>Entity '{0}' is of an unknown type</value>
+  </data>
+  <data name="TooBigSetMember" xml:space="preserve">
+    <value>Value '{0}' exceeds the maximal size of set type</value>
+  </data>
+  <data name="AssignmentCompatibility" xml:space="preserve">
+    <value>Types '{0}' and '{1}' are not assignment compatible</value>
+  </data>
+  <data name="AssignmentCompatibilityInProcedureCall" xml:space="preserve">
+    <value>Cannot pass element '{4}' of type '{1}' as argument {2} for procedure '{3}'. Type '{0}' or compatible is expected.</value>
+  </data>
+  <data name="WrongIndicesNumber" xml:space="preserve">
+    <value>Number of indices in indexer is not equal to the rank of the array type</value>
+  </data>
+  <data name="WrongIndexerType" xml:space="preserve">
+    <value>Type in indexer is neither array nor string but {0}</value>
+  </data>
+  <data name="IllegalForVariable" xml:space="preserve">
+    <value>Illegal syntax of FOR variable (should be identifier)</value>
+  </data>
+  <data name="IllegalCall" xml:space="preserve">
+    <value>Illegal procedure designator</value>
+  </data>
+  <data name="MissingParameters" xml:space="preserve">
+    <value>Some of {0} arguments in the procedure call are missing</value>
+  </data>
+  <data name="ExtraParameters" xml:space="preserve">
+    <value>Extra arguments in the procedure call (should be {0})</value>
+  </data>
+  <data name="IllegalArgumentForVar" xml:space="preserve">
+    <value>Cannot specify expression as an argument for var-parameter '{0}'</value>
+  </data>
+  <data name="ExtraReturnValue" xml:space="preserve">
+    <value>{0} was specified without return value</value>
+  </data>
+  <data name="MissedReturnValue" xml:space="preserve">
+    <value>Return value missed for {0}</value>
+  </data>
+  <data name="RefinesItself" xml:space="preserve">
+    <value>Definition '{0}' refines itself</value>
+  </data>
+  <data name="MutualRefinement" xml:space="preserve">
+    <value>Mutual definition refinement: '{0}' refines '{1}' and vice versa</value>
+  </data>
+  <data name="IllegalUseOfExternal" xml:space="preserve">
+    <value>Illegal use of external entity '{0}'</value>
+  </data>
+  <data name="ImplementationIsNotPublic" xml:space="preserve">
+    <value>Entity '{0}' should be declared 'public' because it implements '{1}'</value>
+  </data>
+  <data name="IllegalHiding" xml:space="preserve">
+    <value>Implementing procedure '{0}' hides a non-procedure with the same name from the definition</value>
+  </data>
+  <data name="IllegalImplementingProc" xml:space="preserve">
+    <value>Implementing procedure '{0}' and definition procedure '{1}' have different signatures</value>
+  </data>
+  <data name="IllegalImplementingProc2" xml:space="preserve">
+    <value>Definition procedure '{0}' cannot be implemented by {1} '{2}'</value>
+  </data>
+  <data name="IllegalImplementingProc3" xml:space="preserve">
+    <value>Procedure '{0}' cannot implement anything from '{1}'</value>
+  </data>
+  <data name="NonDefinitionInImplements" xml:space="preserve">
+    <value>Non-definition '{0}' is in the right part of implements relation</value>
+  </data>
+  <data name="NonObjectTypeInImplements" xml:space="preserve">
+    <value>Left operand of implements is not an object</value>
+  </data>
+  <data name="IllegalEntityInImplements" xml:space="preserve">
+    <value>Illegal left operand of 'implements'</value>
+  </data>
+  <data name="DefinitionInIs" xml:space="preserve">
+    <value>For definition '{0}', use not IS but 'implements' relation</value>
+  </data>
+  <data name="NonObjectTypeInIs" xml:space="preserve">
+    <value>Left operand of 'is' is not an object</value>
+  </data>
+  <data name="IllegalEntityInIs" xml:space="preserve">
+    <value>Illegal left operand of IS</value>
+  </data>
+  <data name="IllegalTypeInNew" xml:space="preserve">
+    <value>Type in NEW should be array, procedure, object, or activity</value>
+  </data>
+  <data name="IllegalConditionType" xml:space="preserve">
+    <value>Condition in if statement should be of boolean type</value>
+  </data>
+  <data name="IllegalSafeguard" xml:space="preserve">
+    <value>Illegal '{0}' safeguard</value>
+  </data>
+  <data name="ImportMissed" xml:space="preserve">
+    <value>Import declaration for '{0}' missed</value>
+  </data>
+  <data name="PrivateDefinition" xml:space="preserve">
+    <value>Private definition '{0}' is used in a public postulated interface type</value>
+  </data>
+  <data name="PrivateObject" xml:space="preserve">
+    <value>Private object '{0}' is used in a public declaration</value>
+  </data>
+  <data name="PrivateType" xml:space="preserve">
+    <value>Private type '{0}' is used in a declaration</value>
+  </data>
+  <data name="PrivateActivity" xml:space="preserve">
+    <value>Private activity '{0}' is used in a public declaration</value>
+  </data>
+  <data name="PrivateProtocol" xml:space="preserve">
+    <value>Private protocol '{0}' is used in a public activity type</value>
+  </data>
+  <data name="PrivateEntity" xml:space="preserve">
+    <value>Private entity '{0}' is inaccessible in the current context</value>
+  </data>
+  <data name="IllegalModifierFor" xml:space="preserve">
+    <value>Illegal '{0}' modifier for {1} declaration</value>
+  </data>
+  <data name="AssignToConstant" xml:space="preserve">
+    <value>Cannot assign to constant '{0}'</value>
+  </data>
+  <data name="ModifyImmutable" xml:space="preserve">
+    <value>Cannot modify immutable variable {0} outside its scope</value>
+  </data>
+  <data name="UnresolvedReference" xml:space="preserve">
+    <value>Unresolved external reference: '{0}'</value>
+  </data>
+  <data name="RecursiveDefinition" xml:space="preserve">
+    <value>Direct or indirect recursion in type definition for '{0}'</value>
+  </data>
+  <data name="NotAnInstance" xml:space="preserve">
+    <value>Cannot access to a member of '{0}' because it is object but not an instance of object</value>
+  </data>
+  <data name="WrongConstructor" xml:space="preserve">
+    <value>No constructor for type '{0}' with {1} parameters</value>
+  </data>
+  <data name="WrongConstructorParams" xml:space="preserve">
+    <value>Illegal argument type(s) for '{0}' constructor. Expected {1}</value>
+  </data>
+  <data name="ValueObjectWithParams" xml:space="preserve">
+    <value>Value objects cannot have parameters</value>
+  </data>
+  <data name="IllegalAssignmentSign" xml:space="preserve">
+    <value>Perhaps, '=' token is used instead of assignment token ':='</value>
+  </data>
+  <data name="WrongAssignmentRight" xml:space="preserve">
+    <value>Undefined type of the right part of the assignment statement</value>
+  </data>
+  <data name="EmtpyEnumType" xml:space="preserve">
+    <value>Enumeration type with no enumerators</value>
+  </data>
+  <data name="ValueObjectInDeref" xml:space="preserve">
+    <value>Operand of object type '{0}' with value modifier is used in dereference operator</value>
+  </data>
+  <data name="MissingObjectParameters" xml:space="preserve">
+    <value>Some of {0} arguments in the object constructor are missing</value>
+  </data>
+  <data name="ExtraObjectParameters" xml:space="preserve">
+    <value>Extra arguments in the object constructor (should be {0})</value>
+  </data>
+  <data name="MissingActivityParameters" xml:space="preserve">
+    <value>Some of {0} arguments in the activity launcher are missing</value>
+  </data>
+  <data name="ExtraActivityParameters" xml:space="preserve">
+    <value>Extra arguments in the activity launcher (should be {0})</value>
+  </data>
+  <data name="NoAccessorPrototype" xml:space="preserve">
+    <value>Accessor implementation '{0}' should refer to a definition variable</value>
+  </data>
+  <data name="NoAccessorModifier" xml:space="preserve">
+    <value>Accessor is not specified for the implementation of the definition variable '{0}'</value>
+  </data>
+  <data name="IllegalProcForVar" xml:space="preserve">
+    <value>Type returning by implementing procedure '{0}' differs from the type of the variable</value>
+  </data>
+  <data name="IllegalAccessorSignature" xml:space="preserve">
+    <value>Illegal accessor signature for definition variable '{0}'</value>
+  </data>
+  <data name="IllegalAccessorSpec" xml:space="preserve">
+    <value>Illegal accessor specification '{0}' for definition variable '{1}'</value>
+  </data>
+  <data name="AssignToProc" xml:space="preserve">
+    <value>Cannot assign to procedure '{0}' without 'set' modifier</value>
+  </data>
+  <data name="WrongWidthInWrite" xml:space="preserve">
+    <value>Width for expression is less than width for mantissa</value>
+  </data>
+  <data name="ExtraWidthInWrite" xml:space="preserve">
+    <value>Extra width specifier for non-real argument</value>
+  </data>
+  <data name="NoDefinition" xml:space="preserve">
+    <value>Definition {0} is not declared (only implementation)</value>
+  </data>
+  <data name="UndeclaredDefinition" xml:space="preserve">
+    <value>Could not find definition {0}</value>
+  </data>
+  <data name="IllegalTargetType" xml:space="preserve">
+    <value>Illegal target type {0} in type conversion</value>
+  </data>
+  <data name="IllegalArgsInTypeConversion" xml:space="preserve">
+    <value>Type conversion should have one or two arguments: (expr[,width])</value>
+  </data>
+  <data name="IllegalWidthInTypeConversion" xml:space="preserve">
+    <value>Width in type conversion is not a constant</value>
+  </data>
+  <data name="WrongBeginEndBalance" xml:space="preserve">
+    <value>Final 'end' is missed for {0} statement</value>
+  </data>
+  <data name="NoMainModule" xml:space="preserve">
+    <value>Could not find module '{0}' which was specified as the program entry point</value>
+  </data>
+  <data name="NoEntityImplementation" xml:space="preserve">
+    <value>{0} '{1}' does not implement definition entity '{2}'</value>
+  </data>
+  <data name="CannotDeriveFromSystem" xml:space="preserve">
+    <value>Object '{0}' with 'val' modifier implements a system entity</value>
+  </data>
+  <data name="ExceptionAgain" xml:space="preserve">
+    <value>'on exception' clause is duplicated or comes after 'on termination' clause</value>
+  </data>
+  <data name="TerminationAgain" xml:space="preserve">
+    <value>Duplicated 'on termination' clause</value>
+  </data>
+  <data name="ExcTypeAgain" xml:space="preserve">
+    <value>'on Type do' clause comes after 'on exception' or 'on termination'</value>
+  </data>
+  <data name="IllegalProcAccess" xml:space="preserve">
+    <value>Cannot access to procedure '{0}' because it is not specified in definition '{1}'</value>
+  </data>
+  <data name="NoProcInDefinition" xml:space="preserve">
+    <value>Cannot implement procedure '{0}' because it is not specified in definition '{1}'</value>
+  </data>
+  <data name="DefinitionAmbiguity" xml:space="preserve">
+    <value>Ambiguous selector: member '{0}' is declared in '{1}' and '{2}'</value>
+  </data>
+  <data name="NoMemberInInterface" xml:space="preserve">
+    <value>Member '{0}' not found in definitions from interface type '{0}'</value>
+  </data>
+  <data name="DelegateWithProcType" xml:space="preserve">
+    <value>Delegate's argument '{0}' should be a subprogram (but not of a procedure type)</value>
+  </data>
+  <data name="DelegateWrongArg" xml:space="preserve">
+    <value>Delegate's argument '{0}' should be a subprogram</value>
+  </data>
+  <data name="NonOpenArray" xml:space="preserve">
+    <value>Array '{0}' is expected to be an open array.</value>
+  </data>
+  <data name="WrongPlaceForProtocol" xml:space="preserve">
+    <value>Protocols are allowed only within modules and objects</value>
+  </data>
+  <data name="UndeclaredProduction" xml:space="preserve">
+    <value>Production or terminal symbol '{0}' is not declared</value>
+  </data>
+  <data name="IllegalTypeInProduction" xml:space="preserve">
+    <value>Type "{0}" cannot be used in protocol syntax</value>
+  </data>
+  <data name="IllegalEntityInProduction" xml:space="preserve">
+    <value>Unknown entity '{0}' in production</value>
+  </data>
+  <data name="NoProtocolKeywords" xml:space="preserve">
+    <value>Cannot apply IS operator for protocol '{0}' because there are no keywords</value>
+  </data>
+  <data name="AwaitOutsideUnit" xml:space="preserve">
+    <value>Await statement is specified outside of object/module</value>
+  </data>
+  <data name="AwaitIsDeclaredInNonProtectedMethod" xml:space="preserve">
+    <value>Await is declared in a not protected module or object</value>
+  </data>
+  <data name="IndexerIsReadOnly" xml:space="preserve">
+    <value>Indexer {0} is read only</value>
+  </data>
+  <data name="IndexerIsWriteOnly" xml:space="preserve">
+    <value>Indexer {0} is write only</value>
+  </data>
+  <data name="MissingCondition" xml:space="preserve">
+    <value>Missing a condition for a conditional statement or cycle</value>
+  </data>
+  <data name="NotGetOrSetInIndexer" xml:space="preserve">
+    <value>Object implementing indexer should implement [].Ger and/or [].Set</value>
+  </data>
+  <data name="NotImplementedIndexer" xml:space="preserve">
+    <value>Object is declared as implementing an indexer operator, but the implementation is missing</value>
+  </data>
+  <data name="ObjectDoesNotImplementIndexer" xml:space="preserve">
+    <value>Object does not implement an indexer operator</value>
+  </data>
+  <data name="NoNeedForCallingNewForValueType" xml:space="preserve">
+    <value>New called for a value type.</value>
+  </data>
+  <data name="ExitStatementDoesntBelongAnyLoopStatement" xml:space="preserve">
+    <value>Exit statement must be within a loop statement</value>
+  </data>
+  <data name="EmptyProtocol" xml:space="preserve">
+    <value>Protocol {0} must contan at least one production</value>
+  </data>
+  <data name="ExplicitTypeConversionRequired" xml:space="preserve">
+    <value>Types of integer, cardinal and real expressions must be explicitly set before sending. 
+E.g. p(integer(10)) instead of p(10).</value>
+  </data>
+  <data name="PropertyIsReadOnly" xml:space="preserve">
+    <value>Property {0} is read only</value>
+  </data>
+  <data name="DelegateForMethodOfValueObject" xml:space="preserve">
+    <value>Assigning a delegate for a method of value object {0}. It will be called for new instance of the object.</value>
+  </data>
+  <data name="ConstantComputationOverflow" xml:space="preserve">
+    <value>Overflow in constant expression. The result is too big</value>
+  </data>
+  <data name="VarParamInActivity" xml:space="preserve">
+    <value>Cannot pass paramiters to activity by reference</value>
+  </data>
+  <data name="RepetitionMustContainBothDirections" xml:space="preserve">
+    <value>Repetition in a production must contain sends in both directions</value>
+  </data>
+  <data name="DelegateWithWrongArgs" xml:space="preserve">
+    <value>Delegate {0} arguments do not match requested: ({1})</value>
+  </data>
+  <data name="NotAllowedName" xml:space="preserve">
+    <value>Name {0} is not allowed in {1}</value>
+  </data>
+  <data name="SupposedToBePrivate" xml:space="preserve">
+    <value>Method {0} is supposed to be declared as private</value>
+  </data>
+  <data name="AlreadyImportedInDefinition" xml:space="preserve">
+    <value>Type {0} was already imported in definition/enclosing namespace {1}. No need to import one more time.</value>
+  </data>
+  <data name="WrongAssignmentLeft" xml:space="preserve">
+    <value>Illegal type of the left part of the assignment statement</value>
+  </data>
+  <data name="WrongRefinesImplementsName" xml:space="preserve">
+    <value>Name '{0}' cannot be used in refines/impements clause</value>
+  </data>
+  <data name="IllegalUseOfModifier" xml:space="preserve">
+    <value>Modifier '{0}' cannot be used for {1}</value>
+  </data>
+  <data name="CannotImportDefinition" xml:space="preserve">
+    <value>Definition '{0}' does not have an implementation. You can implement definitions and import implementations.</value>
+  </data>
+  <data name="ReferenceInOperator" xml:space="preserve">
+    <value>Variable '{0}' cannot be passed by reference in an operator. Remove 'var' before the arguments</value>
+  </data>
+  <data name="InternalCompilerError" xml:space="preserve">
+    <value>Internal Compiler Error. Please report these error detailes:
+{0}</value>
+  </data>
+  <data name="901" xml:space="preserve">
+    <value>ICIPJHA9ZCHECZEKE9KMEEC1PMKEQEKDPIAEQPP9HKC8Q1K0QTPRK0AHEEZRPIAQE0ATEDDMPMJMJZA1C8ATJMC3EMDZZPMERQIAQMITAHMRAZDZIQZAHPPJQZZIRRCA</value>
+  </data>
+  <data name="IncompatibleSizes" xml:space="preserve">
+    <value>Arrays of types '{1}' and '{2}' have incompatible sizes for '{0}' operator</value>
+  </data>
+  <data name="WrongIndexType" xml:space="preserve">
+    <value>Illegal index type '{0}' for the indexer of type '{1}'</value>
+  </data>
+  <data name="IncorrectConstantRange" xml:space="preserve">
+    <value>Constant range has incorrect borders</value>
+  </data>
+  <data name="WrongRangeVarType" xml:space="preserve">
+    <value>Incorrect type '{0}' of a range variable, it should be integer</value>
+  </data>
+  <data name="SyntaxWarningIn" xml:space="preserve">
+    <value>Syntax warning in {0}: {1}</value>
+  </data>
+  <data name="ArrayNotMath" xml:space="preserve">
+    <value>Illegal operand type '{1}' for '{0}' operator. Probably 'math' modifier or an appropriate overloaded operator is missing</value>
+  </data>
+  <data name="IncorrectRankForTransp" xml:space="preserve">
+    <value>Illegal operand type '{0}' for '!' operator. Array rank should be equal to 2</value>
+  </data>
+  <data name="IncorrectRanksForBinMatrixOp" xml:space="preserve">
+    <value>Illegal operand types '{1}' and '{2}' for matrix binary operator '{0}'</value>
+  </data>
+  <data name="IncorrectRetTypeForGenComparison" xml:space="preserve">
+    <value>Illegal operand types '{1}' and '{2}' for '{0}' operator. Return type of overloaded '{0}' operation for array base types should be 'boolean'</value>
+  </data>
+  <data name="MatrixIsNotSquare" xml:space="preserve">
+    <value>Illegal operand type '{1}' for matrix binary operator '{0}'. Matrix should be square</value>
+  </data>
+  <data name="RanksNotEqual" xml:space="preserve">
+    <value>Illegal operand types '{1}' and '{2}' for '{0}' operator. Array ranks should be equal</value>
+  </data>
+  <data name="WrongIndexTypeMathMaybe" xml:space="preserve">
+    <value>Illegal index type '{0}' for the indexer of type '{1}'. Probably 'math' modifier is missing</value>
+  </data>
+  <data name="MathArrayInOverloadedOperator" xml:space="preserve">
+    <value>Illegal type '{0}' for overloaded operator: cannot use math array</value>
+  </data>
+  <data name="RangeRightBorderNotSpecified" xml:space="preserve">
+    <value>Range right border should be specified in an assignment statement</value>
+  </data>
+  <data name="OnlyExternalTypesInOperator" xml:space="preserve">
+    <value>Overloaded operators can only be defined in a module where at least one of the operands is declared</value>
+  </data>
+  <data name="WrongParameterInOperatorDeclaration" xml:space="preserve">
+    <value>Wrong type of an operator argument. Interfaces are not allowed. Use object type</value>
+  </data>
+  <data name="SupposedToBeProtected" xml:space="preserve">
+    <value>Enclosing object/module needs a protected modifier</value>
+  </data>
+  <data name="CannotResolve" xml:space="preserve">
+    <value>Cannot resolve {0}</value>
+  </data>
+  <data name="ActivityVariableIsNotLocal" xml:space="preserve">
+    <value>Use local variables for activity references. Field '{0}' can be used only within the active body of '{1}'</value>
+  </data>
+  <data name="AliasActivityReference" xml:space="preserve">
+    <value>Copying activity references to is not allowed. There should be only one copy. You can also pass it as a procedure parameter.</value>
+  </data>
+  <data name="AcceptCalledForInvalidDialog" xml:space="preserve">
+    <value>Accept is called for the dialog that was not initiated</value>
+  </data>
+  <data name="ActivityVariableMustBeLocal" xml:space="preserve">
+    <value>Activity variable must be simple local variable</value>
+  </data>
+  <data name="ProtocolNotCompleted" xml:space="preserve">
+    <value>Routine terminates before dialog {0} complets. Expected: {1}</value>
+  </data>
+  <data name="ProtocolViolation" xml:space="preserve">
+    <value>Possible protocol violation. Expected: {0}</value>
+  </data>
+  <data name="NamespaceAndTypeHaveSameName" xml:space="preserve">
+    <value>Namespace's name {0} clashes with external type {0}</value>
+  </data>
+  <data name="DeprecatedImport" xml:space="preserve">
+    <value>Usage of {0} is deprecated. Use corresponding language constructs</value>
+  </data>
+  <data name="DefinedInBaseDefinition" xml:space="preserve">
+    <value>Entity {0} is already defined in base definition {1}</value>
+  </data>
+  <data name="IllegalImplementingProc4" xml:space="preserve">
+    <value>Identifier {0} does not denote a procedure from any definition</value>
+  </data>
+  <data name="PublicMethodInActor" xml:space="preserve">
+    <value>Actors cannot have public methods. Use activities to interact with it</value>
+  </data>
+  <data name="UndeclaredEBNFProduction" xml:space="preserve">
+    <value>Production {0} is not defined in {1} by this point. A production must be declared before it is used. Textually the last one is the entry point</value>
+  </data>
+  <data name="ProtocolAmbiguity" xml:space="preserve">
+    <value>Ambiguity in the protocol. Protocol {0} contains alternatives that mix sends and receives. Change the protocol such at any point it is clear whether client or server decides about the next message</value>
+  </data>
+  <data name="IncompatibleMathTypes" xml:space="preserve">
+    <value>Types '{0}' and '{1}' are not compatible for math operation '{2}'</value>
+  </data>
+  <data name="AssignMathExpressionToNonMath" xml:space="preserve">
+    <value>Cannot assign math expression to non-math receiver. Either assign to math receiver or use only local math variable in right hand side.</value>
+  </data>
+</root>

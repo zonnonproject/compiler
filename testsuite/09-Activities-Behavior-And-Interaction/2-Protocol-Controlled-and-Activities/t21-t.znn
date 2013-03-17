@@ -1,0 +1,40 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Several correct accepts and returns
+ *)
+
+module {protected} Main;
+
+protocol P = (
+	dialog = {integer ?integer} {string ?string} 
+);
+
+activity A implements P;
+var i: integer;
+begin 
+	do
+	    writeln("do return");
+		return integer(10);
+		writeln("wait i");
+		accept unused
+	on exception do
+		writeln("exception thrown in activity");
+	end;
+end A;
+
+var 
+	a : activity {P};
+begin
+	a := new A; 
+	do
+	    writeln("send 10 and wait");
+	    a( integer(10) );  
+	    writeln("wait");
+		unused := a();
+		halt(0) (* failure *)
+	on exception do
+	  writeln("exception thrown");
+	  halt(1)
+	end
+end Main.

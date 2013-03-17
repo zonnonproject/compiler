@@ -1,0 +1,12 @@
+(** 
+ * 4. Language symbols and identifiers. 
+ * 4.4. Numeric Constants
+ *
+ * Negative test: incompatible assignment.
+ *)
+module Main;
+	var r : real { 32 };
+begin
+	r := 1234.56 { 80 };
+	halt(0);
+end Main.

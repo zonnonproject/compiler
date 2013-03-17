@@ -1,0 +1,141 @@
+(** 
+ * 17. Math extensions.
+ * 17.2. Overload operators
+ * 
+ * Negative test: array is not math
+ * with scalar
+ *)
+
+module Main;
+
+type v = array {math} * of integer;
+type vc = array * of complex;
+type vb = array {math} * of boolean;
+
+type {public, ref} complex = object
+var {public}
+	re, im : real;
+	
+procedure {public} init(re_, im_: real);
+begin
+	re := re_;
+	im := im_;
+end init;
+	
+begin
+	re := 0.0;
+	im := 0.0;
+end complex;
+
+operator {public} '+' (z1, z2 : complex) : complex;
+var 
+	res : complex;
+begin
+	res := new complex;
+	res.re := z1.re + z2.re;
+	res.im := z1.im + z2.im;
+	return res;
+end '+';
+
+operator {public} '-' (z1, z2 : complex) : complex;
+var 
+	res : complex;
+begin
+	res := new complex;
+	res.re := z1.re - z2.re;
+	res.im := z1.im - z2.im;
+	return res;
+end '-';
+
+operator {public} '*' (z1, z2 : complex) : complex;
+var 
+	res : complex;
+begin
+	res := new complex;
+	res.re := z1.re * z2.re - z1.im * z2.im;
+	res.im := z1.re * z2.im + z1.im * z2.re;
+	return res;
+end '*';
+
+operator {public} '/' (z1, z2 : complex) : complex; (*there is no sense in this operator*)
+var 
+	res : complex;
+begin
+	res := new complex;
+	res.re := z1.re * z2.re + z1.re * z2.im;
+	res.im := z1.im * z2.im - z1.im * z2.re;
+	return res;
+end '/';
+
+operator {public} '>' (z1, z2 : complex) : boolean;
+begin
+	return ((z1.re > z2.re) & (z1.im > z2.im));
+end '>';
+
+operator {public} '>=' (z1, z2 : complex) : boolean;
+begin
+	return ((z1.re >= z2.re) & (z1.im >= z2.im));
+end '>=';
+
+operator {public} '<' (z1, z2 : complex) : boolean;
+begin
+	return ((z1.re < z2.re) & (z1.im < z2.im));
+end '<';
+
+operator {public} '<=' (z1, z2 : complex) : boolean;
+begin
+	return ((z1.re <= z2.re) & (z1.im <= z2.im));
+end '<=';
+
+operator {public} '=' (z1, z2 : complex) : boolean;
+begin
+	return ((z1.re = z2.re) & (z1.im = z2.im));
+end '=';
+
+operator {public} '#' (z1, z2 : complex) : boolean;
+begin
+	return ((z1.re # z2.re) or (z1.im # z2.im));
+end '#';
+
+var
+	a, b, c : v;
+	ac, bc, cc : vc;
+	cb1, cb2 : vb;
+	i : integer;
+	z : complex;
+	q1, q2 : boolean;
+  
+begin
+	ac := new vc(2);
+	ac[0] := new complex;
+	ac[0].init(2., 3.);
+	ac[1] := new complex;
+	ac[1].init(-1., 0.);
+	bc := new vc(2);
+	bc[0] := new complex;
+	bc[0].init(3., -1.);
+	bc[1] := new complex;
+	bc[1].init(1., -4.);
+	
+	(*q2 := ac # bc;
+	for i := 0 to len(ac) - 1 do
+		if (q2 # (ac[i] # bc[i]))
+		then
+			halt(0);
+		end;
+	end;*)
+	
+	a := [0, 1, 0];
+	b := [1, 1, 0];
+	cc := ac + bc;
+	(*
+	if (cc[0] # (ac[0] + bc[1]) or (cc[1] # ac[1] + bc[1]) or (cc[2] # ac[0] + bc[0]))
+	then
+		halt(0);
+	end;
+	
+	halt(1);
+	*)
+	halt(0);
+end Main.
+

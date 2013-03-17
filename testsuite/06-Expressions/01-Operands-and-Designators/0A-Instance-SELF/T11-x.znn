@@ -1,0 +1,18 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * A. Instance = self
+ *
+ * Negative test: call of procedure that does not exist.
+ *)
+object A;
+	var i : integer;
+begin
+	self.x();
+	i := self.x();
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

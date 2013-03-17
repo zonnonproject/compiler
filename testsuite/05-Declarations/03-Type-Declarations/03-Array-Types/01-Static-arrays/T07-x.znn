@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: negative array length.
+ * The array length is constant.
+ * The constant is declated after the array declaration.
+ *)
+module A;
+	type T = array N - 101 of real;
+
+	const N = 100;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

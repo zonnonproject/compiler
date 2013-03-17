@@ -1,0 +1,18 @@
+(**
+ * 2. Program Constructs and their Relations.
+ *  
+ * Positive test: module contains implementation.
+ *)
+module A;
+	definition B;
+	end B;
+
+	implementation B;
+	end B;
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.
+

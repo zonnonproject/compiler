@@ -1,0 +1,26 @@
+(** 
+ * 5. Declarations.
+ * 6.4. Variable declaration.
+ * definition name is used as type of variable
+ *
+ * Negative test: the definition B.C is used as variable x type
+ * The definition B.C is used _before_ it is declared.
+ *)
+object A;
+
+import B.C;
+
+var 
+	x : B.C; (* The interface type object { B.C } must be used instead! *)
+end A.
+
+module B;
+	definition { public } C;
+	end C;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

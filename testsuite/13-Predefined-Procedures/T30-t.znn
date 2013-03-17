@@ -1,0 +1,11 @@
+(**
+ * 09.Predefined procedures.
+ * The low procedure.
+ *
+ * Positive test: low of 'a' and '_'.
+ *)
+module Main;
+begin
+	if (low('A') = 'a') & (low('_') = '_')
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,26 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call.
+ *
+ * Positive test: the procedure call in module.
+ *)
+module Main;
+	procedure p2(var i : integer) : integer;
+	begin
+		return p1(i);
+	end p2;
+
+	procedure p1(var j : integer) : integer;
+	begin  
+		j := j + 1;
+		return j;
+	end p1;
+
+	var n, k : integer;
+begin
+	n := 4;
+	k := p2(n);
+
+	if (k = 5) & (n = 5)
+	then halt(1) else halt(0) end;
+end Main.

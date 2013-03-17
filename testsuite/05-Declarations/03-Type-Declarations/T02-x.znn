@@ -1,0 +1,17 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Negative test: the variable name B is used as type name of type T.
+ * The variable is declared before it is used.
+ *)
+module A;
+	var B : integer;
+	type T = B;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

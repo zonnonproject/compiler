@@ -1,0 +1,31 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call.
+ *
+ * Positive test: the procedure call.
+ * The procedure is located in object A.
+ *)
+module Main;
+	import A;
+
+	var k, j : integer;
+		a : A;
+
+	procedure p2(var i : integer) : integer;
+	begin
+		return a.p1(i);
+	end p2;
+begin
+	j := 1;
+	k := p2(j);
+
+	if k = 2 
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public} A;
+	procedure {public} p1(var j : integer) : integer;
+	begin  
+		return j + 1;
+	end p1;
+end A.

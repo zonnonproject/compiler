@@ -1,0 +1,16 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * Definition name
+ *
+ * Negative test: the nested definition has qualified name B.C.
+ *)
+module {public} A;
+	definition {public} B.C;
+	end C;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

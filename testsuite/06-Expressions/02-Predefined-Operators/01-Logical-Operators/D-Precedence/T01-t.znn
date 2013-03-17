@@ -1,0 +1,22 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators
+ * D. Precedence of logical operators.
+ *
+ * Positive test: 
+ *)
+module Main;
+	var a, b, c, d : boolean;
+begin
+	a := false;
+	b := false;
+	c := false;
+	d := false;
+
+	(*  The correct order is:
+	 *	a or ((~b) & (~c)) or d 
+	 *)	
+	if a or ~b & ~c or d
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,26 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.2. Dynamic arrays
+ *
+ * Negative test: 1-dimensional dynamic array creating and indexing.
+ * The indexed elements are out of the array.
+ *)
+module Main;
+	import System.IndexOutOfRangeException;
+
+	type SimpleArray = array * of integer;
+
+	type Acceptable = array 6 of array * of integer;
+
+	var a : Acceptable;
+	var i : integer;
+begin
+	a[1] := new SimpleArray(10);
+        a[1][1] := 10;
+        if a[1][1] = 10 then
+           halt(1)
+	else
+           halt(0)
+	end
+end Main.

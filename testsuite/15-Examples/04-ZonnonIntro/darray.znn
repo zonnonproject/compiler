@@ -1,0 +1,61 @@
+(* ********* Zonnon online collection ***********
+ * Example on using dynamic arrays
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module example610;
+
+type Vector = array * of integer;
+
+procedure CreateAndReadVector(var a: Vector);
+	var i, n: integer;
+begin
+	write("Количество элементов: "); readln(n);
+	a := new Vector(n);
+	for i := 0 to len(a) - 1 do
+		write("a[",i:2,"]: "); read(a[i])
+	end
+end CreateAndReadVector; 
+
+procedure InitializeMatrix(var mat: array of array of real);
+	var i, j: integer; 
+begin
+	for i := 0 to len(mat, 0) - 1 do
+		for j := 0 to len(mat, 1) - 1 do
+			mat[i][j] := i*10+j;
+		end
+	end
+end InitializeMatrix;
+
+procedure PrintMatrix(var mat: array of array of real);
+	var i, j: integer; 
+begin
+	for i := 0 to len(mat, 0) - 1 do
+		for j := 0 to len(mat, 1) - 1 do
+			write(mat[i][j]:3:0);
+		end;
+		writeln;
+	end
+end PrintMatrix;
+
+procedure PrintVector(var vec: array of integer);
+	var i: integer; 
+begin
+    for i := 0 to len(vec) - 1 do
+		write(vec[i]:3);
+	end
+end PrintVector;
+
+var m: array 10 of array 10 of real;
+var a: Vector;
+begin
+  CreateAndReadVector(a);
+  writeln;
+  PrintVector(a);
+  InitializeMatrix(m);
+  writeln;
+  PrintMatrix(m);
+end example610.

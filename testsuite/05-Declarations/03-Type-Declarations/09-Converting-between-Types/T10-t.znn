@@ -1,0 +1,15 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: casting from integer{32} to real{32}.
+ *)
+module Main;
+	var r : real { 32 };
+begin
+	r := real(3, 32);
+
+	if r = 3.0 
+	then halt(1) else halt(0) end;
+end Main.

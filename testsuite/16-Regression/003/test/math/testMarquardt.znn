@@ -1,0 +1,161 @@
+module {public} Main;
+
+   (* Tests the module Math.NewtonRaphson *)
+
+   import
+      System.Int32               as Int32,
+      System.IO.StreamWriter     as StreamWriter,
+      System.IO.Path             as Path,
+      System.Reflection.Assembly as Assembly,
+      BelCore.Boolean   as B,
+      BelCore.TextFiles as TF,
+      BelCore.Log       as L,
+      BelCore.Numbers   as N,
+      BelCore.Arrays    as A,
+      BelCore.Matrices  as M,
+      BelMath.Distributions as P,
+      BelMath.NewtonRaphson as NR;
+
+   var
+      asm : Assembly;
+      dir, loc, path : string;
+
+   procedure {public} Dat (n : integer; var x : N.Number; var y : A.Array);
+   var
+      c : N.Number;
+   begin
+      if n = 1 then
+         x := -3;
+         c := -4.0
+      elsif n = 2 then
+         x := -2;
+         c := -1.9
+      elsif n = 3 then
+         x := -1;
+         c := -0.55
+      elsif n = 4 then
+         x := 0;
+         c := 0.05
+      elsif n = 5 then
+         x := 1;
+         c := 0.65
+      elsif n = 6 then
+         x := 2;
+         c := 1.9
+      else
+         x := 3;
+         c := 4.3
+      end;
+      y.Initialize(1);
+      y[1] := c
+   end Dat;
+
+   procedure {public} Thy (p : A.Array; x : N.Number; var y : A.Array);
+   begin
+      y.Initialize(1);
+      y[1] := p[1] + p[2]*x + p[3]*(x**3)
+   end Thy;
+
+   procedure {public} BMtx (n : integer; p : A.Array) : M.Matrix;
+   var
+      b : M.Matrix;
+      x, xDat : N.Number;
+      yDat : A.Array;
+   begin
+      b.Initialize(1,3);
+      Dat(n, xDat, yDat);
+      b[1,1] := 1;
+      b[1,2] := xDat;
+      b[1,3] := xDat**3;
+      return b
+   end BMtx;
+
+   procedure {public} ObjFn (p : A.Array) : N.Number;
+   var
+      i : integer;
+      psi, xDat : N.Number;
+      yDat, yThy : A.Array;
+   begin
+      (* first invariant of the moment of residuals *)
+      for i := 1 to 7 do
+         Dat(i, xDat, yDat);
+         Thy(p, xDat, yDat);
+         psi := psi + (yDat[1] - yThy[1])**2
+      end;
+      return psi
+   end ObjFn;
+
+   procedure {public} GMtx (m : M.Matrix) : M.Matrix;
+   var
+      g : M.Matrix;
+   begin
+      (* G matrix is the gradient of the merit function *)
+      (* taken with respect to the moment of residuals  *)
+      g.Initialize(1,1);
+      g[1,1] := 1;
+      return g
+   end GMtx;
+
+   procedure {public} Run;
+   var
+      ci, par : A.Array;
+      file : string;
+      i : integer;
+      okay : boolean;
+      opt : NR.Marquardt;
+      rsq, tol, x : N.Number;
+      sw : StreamWriter;
+      vp, vr : M.Matrix;
+      n, y : Int32;
+   begin
+      n := 7;
+      tol := 0.0001;
+      par.Initialize(3);
+      x := 0;
+      par[1] := x;
+      x := 0.01;
+      par[2] := x;
+      x := 0.1;
+      par[3] := x;
+      opt.Solve(n, tol, Dat, Thy, BMtx, ObjFn, GMtx, par, okay);
+      write("Optimization at a tolerance of");
+      write(tol.Typeset());
+      if okay then
+         writeln(" succeeded.");
+         write("The R-squared statistic is: ");
+         rsq := opt.RSquared(n, Dat, par, Thy);
+         writeln(rsq.Typeset());
+         writeln("With optimum parameters and 90% confidence intervals of:");
+         vr := opt.CovarianceMatrixForResiduals(n, Dat, par, Thy);
+         vp := opt.CovarianceMatrixForParameters(n, par, BMtx, vr);
+         ci := opt.ConfidenceIntervals(P.Certainty.ninety, vp);
+         for i := 1 to 3 do
+            y := i;
+            write("   p[" + y.ToString() + "] = ");
+            x := par[i];
+            write(x.Typeset());
+            x := ci[i];
+            writeln(" +/- " + x.Typeset())
+         end
+      else
+         writeln(" failed.")
+      end;
+      file := Path.Combine(dir, "optimizationStatistics");
+      sw := TF.OpenWriter(file);
+      opt.Statistics(sw);
+      TF.CloseWriter(sw);
+      writeln("The statistics of this run have been written to file:");
+      writeln("   " + file + ".");
+      writeln
+   end Run;
+
+begin
+   asm := Assembly.GetExecutingAssembly();
+   loc := asm.Location;
+   path := Path.GetDirectoryName(loc);
+   dir := Path.Combine(path, "iofiles");
+   writeln("This program tests the module Math.NewtonRaphson.");
+   writeln;
+   Run;
+   L.Close
+end Main.

@@ -1,0 +1,13 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the procedure call used wrong actual parameter type.
+ *)
+module Main;
+	procedure A(i : integer);
+	begin
+	end A;
+begin
+	A(3.0);
+	halt(0);
+end Main.

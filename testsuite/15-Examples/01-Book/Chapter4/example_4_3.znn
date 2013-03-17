@@ -1,0 +1,53 @@
+(* ********* Zonnon online collection ***********
+ * BuildTree (Chapter 4, Example 4.3)
+ *
+ * This example is a part of Prof. Nikalus Wirth's book
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module BuildTree;
+
+object {ref, public} Node;
+var {public}
+   key: integer;
+   left, right: Node;
+end Node;
+
+var root: Node; n: integer;
+
+procedure tree(n:integer): Node;
+var 
+   newnode: Node;
+   x, nl, nr: integer;
+begin
+   if n = 0 then newnode := nil;
+   else nl := n div 2; nr := n - nl-1;
+      write("?> "); read(x); newnode := new Node;
+      newnode.key := x;
+      newnode.left:= tree(nl);
+      newnode.right:= tree(nr);
+   end;
+   return newnode;
+end tree;
+
+procedure PrintTree(t: Node; h: integer);
+var i: integer;
+begin
+   if t # nil then
+      PrintTree(t.left, h+1);
+      for i:=1 to h do write(" "); end;
+      writeln(t.key:6);
+      PrintTree(t.right, h+1);
+   end;
+end PrintTree;
+
+begin
+   writeln("Example 4.3 (BuildTree)");   
+   write("Enter number of nodes: ");
+   readln(n);
+   writeln("Enter nodes: ");
+   root := tree(n);
+   PrintTree(root, 0);
+   writeln("Type 'q' to exit");	
+end BuildTree.

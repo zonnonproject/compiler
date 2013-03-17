@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * integer type
+ *
+ * Negative test: integer value is less then integer minimum.
+ *)
+module Main;
+	var imin : integer;
+begin
+	do
+		imin := min(integer);
+		imin := imin - 1;
+		halt(0);
+	on Overflow do
+		halt(1);
+	end
+end Main.

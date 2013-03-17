@@ -1,0 +1,37 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Catching the protocol exception in the module
+ *)
+
+module {protected} Main;
+
+protocol P = (
+	dialog = integer
+);
+
+activity A implements P;
+var 
+	i : integer;
+begin 
+	accept unused;
+end A;
+
+procedure R;
+var 
+	a : activity {P};
+begin 
+	a := new A;
+	a( "Sending a string instead of integer" );
+end R;
+
+
+begin
+	do
+		R
+	on exception do
+		halt (1) (* Success! Protocol exception *)	
+	end;
+
+	halt(0) (* failure *)
+end Main.

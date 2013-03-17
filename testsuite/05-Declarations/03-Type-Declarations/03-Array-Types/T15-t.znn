@@ -1,0 +1,23 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: the postulated interface is used in type declaration.
+ * The module B is declared after it is used.
+ *)
+module A;
+	import B;
+
+	type T = array 1 of object { B.E };
+end A.
+
+module B;
+	definition E;
+    end E;
+end B.
+
+module Main;
+begin
+	halt(1);
+end Main.

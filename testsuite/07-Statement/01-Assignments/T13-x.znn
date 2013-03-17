@@ -1,0 +1,14 @@
+(** 
+ * 7. Statement 
+ * 7.1. Assignments
+ *
+ * Negative text: char assignment to integer.
+ *)
+module Main;
+	var c : char;
+		i : integer;
+begin
+(*	c := 'a'; *)
+	c := i;
+	halt(0);
+end Main.

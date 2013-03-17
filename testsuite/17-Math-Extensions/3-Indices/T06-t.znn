@@ -1,0 +1,21 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: range indexing (static array) : index out of range
+ *)
+
+module Main;
+
+var
+	a : array {math} 5 of integer;
+	n : integer;
+begin	
+	n := 5;
+	do
+		a[3..n] := [9, 10, 11];
+	on OutOfRange do
+		halt(1);
+	end;
+	halt(0);
+end Main.

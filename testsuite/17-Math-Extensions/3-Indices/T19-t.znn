@@ -1,0 +1,32 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Positive test: mixed indexing
+ *)
+
+module Main;
+
+type vb = array {math} * of boolean;
+type vi = array {math} * of integer;
+type vmi = array {math} * of integer;
+
+var
+	a1, a2 : vmi;
+	b : vb;
+	i : vi;
+begin	
+
+	a1 := [4, 5, 6, 7];
+	a2 := new vmi(5);
+	b := [true, false, true, false];
+	i := [2, 3];
+	
+	a2[i] := a1[b];
+	if (a2[0] = 0) & (a2[1] = 0) & (a2[2] = 4) & (a2[3] = 6) & (a2[4] = 0)
+	then
+		halt(1);
+	else
+		halt(0);
+	end;		
+end Main.

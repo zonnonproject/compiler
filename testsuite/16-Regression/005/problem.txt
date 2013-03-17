@@ -1,0 +1,61 @@
+Dear Roman,
+
+thank you for your reply, some days ago, relating some installation problems with Zonnon 1.10.
+
+The new release 1.11 for Visual Studio 2008 has been a bit better. But the most installation problems still remained.
+
+The most of this problems could be solved, so that I could give you some constructive feedback.
+
+1.) the *setup needs administator rights* (for gacutil and regasm), but this is never proved during the installation process. *Running gacutil.exe and regasm *with Windows Vista Home Premium *needs administator rights*. Even without administrator rights the installation is declared to be sucessfull.
+But this is confusing.
+
+_Solution:_ It would be better to rollback the installation, when there are no admin rights.
+
+The compilation problems in Visual Studio 2008 seemed to be associated with errormessages,  caused when running integrate2008.bat.
+
+2.) *Gacutil.exe could not be found* anywhere on my computer. May be that the installation of Visual Studio 2008 was incomplete. The Zonnon setup expects gacutil.exe in the Zonnon-Home directory, but doesn't place a copy there.
+
+_Solution:_ placing a copy of gacutil in the ZonnonHomeDirectory. It may be helpfull, when "gacutil.exe" is distributed with the zonnon package.
+
+3.) with *activated UAC adding assemblies in the Global Assembly Cage is denied*.
+For example:
+...
+D:\Languages\Zonnon 1.11>gacutil /nologo /i Microsoft.VisualStudio.OLE.Interop.dll
+Failure adding assembly to the cache: Access denied. You might not have administrative credentials to perform this task. Contact your system administrator for assistance.
+
+D:\Languages\Zonnon 1.11>gacutil /nologo /i Microsoft.VisualStudio.Designer.Interfaces.dll
+Failure adding assembly to the cache: Access denied. You might not have administrative credentials to perform this task. Contact your system administrator for assistance.
+
+D:\Languages\Zonnon 1.11>gacutil /nologo /i Microsoft.VisualStudio.Shell.Interop.dll
+Failure adding assembly to the cache: Access denied. You might not have administrative credentials to perform this task. Contact your system administrator for assistance.
+
+D:\Languages\Zonnon 1.11>gacutil /nologo /i Microsoft.VisualStudio.TextManager.Interop.dll
+Failure adding assembly to the cache: Access denied. You might not have administrative credentials to perform this task. Contact your system administrator for assistance.
+
+_Solution:_ deactivating UAC and then  running integrate2008.bat as an admin.
+
+
+4.) Missing two files:
+...
+D:\Languages\Zonnon 1.11>gacutil /nologo /i *System.Compiler.Sql.dll *
+Failure adding assembly to the cache:   Das System kann die angegebene 
+Datei nicht finden.
+
+D:\Languages\Zonnon 1.11>gacutil /nologo /i 
+*System.Compiler.Sql.Runtime.dll *
+Failure adding assembly to the cache:   Das System kann die angegebene 
+Datei nicht finden.
+ 
+This two files were not included in the zonnon package and are still 
+missing.
+
+Nevertheless with the first 3 solutions running the Projecttemplates 
+(Consoleapplication and Winformsapplication) within Visual Studio 2008 
+was sucessfull.
+
+So I'am very glad, that I could start exploring Zonnon now.
+
+
+Best regards from Germany
+
+Meik

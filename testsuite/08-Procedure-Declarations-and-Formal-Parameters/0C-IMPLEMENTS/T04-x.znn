@@ -1,0 +1,19 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the procedure E implements the procedure B from the definition A.
+ * Procedure declaration and procedure implementation have different name.
+ *)
+definition {public} A;
+	procedure B(i : integer) : integer;
+end A.
+
+module run implements A;
+	procedure {public} E(i : integer) : integer implements A.B;
+	begin
+		return i+1;
+	end B;
+begin
+	if E(4) = 5
+	then halt(1) else halt(0) end;
+end Main.

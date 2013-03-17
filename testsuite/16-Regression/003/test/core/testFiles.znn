@@ -1,0 +1,104 @@
+module {public} Main;
+
+  import
+      System.IO.BinaryReader     as BinaryReader,
+      System.IO.BinaryWriter     as BinaryWriter,
+      System.IO.Path             as Path,
+      System.IO.StreamReader     as StreamReader,
+      System.IO.StreamWriter     as StreamWriter,
+      System.Reflection.Assembly as Assembly,
+      System.Single              as Single,
+      BelCore.DataFiles          as DF,
+      BelCore.Log                as L,
+      BelCore.TextFiles          as TF;
+
+   procedure {private} Store;
+   var
+      bw : BinaryWriter;
+      file, s : string;
+      i : integer;
+      sw : StreamWriter;
+      x : Single;
+   begin
+      s := "";
+      file := "testFile";
+      bw := DF.OpenWriter(file);
+      sw := TF.OpenWriter(file);
+      writeln("Enter three reals to store to binary and text files.");
+      for i := 1 to 3 do
+         writeln;
+         readln(s);
+         sw.WriteLine(s);
+         x := Single.Parse(s);
+         bw.Write(x);
+         s := "   The ";
+         if i = 1 then
+            s := s + "first "
+         elsif i = 2 then
+            s := s + "second"
+         else
+            s := s + "third "
+         end;
+         s := s + "real number stored to these files was: ";
+         s := s + x.ToString("E7");
+         writeln(s)
+      end;
+      DF.CloseWriter(bw);
+      TF.CloseWriter(sw)
+   end Store;
+
+   procedure {private} Load;
+   var
+      br : BinaryReader;
+      file, s : string;
+      i : integer;
+      sr : StreamReader;
+      x : Single;
+   begin
+      file := "testFile";
+      br := DF.OpenReader(file);
+      sr := TF.OpenReader(file);
+      (* read in the data *)
+      for i := 1 to 3 do
+         x := br.ReadSingle();
+         s := "The ";
+         if i = 1 then
+            s := s + "first "
+         elsif i = 2 then
+            s := s + "second"
+         else
+            s := s + "third "
+         end;
+         s := s + "real number read from the binary file was: ";
+         s := s + x.ToString("E7");
+         writeln(s)
+      end;
+      DF.CloseReader(br);
+      TF.CloseReader(sr)
+   end Load;
+
+   procedure {public} Files;
+   var
+      asm : Assembly;
+      dir, file, loc, path : string;
+   begin
+      Store;
+      writeln;
+      writeln("Data have been stored in the files");
+      asm := Assembly.GetExecutingAssembly();
+      loc := asm.Location;
+      path := Path.GetDirectoryName(loc);
+      dir := Path.Combine(path, "iofiles");
+      file := Path.Combine(dir, "testFile.dat");
+      writeln(file + " and");
+      file := Path.Combine(dir, "testFile.txt");
+      writeln(file + ".");
+      writeln("When read back in (to check their integrity) one gets:");
+      writeln;
+      Load;
+      writeln
+   end Files;
+begin
+   Files;
+   L.Close
+end Main.

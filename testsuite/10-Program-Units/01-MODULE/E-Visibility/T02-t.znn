@@ -1,0 +1,21 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * Module visibility
+ *
+ * Positive test: the default (public) visibility value is applied for the module A.B.
+ * The module is declared after it was used.
+ *)
+module Main;
+	import A.B;
+begin
+	if A.B.f = 3 
+	then halt(1) else halt(0) end;
+end Main.
+
+module { public } A.B;
+	procedure { public } f : integer;
+	begin 
+		return 3; 
+	end f;
+end B.

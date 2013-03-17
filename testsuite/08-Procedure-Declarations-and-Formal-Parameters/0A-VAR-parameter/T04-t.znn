@@ -1,0 +1,19 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Positive test: the function call uses initialized variable parameter.
+ *)
+module Main;
+	procedure A(var i : integer);
+	begin
+		i := i + 1;
+	end A;
+
+	var i : integer;
+begin
+	i := 1;
+	A(i);
+
+	if i = 2 
+	then halt(1) else halt(0) end;
+end Main.

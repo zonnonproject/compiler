@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Negative test: the element C is absent in object B.
+ *)
+module A;
+	import B.C;
+
+	type {public}
+		T = B.C;
+end A.
+
+object B;
+end B.
+
+module Main;
+begin
+	halt(0);
+end Main.
+

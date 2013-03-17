@@ -1,0 +1,39 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Binary
+ * 
+ * Negative test: Binary : array lengths are not equal (arrays are static)
+ * array + array
+ *)
+
+module Main;
+
+type vi = array {math} *,* of integer;
+type vr = array {math} *,* of real;
+type vc = array {math} *,* of cardinal;
+
+type iind = array {math} * of integer;
+type bind = array {math} * of boolean;
+
+var
+	ai1 : array {math} 5, 3 of integer;
+	ai2, ai3 : vi;
+	ar1 : array {math} 2, 3 of real;
+	ar2, ar3, ar4 : vr;
+	ac1 : array {math} 2, 3 of cardinal;
+	ac2, ac3 : vc;
+	
+	bi1, bi2 : iind;
+	bb1, bb2 : bind;
+	
+	i, j : integer;
+	
+begin	
+	
+	ar3 := ai1 .* ar1;
+	
+	halt(0);
+	
+end Main.
+	

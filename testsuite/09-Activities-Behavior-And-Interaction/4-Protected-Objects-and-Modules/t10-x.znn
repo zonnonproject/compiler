@@ -1,0 +1,40 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.4. Protocted-Objects-and-Modules
+ *
+ * Negative test: value and protected not compatible
+ *)
+module Main;
+
+type {public, protected} O = object
+	var {public}
+		a, b : integer;
+
+	procedure {public} Exchange;
+	var t : integer;
+	begin
+		t := a;
+		a := b;
+		b := t;
+	end Exchange;
+end O;
+
+var o:O;
+procedure halt(i: integer);
+begin
+	if i=1 then
+		writeln("success")
+	else
+		writeln("failure")
+	end; readln
+end halt;
+begin
+  o.a := 1;
+  o.b := 2;
+  o.Exchange;
+  if (o.a = 2) & (o.b = 1) then
+     halt(1)
+  else
+     halt(0)
+  end
+end Main.

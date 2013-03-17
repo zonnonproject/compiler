@@ -1,0 +1,18 @@
+(**
+ * 11. Program Units.
+ * 11.3. definition
+ * Definition name
+ * 
+ * Negative test: wrong definition name A.B.C.
+ * The element A of qualified name A.B.C is used for module A already.
+ *)
+module {public} A;
+end A.
+
+definition {public} A.B.C;
+end C.
+
+module Main;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators.
+ *
+ * Negative test: the procedures with real and char results are used in logical operator.
+ * The object is declared after its procedures are used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		r : boolean;
+begin
+	r := b.p or b.q;
+	halt(0);
+end Main.
+
+object A.B;
+	procedure { public } p : real;
+	begin 
+		return 1.0 
+	end p;
+
+	procedure { public } q : char;
+	begin 
+		return 'c' 
+	end q;
+end B.

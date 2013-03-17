@@ -1,0 +1,12 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Positive test: 5 + 2
+ *)
+module Main;
+begin
+	if 5 + 2 = 7 
+	then halt(1) else halt(0) end;
+end Main.

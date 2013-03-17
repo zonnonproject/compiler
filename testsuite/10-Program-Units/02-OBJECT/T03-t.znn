@@ -1,0 +1,36 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ *
+ * Test for namespace conflict interpretation.
+ * External and nested objects with the same name exist.
+ * What object B will be used in module A: nested or external?
+ *
+ * Zonnon compiler can generate wrong code.
+ * To check wrong code each object write specific value to output stream.
+ *)
+module Main;
+	type longreal = real {64};
+
+	type {public, ref} Node = object
+		var {public}
+			key : longreal;
+			left, right : Node;
+	end Node;
+
+	procedure P(node : Node; var leftNode : Node);
+	begin
+		if node.left = leftNode then halt(1) end;
+	end P;
+
+	var node, leftNode : Node;
+
+
+begin
+	leftNode := new Node;
+	node := new Node;
+	node.left := leftNode;
+
+	P(node, leftNode);
+	halt(0);
+end Main.

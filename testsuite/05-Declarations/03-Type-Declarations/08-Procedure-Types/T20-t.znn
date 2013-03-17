@@ -1,0 +1,28 @@
+module Main;
+	import System;
+type {public, ref} MainForm = object
+
+procedure {public} onEBC(sender:object; args: System.EventArgs);
+begin
+  s := true;
+  writeln("be happy");
+end onEBC;
+
+begin
+	clickEvent := onEBC;	
+(*	exitButton.add_Click(clickEvent);*)
+
+end MainForm;    
+
+var {private}
+	clickEvent: System.EventHandler;
+
+var s: boolean;
+var mainForm: MainForm;
+begin
+    s := false;
+	mainForm := new MainForm; 	
+	clickEvent(nil, nil);
+(* not run	Forms.Application.Run(mainForm); *)
+    if s then halt(1) else halt(0) end
+end Main.

@@ -1,0 +1,23 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * real type
+ *
+ * Negative test: wrong real variables assignment.
+ * Equvivalent types are used for real variables declaration.
+ * 
+ *)
+module Main;
+	type real64 = real { 64 };
+	type real80 = real { 80 };
+	var r64 : real64;
+	var r80 : real80;
+begin
+	r64 := 1.28;
+	r80 := 3.14;
+
+	r64 := r80 ; (* Wrong assignment: left type width {64} < right type width {80} *)
+	halt(0);
+end Main.
+

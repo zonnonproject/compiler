@@ -1,0 +1,89 @@
+(* ********* Zonnon online collection ***********
+ * Hilbert
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+
+module Hilbert;
+
+import Turtle;
+
+const  
+	RIGHT = 270;
+	LEFT  =  90;
+
+var	
+	topLevel : integer;
+	distance : integer;
+
+procedure ToggleDirection(var direction : integer);
+begin
+	direction := (direction + 180) mod 360
+end ToggleDirection;
+ 
+procedure InnerDraw(level : integer; direction : integer);
+begin
+	if level = 1 then
+		Turtle.Walk(distance,0);
+		Turtle.Turn(direction);
+		Turtle.Walk(distance,1);
+		Turtle.Turn(direction);
+		Turtle.Walk(distance,2);
+	else
+		Turtle.Turn(direction);
+		ToggleDirection(direction);
+		InnerDraw(level-1, direction);
+		ToggleDirection(direction);
+		Turtle.Turn(direction);
+
+		Turtle.Walk(distance,3);
+
+		InnerDraw(level-1, direction);
+		ToggleDirection(direction);
+		Turtle.Turn(direction);
+
+		Turtle.Walk(distance,4);
+
+		Turtle.Turn(direction);
+		ToggleDirection(direction);
+		InnerDraw(level-1, direction);
+
+		Turtle.Walk(distance,0);
+
+		Turtle.Turn(direction);
+		ToggleDirection(direction);
+		InnerDraw(level-1, direction);
+		ToggleDirection(direction);
+		Turtle.Turn(direction)
+	end
+end InnerDraw;
+ 
+procedure { public } Draw;
+begin
+	writeln("please enter toplevel(default: 5):");
+	readln(topLevel);
+
+	if topLevel <= 0 
+	then topLevel := 5
+	end;
+
+	write("chosen toplevel: "); writeln(topLevel);
+	writeln("please enter distance (default: 3):");
+	readln(distance);
+
+	if distance <= 0 
+	then distance := 3
+	end;
+
+	write("chosen distance: "); writeln(distance);
+	Turtle.SetTo(distance, distance, 90);
+	InnerDraw(topLevel, RIGHT)
+end Draw;
+ 
+begin
+	Draw()
+end Hilbert.
+

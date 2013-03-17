@@ -1,0 +1,273 @@
+(* ********* Zonnon online collection ***********
+ * Zonnon Lsung zur Aufgabe1, Serie 4, Informatik 1, WS 02/03
+ *
+ * This example is a part of Prof. Jurg Gutknecht's lectures
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Median;
+
+const
+	POOLSIZE = 1000;
+	NAMESIZE = POOLSIZE div 10;
+
+var
+	names : array POOLSIZE of char;
+	nameList : array NAMESIZE of integer;
+	nofNames : integer;
+
+procedure NullArray(a : array of char);
+var k : integer;
+begin
+	for k := 0 to len(a)-1 do
+		a[k] := char(0);
+	end;
+end NullArray;
+
+(* Reads all names from the shell to names and builds nameList. *)
+procedure ReadNames;
+var buffer : string;
+	name : array 50 of char;
+	i, j : integer;
+begin 
+	j := 0;	(* Index in names. *)
+	nofNames := 0;	(* Index in nameList. *)
+
+	NullArray(name);	
+	readln(buffer);
+	copy(buffer, name);
+
+	while name[0] # '#' do
+		nameList[nofNames] := j;
+		inc(nofNames);
+		i := -1;
+
+		repeat
+			inc(i);
+			names[j] := name[i];
+			inc(j)
+		until name[i] = char(0);
+
+		NullArray(name);	
+		readln(buffer);	
+		copy(buffer, name);
+	end;
+end ReadNames;
+
+(* Prints all entries in the string pool. *)
+procedure ListNames;
+var 
+	s : string;
+	str : array 50 of char;
+	i, j : integer;
+	name : integer;
+begin
+	name := 0;
+	j := 0;
+	repeat
+		NullArray(str);	
+		i := -1;
+		inc(name);
+		repeat
+			inc(i);
+			str[i] := names[j];
+			inc(j)
+		until str[i] = char(0);
+
+		copy(str, s);
+		writeln(s)
+	until name >= nofNames
+end ListNames;
+
+(* Prints all entries in the display array. *)
+procedure ListNameList;
+var
+	s : string;
+	str : array 50 of char;
+	i, j, k : integer;
+begin 
+	k := 0; 
+	repeat
+		i :=  -1;
+		j := nameList[k];
+		NullArray(str);
+
+		repeat
+			inc(i);
+			str[i] := names[j]; 
+			inc(j)
+		until str[i] = char(0);
+		inc(k);
+
+		s := " ";
+		copy(str, s);
+(*		write("j = "); writeln(j:3); *)
+		write(k:2); write(": "); 
+		writeln(s)
+	until k >= nofNames
+end ListNameList;
+
+(* true <=> names[nameList[a]] < names[nameList[b]] *)
+procedure Less(a, b : integer) : boolean; 
+var i, j : integer;
+begin
+	i := nameList[a];	
+	j := nameList[b];
+
+	while (names[i] = names[j]) & (names[i] # char(0)) do
+		inc(i);
+		inc(j)
+	end;
+
+	return names[i] < names[j]
+end Less;
+
+(* true <=> names[nameList[a]] > names[nameList[b]] *) 
+procedure Greater(a, b : integer) : boolean;
+var  i, j : integer;
+begin
+	i := nameList[a];	
+	j := nameList[b];
+
+	while (names[i]  = names[j]) & (names[i] # char(0)) do
+		inc(i);
+		inc(j)
+	end;
+
+	return names[i] > names[j]
+end Greater;
+  
+(* Prints names[nameList[n]]. *)
+procedure PrintName(n : integer);
+var  
+	s : string;
+	str : array 50 of char;
+	i, j : integer;
+begin
+	i := -1;	
+	j := nameList[n];
+	NullArray(str);
+
+	repeat
+		inc(i);
+		str[i] := names[j];
+		inc(j)
+	until str[i] = char(0);
+
+	copy(str, s);
+	writeln(s)
+end PrintName;
+
+(* 4.1 Median berechnen *)
+procedure CalcMedian;
+var  
+	left, right : integer;
+	i, j, m, t, center : integer;
+	done : boolean;
+begin
+	left := 0; right := nofNames-1;
+	done := false;
+	center := (left + right) div 2;
+	repeat
+		i := left; j := right; m := (i + j) div 2;
+		
+		(* inner loop for quick sort *)
+		loop
+			while Greater(m, i) do inc(i) end;
+			while Less(m, j) do dec(j) end;
+			if i >= j then exit end;
+			t := nameList[i]; nameList[i] := nameList[j]; nameList[j] := t;
+			inc(i); dec(j)
+		end;
+		if i = j then inc(i); dec(j) end;
+
+		(*	check which part to sort	*)
+		if center <= j then right := j
+		elsif i <= center then left := i
+		else done := true (*	median is at nameList[center]	*) 
+		end
+	until done;
+	PrintName(center);
+end CalcMedian;
+
+procedure InnerSort(left, right : integer);
+var  
+	i, j, m, t : integer;
+begin
+    i := left; j := right; m := (i + j) div 2;
+    loop
+        while Greater(m, i) do inc(i) end;
+        while Less(m, j) do dec(j) end;
+        if i >= j then exit end;
+        t := nameList[i]; nameList[i] := nameList[j]; nameList[j] := t;
+        inc(i); dec(j)
+    end;
+    if i = j then inc(i); dec(j) end;
+    if left < j then InnerSort(left, j) end;
+    if i < right then InnerSort(i, right) end
+end InnerSort;
+
+(* Complete quick sort, for verifying Median. *)
+procedure Sort;
+begin
+	if nofNames < 0 then return end;
+	InnerSort(0, nofNames-1)
+end Sort;
+
+(* Search for top 20% instead  of median. *)
+procedure CalcTopFive;
+var  
+	left, right : integer;
+	i, j, m, t, center : integer;
+	done : boolean;
+begin 
+	left := 0; right := nofNames-1;
+	done := false; 
+	center := (left + right) div 5;
+
+	repeat
+		i := left; j := right; m := (i + j) div 2;
+
+		(* Inner loop for quick sort. *)
+		loop
+			while Greater(m, i) do inc(i) end;
+			while Less(m, j) do dec(j) end;
+			if i >= j then exit end;
+			t := nameList[i]; nameList[i] := nameList[j]; nameList[j] := t;
+			inc(i); dec(j)
+		end; 
+		if i = j then inc(i); dec(j) end;
+
+		(*	check which part to sort	*)
+		if center <= j then right := j
+		elsif i <= center then left := i
+		else done := true 
+		end
+	until done;
+
+	PrintName(center);
+end CalcTopFive;
+
+var s : string;
+
+begin
+	writeln("Please enter the names of the employees,");
+	writeln("separated by <return>, terminated by '#'. ");
+	ReadNames();
+
+	writeln();
+	writeln("This is the list you entered:");
+	ListNameList();
+
+	writeln();
+	writeln("Sorted list of names:");
+	Sort();  
+	ListNameList();
+
+	writeln();
+	writeln("Median: "); CalcMedian(); writeln();
+
+	writeln("Done, press the Enter key"); 
+	readln(s);
+end Median. 

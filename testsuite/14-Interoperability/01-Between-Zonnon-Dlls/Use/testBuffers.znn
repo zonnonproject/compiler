@@ -1,0 +1,167 @@
+module {public} Main;
+
+   import
+      Data.Object,
+      Data.Datum,
+	  System.IO.BinaryReader,
+	  System.IO.BinaryWriter,
+      System.Int32 as Int32;     
+
+   type {public, ref} TestData = object implements Data.Datum
+      var {public}
+         i : integer;
+
+      procedure {public} Initialize 
+       implements Data.Object.Initialize;
+      begin
+	     writeln("TestData Initialize called");
+         i := 0
+      end Initialize;
+
+      procedure {private} Finalize;
+      begin
+         (* nothing to do *)
+      end Finalize;
+
+      procedure {public} Load (br : System.IO.BinaryReader)
+       implements Data.Object.Load;
+      begin
+         i := br.ReadInt32()
+      end Load;
+
+      procedure {public} Store (bw : System.IO.BinaryWriter)
+         implements Data.Object.Store;
+      var
+         j : Int32;
+      begin
+         j := i;
+         bw.Write(j);
+         bw.Flush()
+      end Store;
+
+      procedure {public} Clone () : object{Data.Object}
+         implements Data.Datum.Clone;
+      var
+         d : TestData;
+         o : object{Data.Object};
+      begin
+         d := new TestData;
+         d.Initialize();
+         o := object(d);
+         return o
+      end Clone;
+
+      procedure {public} Copy () : object{Data.Object}
+         implements Data.Datum.Copy;
+      var
+         d : TestData;
+         o : object{Data.Object};
+      begin
+         d := new TestData;
+         d.Initialize();
+         d.i := i;
+         o := object(d);
+         return o
+      end Copy;
+
+   begin
+      i := 0
+   end TestData;
+
+(*
+   type {public}
+      Datum = object{D};
+
+   procedure {public} Queue;
+   var
+      int : I;
+      n, n1, n2, n3 : QueueNode;
+      queue : Q;
+      qn : object{QN};
+      s : string;
+   begin
+      queue := new Q;
+      n1 := new QueueNode;
+      n1.i := 200;
+      queue.Push(n1);
+      n2 := new QueueNode;
+      n2.i := 300;
+      queue.Push(n2);
+      n3 := new QueueNode;
+      n3.i := 400;
+      queue.Push(n3);
+      s := "The length of the queue is: ";
+      write(s);
+      int := queue.Length();
+      writeln(int.ToString());
+      qn := queue.Pop();
+      n := QueueNode(qn);
+      s := "The first node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      qn := queue.Pop();
+      n := QueueNode(qn);
+      s := "The second node popped was: ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      qn := queue.Pop();
+      n := QueueNode(qn);
+      s := "The third node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      writeln
+   end Queue;
+
+   procedure {public} Stack;
+   var
+      int : I;
+      n, n1, n2, n3 : StackNode;
+      s : string;
+      sn : object{SN};
+      stack : S;
+   begin
+      stack := new S;
+      n1 := new StackNode;
+      n1.i := 200;
+      stack.Push(n1);
+      n2 := new StackNode;
+      n2.i := 300;
+      stack.Push(n2);
+      n3 := new StackNode;
+      n3.i := 400;
+      stack.Push(n3);
+      s := "The length of the stack is: ";
+      write(s);
+      int := stack.Length();
+      writeln(int.ToString());
+      sn := stack.Pop();
+      n := StackNode(sn);
+      s := "The first node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      sn := stack.Pop();
+      n := StackNode(sn);
+      s := "The second node popped was: ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      sn := stack.Pop();
+      n := StackNode(sn);
+      s := "The third node popped was:  ";
+      write(s);
+      int := n.i;
+      writeln(int.ToString());
+      writeln
+   end Stack;
+*)
+var td:TestData;
+begin
+  td := new TestData;  
+(*  Queue;
+  Stack; *)
+  halt(1)
+end Main.

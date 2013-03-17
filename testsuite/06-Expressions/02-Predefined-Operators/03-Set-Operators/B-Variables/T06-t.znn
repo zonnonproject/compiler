@@ -1,0 +1,17 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.4. Set Operators.
+ *
+ * Positive test: set monadic minus.
+ *)
+module Main;
+	var s1, s2, s3 : set;
+begin
+	s1 := { min(set)..max(set) };
+	s2 := s1 - { 1 }; (* All integer elements without 1. *)
+	s3 := -s2;        (* 1 is only set element.          *)
+
+	if ~(0 in s3) & (1 in s3) & ~(2 in s3)
+	then halt(1) else halt(0) end;
+end Main.

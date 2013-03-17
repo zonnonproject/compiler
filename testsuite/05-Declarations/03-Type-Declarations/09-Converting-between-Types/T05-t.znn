@@ -1,0 +1,12 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: casting from integer to charater.
+ *)
+module Main;
+begin
+	if (char(65) = 'A') & (char(49) = '1')
+	then halt(1) else halt(0) end;
+end Main.

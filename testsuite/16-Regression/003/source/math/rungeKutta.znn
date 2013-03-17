@@ -1,0 +1,352 @@
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(*       BBBB      EEEEE     L         The                                    *)
+(*       B   B     E         L           BIO                                  *)
+(*       BBBB      EEE       L           ENGINEERING                          *)
+(*       B    B    E         L           LABORATORY                           *)
+(*       BBBBB     EEEEEE    LLLLLL        @ Saginaw Valley State University  *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Copyright 2008-2009, Alan D. Freed                                         *)
+(*                                                                            *)
+(* This file is part of the BEL suite of .NET/mono libraries.                 *)
+(*                                                                            *)
+(* BEL is a free software: you can redistribute it and/or modify it under the *)
+(* terms of the GNU Lesser General Public License as published by the Free    *)
+(* Software Foundation, either version 3 of the License, or (at your option)  *)
+(* any later version.                                                         *)
+(*                                                                            *)
+(* BEL is distributed in the hope that it will be useful, but WITHOUT ANY     *)
+(* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  *)
+(* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for   *)
+(* more details.                                                              *)
+(*                                                                            *)
+(* You should have received a copy of the GNU Lesser General Public License   *)
+(* along with BEL.  If not, see <http://www.gnu.org/licenses/>.               *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* The MATH modules provide advanced math functions and operations for Zonnon *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* This module exports embedded 4(3) Runge-Kutta integrators that advance     *)
+(* solutions to systems of first-order ODEs by a single dynamically allocated *)
+(* integration step                                                           *)
+(*    dy/dx      =      f(y, x)         with    y(x0)      = y0               *)
+(*    dy[i]/dx   =   f[i](y[k], x)      with    y[i](x0)   = y0[i]            *)
+(*    dy[i,j]/dx = f[i,j](y[k,l], x)    with    y[i,j](x0) = y0[i,j]          *)
+(* where                                                                      *)
+(*       x  is the independent variable                                       *)
+(*       y  is the scalar, vector or matrix of dependent variables            *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* A thrid-order Runge-Kutta integrator that utilizes the weights and         *)
+(* quadrature points of Simpson's rule has a Butcher's tableau of             *)
+(*           [  0          ]                                                  *)
+(*       A = [ 1/2  0      ]                                                  *)
+(*           [  0   1   0  ]                                                  *)
+(*       B = { 1/6 2/3 1/6 }^T                                                *)
+(*       C = {  0  1/2  1  }^T                                                *)
+(* where                                                                      *)
+(*   matrix  A  are the coupling coefficients of Runge-Kutta integration      *)
+(*   vector  B  are the weights of integration                                *)
+(*   vector  C  are the quadrature points of integration                      *)
+(* Kutta's 3/8 rule is a fourth-order integrator with a Butcher's tableau of  *)
+(*           [  0              ]                                              *)
+(*           [ 1/3  0          ]                                              *)
+(*       A = [-1/3  1   0      ]                                              *)
+(*           [  1  -1   1   0  ]                                              *)
+(*       B = { 1/8 3/8 3/8 1/8 }^T                                            *)
+(*       C = {  0  1/3 2/3  1  }^T                                            *)
+(* There is a theorem stating that any fourth-order Runge-Kutta integrator    *)
+(* in four stages cannot possess an embedded integrator of order three.       *)
+(* Therefore, a fifth stage has been added to allow a third-order, embedded,  *)
+(* Runge-Kutta integrator to be constructed. One possible formulation is the  *)
+(* 4(3) Runge-Kutta integrator listed below that combines the weights and     *)
+(* quadrature points of the above two integrators into a single integrator    *)
+(*           [  0                          ]                                  *)
+(*           [ 1/3    0                    ]                                  *)
+(*       A = [  0    1/2    0              ]                                  *)
+(*           [-2/9   2/3   2/9    0        ]                                  *)
+(*           [ 2/3    0   -2/3    1     0  ]                                  *)
+(*    B(4) = { 1/8   3/8    0    3/8   1/8 }^T                                *)
+(*    B(3) = { 1/6    0    2/3    0    1/6 }^T                                *)
+(*    Err  = {-1/24  3/8  -2/3   3/8  -1/24}^T                                *)
+(*       C = {  0    1/3   1/2   2/3    1  }^T                                *)
+(* where B(4) are the weights of a fourth-order method, and B(3) are the      *)
+(* weights of an embedded thrid-order method, for which the fourth-order      *)
+(* integrator has error coefficients of                                       *)
+(*   (-1/54, 1/36, -1/9, 119/144, -1/9, -23/27, -1/9, 1/36, 2/9)              *)
+(* and the third-order embedded integrator has error coefficients of          *)
+(*   (0, 0, 1/9, 1/9).                                                        *)
+(* From finite-element theory, the weights of integration associated with     *)
+(* B(3) and B(4) are those weights needed to mimic uniform pressure across a  *)
+(* surface where, instead, point loads are being applied at the nodal points. *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Exported types establish the function format for an ODE's right-hand side. *)
+(*       F  is for a single ODE with arguments:                               *)
+(*             x  is a number that represents the independent variable        *)
+(*             y  is a number that represents the dependent variable          *)
+(*       FA is for an array of ODEs with arguments:                           *)
+(*             x  is a number that represents the independent variable        *)
+(*             y  is an array that represents the dependent variables         *)
+(*       FM is for a matrix of ODEs with arguments:                           *)
+(*             x  is a number that represents the independent variable        *)
+(*             y  is a matrix that represents the dependent variables         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+(* Associated with these functions are the following solvers, which advance   *)
+(* the solution by a single time step; they are:                              *)
+(*       Solve       for integrating a single ODE with arguments:             *)
+(*             f  is the ODE to be integrated                                 *)
+(*             t  is the error tolerance to be maintained by the integrator   *)
+(*          var - send values for the beginning and return values at the end  *)
+(*             e  is an estimate of error normalized to 1, i.e., err/tol      *)
+(*             h  is the step size                                            *)
+(*             x  is a number that represents the independent variable        *)
+(*             y  is a number that represents the dependent variable          *)
+(*       SolveArray  for integrating an array of ODEs with arguments:         *)
+(*             f  is the array of ODEs to be integrated                       *)
+(*             t  is the error tolerance to be maintained by the integrator   *)
+(*          var - send values for the beginning and return values at the end  *)
+(*             e  is an estimate of error normalized to 1, i.e., err/tol      *)
+(*             h  is the step size                                            *)
+(*             x  is a number that represents the independent variable        *)
+(*             y  is an array that represents the dependent variables         *)
+(*       SolveMatrix for integrating a matrix of ODEs with arguments:         *)
+(*             f  is the matrix of ODEs to be integrated                      *)
+(*             t  is the error tolerance to be maintained by the integrator   *)
+(*          var - send values for the beginning and return values at the end  *)
+(*             e  is an estimate of error normalized to 1, i.e., err/tol      *)
+(*             h  is the step size                                            *)
+(*             x  is a number that represents the independent variable        *)
+(*             y  is a matrix that represents the dependent variables         *)
+(* ------|---------|---------|---------|---------|---------|---------|------- *)
+
+module {public} BelMath.RungeKutta;
+
+import
+   BelCore.Arrays   as A,
+   BelCore.Log      as L,
+   BelCore.Math     as Fn,
+   BelCore.Matrices as M,
+   BelCore.Numbers  as N;
+
+   type {public}
+      (* functions: f(x, y) *)
+      F  = procedure (N.Number; N.Number) : N.Number;
+      FA = procedure (N.Number; A.Array)  : A.Array;
+      FM = procedure (N.Number; M.Matrix) : M.Matrix;
+
+   procedure {public} PiStepSizeController
+                      (p : integer;             (* order of the integrator    *)
+                       var e0 : N.Number;       (* previous error estimate    *)
+                       e : N.Number;            (* current error estimate     *)
+                       var h : N.Number;        (* in/out integrator stepsize *)
+                       var continue : boolean); (* advance to the next step?  *)
+   var
+      antiWindDown, antiWindUp, denom, gain, iGain, one, pGain, two : N.Number;
+   begin
+      (* This is the proportional-integral step-size contoller of:    *)
+      (* K. Gustafsson, M. Lundh and G. S{\"o}derlind, "A PI stepsize *)
+      (* control for the numerical solution of ordinary differential  *)
+      (* equations," BIT, 28 (2), 270-287, 1988.                      *)
+      antiWindUp   := 5;
+      antiWindDown := 0.1;
+      one   := 1;
+      two   := 2;
+      denom := 3*p;
+      iGain := one/denom;
+      pGain := two/denom;
+      gain  := iGain + pGain;
+      if e < 1.2 then
+         (* successful integration step *)
+         h := h*(Fn.Min(antiWindUp, (one/e)**iGain * (e0/e)**pGain));
+         continue := true
+      else
+         (* rerun the integration step with a new, smaller, step size *)
+         h := h*(Fn.Max(antiWindDown, (one/e)**gain));
+         e0 := one;
+         continue := false
+      end
+   end PiStepSizeController;
+
+   procedure {public} Solve
+      (f : F;               (* the right-hand side function, dy/dx = f(x, y)  *)
+       t : N.Number;        (* the error tolerance of integration             *)
+       var e : N.Number;    (* the normalized error, error / tolerance        *)
+       var h : N.Number;    (* the dynamic step-size for integration          *)
+       var x : N.Number;    (* the controlled or independent variable         *)
+       var y : N.Number);   (* the response or dependent variable             *)
+   var
+      continue : boolean;
+      dy, e0, h0, k1, k2, k3, k4, k5, x0, y0 : N.Number;
+   begin
+      if f = nil then
+         L.WarningMessage(500,415, "BelMath.RungeKutta.Solve");
+         return
+      end;
+      e0 := e;
+      h0 := h;
+      x0 := x;
+      y0 := y;
+      (* first stage *)
+      k1 := f(x0, y0);
+      continue := false;
+      repeat
+         (* second stage *)
+         h := h0/3;
+         x := x0 + h;
+         y := y0 + h*k1;
+         k2 := f(x, y);
+         (* third stage *)
+         h := h0/2;
+         x := x0 + h;
+         y := y0 + h*k2;
+         k3 := f(x, y);
+         (* fourth stage *)
+         h := 2*h0/3;
+         x := x0 + h;
+         y := y0 + h*((k3 - k1)/3 + k2);
+         k4 := f(x, y);
+         (* fifth stage *)
+         h := h0;
+         x := x0 + h;
+         y := y0 + h*(2*(k1 - k3)/3 + k4);
+         k5 := f(x, y);
+         (* integrate *)
+         h  := h0/8;
+         y  := y0 + h*(k1 + k5 + 3*(k2 + k4));
+         h  := h0/24;
+         dy := h*(-k1 - k5 - 16*k3 + 9*(k2 + k4));
+         (* compute a normalized error *)
+         e := Fn.Max(Fn.Abs(dy/Fn.Max(Fn.Abs(y),t))/t, t);
+         PiStepSizeController(4, e0, e, h0, continue)
+      until continue;
+      h := h0
+   end Solve;
+
+   procedure {public} SolveArray
+      (f : FA;              (* the right-hand side function, dy/dx = f(x, y)  *)
+       t : N.Number;        (* the error tolerance of integration             *)
+       var e : N.Number;    (* the normalized error, error / tolerance        *)
+       var h : N.Number;    (* the dynamic step-size for integration          *)
+       var x : N.Number;    (* the controlled or independent variable         *)
+       var y : A.Array);    (* the response or dependent variables            *)
+   var
+      continue : boolean;
+      dim, i : integer;
+      d, del, e0, h0, x0 : N.Number;
+      dy, k1, k2, k3, k4, k5, y0 : A.Array;
+   begin
+      if f = nil then
+         L.WarningMessage(500,415, "BelMath.RungeKutta.SolveArray");
+         return
+      end;
+      e0 := e;
+      h0 := h;
+      x0 := x;
+      y0 := y;
+      dim := y.Length();
+      (* first stage *)
+      k1 := f(x0, y0);
+      continue := false;
+      repeat
+         (* second stage *)
+         h := h0/3;
+         x := x0 + h;
+         y := y0 + h*k1;
+         k2 := f(x, y);
+         (* third stage *)
+         h := h0/2;
+         x := x0 + h;
+         y := y0 + h*k2;
+         k3 := f(x, y);
+         (* fourth stage *)
+         h := 2*h0/3;
+         x := x0 + h;
+         y := y0 + (h/3)*(k3 - k1) + h*k2;
+         k4 := f(x, y);
+         (* fifth stage *)
+         h := h0;
+         x := x0 + h;
+         y := y0 + (2*h/3)*(k1 - k3) + h*k4;
+         k5 := f(x, y);
+         (* integrate *)
+         h  := h0/8;
+         y  := y0 + h*(k1 + k5) + (3*h)*(k2 + k4);
+         h  := h0/24;
+         dy := -h*(k1 + k5) - (16*h)*k3 + (9*h)*(k2 + k4);
+         (* compute a normalized error *)
+         d := 0;
+         for i := 1 to dim do
+            del := dy[i]/Fn.Max(Fn.Abs(y[i]), t);
+            d := d + del*del
+         end;
+         e := Fn.Max(Fn.Sqrt(d/dim)/t, t);
+         PiStepSizeController(4, e0, e, h0, continue)
+      until continue;
+      h := h0
+   end SolveArray;
+
+   procedure {public} SolveMatrix
+      (f : FM;              (* the right-hand side function, dy/dx = f(x, y)  *)
+       t : N.Number;        (* the error tolerance of integration             *)
+       var e : N.Number;    (* the normalized error, error / tolerance        *)
+       var h : N.Number;    (* the dynamic step-size for integration          *)
+       var x : N.Number;    (* the controlled or independent variable         *)
+       var y : M.Matrix);   (* the response or dependent variables            *)
+   var
+      continue : boolean;
+      cols, i, j, rows : integer;
+      d, del, e0, h0, x0 : N.Number;
+      dy, k1, k2, k3, k4, k5, y0 : M.Matrix;
+   begin
+      if f = nil then
+         L.WarningMessage(500,415, "BelMath.RungeKutta.SolveMatrix");
+         return
+      end;
+      e0 := e;
+      h0 := h;
+      x0 := x;
+      y0 := y;
+      cols := y.Columns();
+      rows := y.Rows();
+      (* first stage *)
+      k1 := f(x0, y0);
+      continue := false;
+      repeat
+         (* second stage *)
+         h := h0/3;
+         x := x0 + h;
+         y := y0 + h*k1;
+         k2 := f(x, y);
+         (* third stage *)
+         h := h0/2;
+         x := x0 + h;
+         y := y0 + h*k2;
+         k3 := f(x, y);
+         (* fourth stage *)
+         h := 2*h0/3;
+         x := x0 + h;
+         y := y0 + (h/3)*(k3 - k1) + h*k2;
+         k4 := f(x, y);
+         (* fifth stage *)
+         h := h0;
+         x := x0 + h;
+         y := y0 + (2*h/3)*(k1 - k3) + h*k4;
+         k5 := f(x, y);
+         (* integrate *)
+         h  := h0/8;
+         y  := y0 + h*(k1 + k5) + (3*h)*(k2 + k4);
+         h  := h0/24;
+         dy := -h*(k1 + k5) - (16*h)*k3 + (9*h)*(k2 + k4);
+         (* compute a normalized error *)
+         d := 0;
+         for i := 1 to rows do
+            for j := 1 to cols do
+               del := dy[i,j]/Fn.Max(Fn.Abs(y[i,j]), t);
+               d := d + del*del
+            end
+         end;
+         e := Fn.Max(Fn.Sqrt(d/(rows*cols))/t, t);
+         PiStepSizeController(4, e0, e, h0, continue)
+      until continue;
+      h := h0
+   end SolveMatrix;
+
+begin
+end RungeKutta.

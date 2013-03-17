@@ -1,0 +1,22 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Positive test: 2-dimensional array overflow at compilation time.
+ *)
+module Main;
+	import System.IndexOutOfRangeException;
+
+	type T = array 8 of array 8 of boolean;
+	var x : T;
+		b : boolean;
+begin
+	begin
+		x[8][8] := true;
+		b := x[8][8];  
+		halt(1);
+	on 	System.IndexOutOfRangeException do
+		halt(0)
+	end
+end Main.

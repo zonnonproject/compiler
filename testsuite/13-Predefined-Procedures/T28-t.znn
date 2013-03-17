@@ -1,0 +1,17 @@
+(**
+ * 09.Predefined procedures.
+ * The succ(x) procedure.
+ *
+ * Positive test: succ procedure for enumeration type value.
+ *)
+module Main;
+	type E = ( zero, one, two );
+
+	var e1, e2 : E;
+begin
+	e1 := E.zero;
+	e2 := succ(e1);
+	
+	if e2 = E.one 
+	then halt(1) else halt(0) end;
+end Main.

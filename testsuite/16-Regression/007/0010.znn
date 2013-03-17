@@ -1,0 +1,18 @@
+module run;
+
+type float = real;
+type float_2d_array   = array *,* of float;
+
+procedure {public} ludecompositionunpacked(var u: float_2d_array; var k:integer);
+begin
+    u := new float_2d_array(5, 5);
+    u [1,1] := 7.0;
+    k:=17;
+end ludecompositionunpacked;
+
+var a: float_2d_array;
+    r: integer;
+begin
+ ludecompositionunpacked(a, r);
+ writeln(a[1,1],r);
+end run.

@@ -1,0 +1,17 @@
+(**
+ * 11.Program Units.
+ * 11.1. module
+ * ModuleName
+ * 
+ * Negative test: double declaration of module A.B.C.
+ *)
+module A.B.C;
+end C.
+
+module A.B.C;
+end C.
+
+module Main;
+begin
+	halt(0);
+end Main.

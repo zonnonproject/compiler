@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The pred (x) procedure.
+ *
+ * Positive test: pred of char type value.
+ *)
+module Main;
+	var ch1, ch2 : char;
+begin
+	ch1 := 'b';
+	ch2 := pred(ch1); 
+
+	if ch2 = 'a' 
+	then halt(1) else halt(0) end;
+end Main.

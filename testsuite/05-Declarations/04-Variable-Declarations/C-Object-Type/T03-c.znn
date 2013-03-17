@@ -1,0 +1,22 @@
+(**
+ * 5. Declarations.
+ * 6.4. Variable declarations.
+ * Object type of a variable
+ *
+ * Positive test: variable X has the type array of objects B.C.D.
+ * The object type B.C.D is used before it is declared.
+ *)
+object A;
+	import B.C;
+
+	var	X : array 1 of B.C.D;
+end A.
+
+module B.C;
+	type {public} D = ( one, two, three );
+end C.
+
+module Main;
+begin
+	halt(1);
+end Main.

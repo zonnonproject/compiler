@@ -1,0 +1,22 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * integer type
+ *
+ * Positive test: correct integer type variable assignment.
+ * 
+ *)
+module Main;
+	var i8  : integer {  8 };
+	var i16 : integer { 16 };
+begin
+	i8  := 1;
+	i16 := 2;
+
+	i16 := i8;
+
+	if i16 = 1 
+	then halt(1) else halt(0) end;
+end Main.
+

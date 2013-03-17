@@ -1,0 +1,22 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * implements operator.
+ *
+ * Positive test: The module uses implements operator to check itself.
+ * The result is true.
+ *)
+definition A;
+	procedure p : integer;
+end A.
+
+module Main implements A;
+	procedure {public} p : integer implements A.p;
+	begin 
+		return 1 
+	end p;
+begin
+	if self implements A 
+	then halt(1) else halt(0) end;
+end Main.

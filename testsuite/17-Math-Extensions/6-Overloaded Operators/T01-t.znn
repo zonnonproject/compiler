@@ -1,0 +1,73 @@
+module Main;
+
+type v = array {math} * of integer;
+type vc = array {math} * of complex;
+
+type {public, ref} complex = object
+var {public}
+	re, im : real;
+begin
+	re := 0.0;
+	im := 0.0;
+end complex;
+
+operator {public} '+' (z1, z2 : complex) : complex;
+var 
+	res : complex;
+begin
+	res := new complex;
+	res.re := z1.re + z2.re;
+	res.im := z1.im + z2.im;
+	return res;
+end '+';
+
+operator {public} '-' (z1, z2 : complex) : complex;
+var 
+	res : complex;
+begin
+	res := new complex;
+	res.re := z1.re - z2.re;
+	res.im := z1.im - z2.im;
+	return res;
+end '-';
+
+operator {public} '*' (z1, z2 : complex) : complex;
+var 
+	res : complex;
+begin
+	res := new complex;
+	res.re := z1.re * z2.re - z1.im * z2.im;
+	res.im := z1.re * z2.im + z1.im * z2.re;
+	return res;
+end '*';
+
+var
+	a, b, c : v;
+	ac, bc, cc : vc;
+	i : integer;
+  
+begin
+	a := [1, 2];
+	b := [-1, -4];
+	c := a + b;
+	
+	ac := new vc(1);
+	ac[0] := new complex;
+	bc := new vc(1);
+	bc[0] := new complex;
+	
+	cc := ac + bc;
+	cc := ac - bc;
+	cc := ac + ac[0];
+	cc := ac[0] - ac;
+	cc := ac .* bc;
+	
+	(*
+	for i := 0 to len(c) - 1 do
+		writeln(c[i]);
+	end;
+	*)
+
+	halt(1);
+end Main.
+

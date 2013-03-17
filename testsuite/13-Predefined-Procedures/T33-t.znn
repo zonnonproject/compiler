@@ -1,0 +1,13 @@
+module Main;
+var 
+	s1, s : string;
+	a : array 8 of char;
+begin 
+	a[0] := "2";
+	a[1] := "5";
+
+	copy(a, s);
+	writeln(s); 
+	if s = "25"
+	then halt(1) else halt(0) end;
+end Main.

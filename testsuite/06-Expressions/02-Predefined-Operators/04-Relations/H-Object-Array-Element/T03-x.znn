@@ -1,0 +1,20 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ *
+ * Negative test: < operator for object private array element.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b.x[0] := 1;
+	b.y[1] := 2;
+	if b.x[0] < b.y[1] then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { private } x, y : array 2 of integer;
+end B.

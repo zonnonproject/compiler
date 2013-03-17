@@ -1,0 +1,54 @@
+(** 
+ * 11.Program Units.
+ * 11.3. Definition
+ *
+ * Positive test: common interface for a list
+ *)
+
+
+module Main;
+
+definition Item;
+	var next: object{Item};
+end Item;
+
+procedure AddToTheList(root, newItem: object{Item});
+var it: object{Item};
+begin
+ it := root;
+ while it.next # nil do it := it.next end;
+ it.next := newItem;
+end AddToTheList;
+
+procedure PrintList(root: IntItem);
+var it: IntItem;
+begin
+ it := root;
+ while it # nil do it.Print; it := IntItem(it.next) end;
+end PrintList;
+
+
+type {ref} IntItem = object implements Item
+	var {public} value: integer;
+	
+	procedure {public} Print;
+	begin
+		writeln(value);
+	end Print;
+end IntItem;
+
+type 
+
+var root, item: IntItem;
+	i: integer;
+begin
+	root:= new IntItem;
+	root.value := 0;
+	for i:= 1 to 10 do
+		item := new IntItem;
+		item.value := i;
+		AddToTheList(root, item)
+	end;
+	PrintList(root);	
+	halt(1)
+end Main.

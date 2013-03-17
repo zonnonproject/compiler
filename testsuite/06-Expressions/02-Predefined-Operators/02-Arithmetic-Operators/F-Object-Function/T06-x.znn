@@ -1,0 +1,29 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Negative test: function boolean result is used in arithmetic expression.
+ * The object is declared before its using.
+ *)
+object A.B;
+	procedure { public } p1 : boolean;
+	begin 
+		return false 
+	end p1;
+
+	procedure { public } p2 : boolean;
+	begin 
+		return true 
+	end p2;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+		r : boolean;
+begin
+	r := (b.p1 * b.p2 = 15);
+	halt(0);
+end Main.

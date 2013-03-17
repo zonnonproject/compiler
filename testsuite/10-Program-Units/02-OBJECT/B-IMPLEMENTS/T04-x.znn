@@ -1,0 +1,24 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * implements clause
+ *
+ * Negative test: wrong qualified name in implements clause.
+ *
+ * The enumeration type name B.C is used in implements caluse of object A.
+ * The enumeration is declared _after_ it is used.
+ *
+ * Correct diagnostic must be output for wrong name B.C!
+ *)
+module B;
+	type { public } 
+		C = ( one, two );
+end B.
+
+object A implements B.C;
+end A.
+
+module Main;
+begin
+	halt(0);
+end Main.

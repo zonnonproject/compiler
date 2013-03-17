@@ -1,0 +1,118 @@
+(* ********* Zonnon online collection ***********
+ * The Sleeping Barber (classic solution)
+ *
+ * This example is a part of Concurrency examples
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*
+The shop has a barber, a barber chair, and a waiting room with several chairs. 
+When a barber finishes cutting a customer's hair, the barber fetches another 
+customer from the waiting room if there is a customer, or stands by the barber 
+chair and daydreams if the waiting room is empty. A customer who needs a haircut
+enters the waiting room. If the waiting room is full, the customer comes back 
+later. If the barber is busy but there is a waiting room chair available, the 
+customer takes a seat. If the waiting room is empty and the barber is 
+daydreaming, the customer sits in the barber chair and wakes the barber up.
+*)
+
+module Main;
+import System.Threading;
+
+const
+	CuttingTime = 4000; 
+	ArrivingTime = 500; 
+	Dispersion = 400; 
+
+	CHAIRS = 7;
+
+var
+	waiting: integer;
+	mutex: System.Threading.Mutex;
+	customers, barbers: System.Threading.AutoResetEvent;
+
+
+type {public, ref} Barber = object(id : integer)
+        
+	procedure cutHair;
+	begin
+		writeln("Barber ",id:2," is doing haircut");
+		System.Threading.Thread.Sleep(CuttingTime);
+	end cutHair;
+
+	activity {public} Live;
+	begin
+		loop
+			customers.WaitOne();
+			mutex.WaitOne();
+			waiting := waiting - 1;
+			barbers.Set();
+			mutex.ReleaseMutex();
+			cutHair();
+		end
+	end Live;
+
+begin
+	new Live();	  
+end Barber;
+
+type {public, ref} Customer = object(id : integer)
+        
+	procedure getHaircut;
+	begin
+		writeln("Customer ",id:4," is getting haircut");
+		System.Threading.Thread.Sleep(CuttingTime);
+	end getHaircut;
+
+	procedure leave;
+	begin
+		writeln("Customer ",id:4," leaving without haircut");
+	end leave;
+
+	procedure startwaiting;
+	begin
+		writeln("Customer ",id:4," waiting. Now waiting ", waiting:1, " customers.");
+	end startwaiting;
+
+	activity {public} Live;
+	begin
+		mutex.WaitOne();
+		if waiting < CHAIRS then
+			waiting := waiting + 1;
+			customers.Set();
+			mutex.ReleaseMutex();
+			startwaiting();
+			barbers.WaitOne();
+			getHaircut();
+		else
+			mutex.ReleaseMutex();
+			leave();
+		end
+	end Live;
+
+begin
+	new Live();	
+end Customer;
+
+var b: Barber; c:Customer;
+    i: integer;
+    r: System.Random;
+begin
+	r := new System.Random;
+	mutex := new System.Threading.Mutex();
+	customers := new System.Threading.AutoResetEvent(false);
+	barbers := new System.Threading.AutoResetEvent(false);
+
+	b := new Barber(0);
+	b := new Barber(1);
+	b := new Barber(2);
+	b := new Barber(3);
+	b := new Barber(4);
+
+	loop
+		c := new Customer(i); inc(i);
+		System.Threading.Thread.Sleep(ArrivingTime + r.Next(- Dispersion div 2, Dispersion div 2));
+	end
+
+end Main.

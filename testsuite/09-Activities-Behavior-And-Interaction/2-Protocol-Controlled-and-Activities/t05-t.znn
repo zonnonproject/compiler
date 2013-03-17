@@ -1,0 +1,29 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.2. Protocol-Controlled-and-Activities
+ *	Positive test: Passing several arguments
+ *)
+module {protected} Main;
+
+activity A;
+var 
+	a, b, c: integer;
+begin
+	accept a;
+	accept b, c;
+	return c, b, a
+end A;
+
+var p : A;
+var a, b, c : integer;
+begin
+	p := new A;
+
+	a, b, c := p( integer(1), integer(2), integer(3));	
+
+	if (a=3) & (b=2) & (c=1) then
+		halt(1)  (* success *)
+	else
+		halt(0)  (* failure *)
+	end
+end Main.

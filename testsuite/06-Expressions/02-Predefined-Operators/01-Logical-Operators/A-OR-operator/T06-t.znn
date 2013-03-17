@@ -1,0 +1,17 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.2. Logical Operators
+ * A. or operator.
+ *
+ * Positive test: true or false for boolean variables.
+ *)
+module Main;
+	var p, q : boolean;
+begin
+	p := true;
+	q := false;
+	
+	if p or q 
+	then halt(1) else halt(0) end;
+end Main.

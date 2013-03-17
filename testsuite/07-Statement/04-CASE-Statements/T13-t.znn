@@ -1,0 +1,30 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Positive test: first label contains obtained value.
+ *)
+module Main;
+	import A;
+
+	var
+		i : integer;
+		ok : boolean; 
+
+begin
+	i := 5;
+	case i of
+		5 : ok := true;
+		|
+		9 : ok := false;
+	else ok := false;
+	end;
+
+	if ok
+	then halt(1) else halt(0) end;
+end Main.
+
+module {public} A;
+	type {public} 
+		Color = (black, white);
+end A.

@@ -1,0 +1,12 @@
+(**
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 6.3.4. String type.
+ *
+ * Positive test: string constants equality 
+ *)
+module Main;
+begin 
+	if "ABC" >= "AB"
+	then halt(1) else halt(0) end;
+end Main.

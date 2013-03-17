@@ -1,0 +1,16 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * set type
+ *
+ * Positive test: wrong set type width.
+ * Warning from compiler.
+ *)
+module Main;
+	var s1   : set {   1 };
+	var s33  : set {  33 };
+	var s128 : set { 128 };
+begin
+	halt(1);
+end Main.

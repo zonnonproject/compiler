@@ -1,0 +1,49 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.4. String type.
+ *
+ * Negative test: 2-dimensional semi-dynamic array as procedure result;
+ * Wrong indexing of the result.
+ *)
+module Main;
+	type Matrix = array *,* of integer;
+
+	(* 
+	 * The procedure sets matrix diagonal elements to 1 
+     * and other elements to 0 and returns this matrix.
+	 *)
+	procedure OneMatrix(n : integer) : Matrix;
+		var i, j : integer;
+			matrix : Matrix;
+	begin
+		matrix := new Matrix(n, n);
+		for i := 0 to len(matrix, 0)-1 do;
+			for j := 0 to len(matrix, 1)-1 do;
+				if i = j 
+				then matrix[i,j] := 1;
+				else matrix[i,j] := 0;
+				end;
+			end;
+		end;
+		return matrix;
+	end OneMatrix;
+
+	var s, i, j : integer;
+		m : Matrix;
+begin
+	s := 0;
+	m := OneMatrix(3);
+
+	do
+		for i := 0 to 3 do
+			for j := 0 to 3 do
+				s := s + m[i,j]
+			end
+		end 
+	on OutOfRange do
+		halt(1)
+	end;
+	
+	halt(0);
+end Main.

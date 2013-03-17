@@ -1,0 +1,54 @@
+(* ********* Zonnon online collection ***********
+ * Simple example on using protocols (Santa)
+ *
+ * This example is a part of Concurrency examples
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module Main;
+import System;
+
+protocol P = (
+        wish = ("toy" | "computer"),
+	dialog = "It's" string ("My age is" integer | "My wish is" wish)
+);
+
+
+
+activity A implements P;
+var 
+    age: integer;
+    action, name, wish: string;
+begin 
+	accept action;
+	accept name;
+	accept action;
+	if action = "My age is" then
+	  accept age;
+  	  writeln(name, " is ", age:2," years old")
+        else
+          accept wish;
+  	  writeln(name, " wants ", wish)
+        end
+
+end A;
+
+var p1, p2, p3: A;
+begin
+  p1:= new A;
+  p2:= new A; 
+  p3:= new A; 
+
+  p1("It's", "Catherine");
+  p1("My age is", integer(18));
+
+  p2("It's", "Catherine");
+  p2("My wish is", "computer");
+  do
+	p3("It's", "Catherine");
+  	p3("My wish is", "cat");
+  on ProtocolMismatch do     
+        writeln("Catherine has broken the protocol");
+  end
+end Main.

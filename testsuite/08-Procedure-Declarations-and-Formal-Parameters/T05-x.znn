@@ -1,0 +1,14 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: double procedure declaration.
+ *)
+module Main;
+	procedure A();
+	begin end A;
+
+	procedure A();
+	begin end A;
+begin
+	halt(0);
+end Main.

@@ -1,0 +1,34 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * Object visibility
+ *
+ * Positive test: private object A.B is used in its namespace.
+ * The object A.B is declared after it was used.
+ *)
+module Main;
+	import A.C as C;
+
+	var c : C;
+begin
+	if c.j = 3 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.C;
+	import A.B as B;
+
+	var {public}
+		j : integer;
+	var {private}
+		b : B;
+begin
+	j := b.i;
+end C.
+
+object {private} A.B;
+	var {public} 
+		i : integer;
+begin 
+	i := 3; 
+end B.

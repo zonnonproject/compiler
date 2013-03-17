@@ -1,0 +1,18 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.8. Casting between types
+ *
+ * Positive test: expression are build from type casting.
+ *)
+module Main;
+var 
+	c : char;
+	i : integer;
+begin
+	c := 'b';
+	i := integer(c) - integer('a');
+
+	if i = 1 
+	then halt(1) else halt(0) end;
+end Main.

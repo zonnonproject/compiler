@@ -1,0 +1,42 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ * 8.2 Properties
+ *
+ * Negative test: the property procedure without set modifier
+ *)
+module Main;
+	import B, C;
+
+	var 
+		b : B;
+		age : C;
+begin
+	age.year := 2001;
+	b.a := age;
+
+	if b.a.year = 2001
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, value} B implements A;
+	import C;
+
+	var {public}
+		a : C;
+
+	procedure {public} age(p : C) implements A.age;
+	begin
+		a := p;
+	end age;
+end B.
+
+definition {public} A;
+	import C;
+
+	var age : C;
+end A.
+
+object { value } C;
+	var { public }
+		year, month, day : integer;
+end C.

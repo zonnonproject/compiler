@@ -1,0 +1,43 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * IMPLEMENTS clause
+ *
+ * Positive test: the DEFINITION C is used as parameter type and result type.
+ * The DEFINITION B is used before it was declared.
+ *)
+module Main;
+	import A, B, C;
+
+	var {public}
+		k : integer;
+		b : object{B};
+		c : object{C};
+begin
+	b := new A;
+	c := b.P(c);
+
+	if k = 1
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public, ref} A implements B;
+	import C, Main;
+
+	procedure {public} P(c : object{C}) : object{C} implements B.P;
+	begin 
+		Main.k := 1;  
+		return c
+	end P;
+
+	var {public}
+		k : integer;
+begin 
+end A.
+
+definition {public} B refines C;
+	procedure P(c : object {C}) : object {C};
+end B.
+
+definition {public} C;
+end C.

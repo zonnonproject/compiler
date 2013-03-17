@@ -1,0 +1,23 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ *
+ * Negative test: < operator for private object variables.
+ *)
+object A.B;
+	var { private } 
+		x, y : integer;
+end B.
+
+module Main;
+	import A;
+
+	var b : A.B;
+begin
+	b.x := 1;
+	b.y := 2;
+	
+	if b.x < b.y
+	then halt(1) else halt(0) end;
+end Main.

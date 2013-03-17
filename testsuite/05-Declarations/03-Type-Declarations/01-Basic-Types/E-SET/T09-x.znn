@@ -1,0 +1,21 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * set type
+ *
+ * Negative test: wrong set type variable assignment.
+ * 
+ *)
+module Main;
+	type set32 = set { 32 };
+	type set64 = set { 64 };
+	var s32 : set32;
+	var s64 : set64;
+begin
+	s32 := { 1 };
+	s64 := { 2 };
+
+	s32 := s64;
+	halt(0);
+end Main.

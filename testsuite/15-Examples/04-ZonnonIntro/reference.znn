@@ -1,0 +1,40 @@
+(* ********* Zonnon online collection ***********
+ * Example on defference between {value} and {ref}
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+
+module Reference;
+
+object {ref, public} RefNumber;
+var {public}
+   val: integer;
+end RefNumber;
+
+object {value, public} Number;
+var {public}
+   val: integer;
+end Number;
+
+
+
+var a,b: RefNumber; 
+var c,d: Number; 
+
+
+begin
+  a := new RefNumber;
+  a.val := 10;
+  b := a; (*   *)
+  b.val := 11; (*  a  b -   *)
+  writeln(a.val, " = ", b.val);
+
+  c.val := 15;
+  d := c; (*   *)
+  d.val := 16; (*   d *)
+  writeln(c.val, " # ", d.val);
+  
+end Reference.

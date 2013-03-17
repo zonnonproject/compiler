@@ -1,0 +1,21 @@
+(* ********* Zonnon online collection ***********
+ * Import one module from another
+ *
+ * This example is a part Introdunction into Zonnon for beginners
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+module MyModule1;
+procedure {public} PrintHello;
+begin
+	writeln("Zonnon Language - Your Language");
+end PrintHello;
+end MyModule1.
+
+module MyModule;
+import MyModule1;
+
+begin
+	MyModule1.PrintHello;
+end MyModule.

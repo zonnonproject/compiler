@@ -1,0 +1,71 @@
+(** 
+ * 9. Concurrency-Activities-Protocols
+ * 9.4. Protocted-Objects-and-Modules
+ *
+ * Positive test: Simple protected object
+ *)
+
+module {protected} Main;
+import System;
+
+var atime, max:integer;
+
+type {public} Obj = object
+	var value, hidden: integer;
+
+	procedure {public} exchange;
+	var t:integer;
+	begin
+		writeln("Exchange enter");
+		System.Threading.Thread.Sleep( 300 );
+		t := value;
+		value := hidden;
+		hidden := t;
+		atime := 1;
+		writeln("Exchange leave");		
+	end exchange;
+
+
+	procedure {public, shared} getValue: integer;
+        begin
+        atime := 2;
+		writeln("Get value enter");
+		inc(max);
+		System.Threading.Thread.Sleep( 100 );
+		if max = 2 then max := 10 end;
+		dec(max);
+		writeln("Get value leave");
+        return value;		
+    end getValue;
+begin
+  max := 0;
+  hidden := 25;
+  value := 10;
+end Obj;
+
+
+var o:Obj;
+
+activity tryToGetValue;
+var value:integer;
+begin
+  System.Threading.Thread.Sleep( 10 ); (* Time for exchage to start *)
+  writeln("Activity is trying to get value");
+  value := o.getValue();
+  writeln("Activity received value: ", value);
+end tryToGetValue;
+	
+
+var value:integer;
+begin
+    do{barrier}
+		atime := 3;
+		new tryToGetValue;
+		o.exchange();
+		value := o.getValue();
+	end;
+	writeln("atime ", atime);
+	writeln("max ", max);
+	System.Threading.Thread.Sleep( 10 );
+    if (atime = 2) & (max = 8) then halt(1) else halt(0) end
+end Main.

@@ -1,0 +1,31 @@
+(** 
+ * 6. Expression.
+ * 6.1. Operands
+ * B. Instance = InstanceName
+ *
+ * Positive test: reading to immutable variable.
+ * The object A.B is declared after it is used.
+ *)
+module Main;
+	import A;
+
+	var b : A.B;
+		i : integer;
+begin
+	if b.k = 5 
+	then halt(1) else halt(0) end;
+end Main.
+
+object A.B;
+	var { public } 
+		i : integer;
+
+	var { public, immutable } 
+		k : integer;
+
+	var { private } 
+		j : integer;
+begin
+	k := 5;
+end B.
+

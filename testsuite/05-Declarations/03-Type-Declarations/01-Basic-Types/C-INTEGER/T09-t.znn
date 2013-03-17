@@ -1,0 +1,22 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * integer type
+ *
+ * Negative test: wrong integer type variable assignment.
+ * Const expression is used for integer type width.
+ *)
+module Main;
+	type integer8  = integer {  8 };
+	type integer16 = integer { 16 };
+	var i8  : integer8;
+	var i16 : integer16;
+begin
+	i8  := 1 {8};
+	i16 := 2 {16};
+
+	i16 := i8; (* Wrong assignment: left type width {16} > right type width {8} *)
+	halt(1);
+end Main.
+

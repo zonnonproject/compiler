@@ -1,0 +1,65 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Binary
+ * 
+ * Positive test: Binary mult
+ * array + scalar
+ *)
+
+module Main;
+
+type vi = array *,* of integer;
+type vr = array *,* of real;
+type vc = array *,* of cardinal;
+
+type iind = array {math} * of integer;
+type bind = array {math} * of boolean;
+
+var
+	ai1 : array {math} 2, 3 of integer;
+	ai2 : vi;
+	ar1 : array {math} 2, 3 of real;
+	ar2 : vr;
+	ac1 : array {math} 2, 3 of cardinal;
+	ac2 : vc;
+	
+	bi1, bi2 : iind;
+	bb1, bb2 : bind;
+	
+	ki : integer;
+	kr : real;
+	kc : cardinal;
+	
+begin	
+	
+	ai1 := [[-1, 2, -3], [4, -5, 6]];
+	ar1 := [[1.1, -2.1, 3.1], [-4.1, 5.1, -6.1]];
+	ac1 := [[1, 2, 3], [4, 5, 6]];
+	
+	ki := 3;
+	ai2 := ai1 * ki;
+	kr := -2.;
+	ar2 := ar1 * kr;
+	kc := 2;
+	ac2 := ac1 * kc;
+	
+	if (ai2[0, 0] # -3) or (ai2[0, 1] # 6) or (ai2[0, 2] # -9) or (ai2[1, 0] # 12) or (ai2[1, 1] # -15) or (ai2[1, 2] # 18)
+	then
+		halt(0);
+	end;
+		
+	if (abs(ar2[0, 0] + 2.2) > 0.001) or (abs(ar2[0, 1] - 4.2) > 0.001) or (abs(ar2[0, 2] + 6.2)>0.001) or (abs(ar2[1, 0] - 8.2) > 0.001) or (abs(ar2[1, 1] + 10.2) > 0.001) or (abs(ar2[1, 2] - 12.2) > 0.001)
+	then
+		halt(0);
+	end;
+	
+	if (ac2[0, 0] # 2) or (ac2[0, 1] # 4) or (ac2[0, 2] # 6) or (ac2[1, 0] # 8) or (ac2[1, 1] # 10) or (ac2[1, 2] # 12)
+	then
+		halt(0);
+	end;
+		
+	halt(1);
+	
+end Main.
+	

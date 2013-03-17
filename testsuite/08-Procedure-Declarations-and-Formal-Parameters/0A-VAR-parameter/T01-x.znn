@@ -1,0 +1,16 @@
+(** 
+ * 8. Procedure declaration and formal parameters
+ *
+ * Negative test: the function call uses value parameter instead variable parameter.
+ *)
+module Main;
+	procedure A(var i : integer);
+	begin
+		i := i + 1;
+	end A;
+
+	var i : integer;
+begin
+	A(1);
+	halt(0);
+end Main.

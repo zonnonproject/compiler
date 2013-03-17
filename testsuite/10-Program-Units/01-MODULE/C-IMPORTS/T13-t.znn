@@ -1,0 +1,55 @@
+(** 
+ * 11.Program Units.
+ * 11.1. module
+ * imports clause
+ *
+ * Positive test: 
+ *)
+
+module Main;
+import System.Random as Random;
+
+type {ref} R = object implements Random
+
+end R;
+
+definition N;
+procedure P;
+end N;
+
+implementation N;
+procedure P implements N.P;
+begin
+	writeln("A.N.P");
+end P;
+end N;
+
+definition M;
+procedure R;
+end M;
+
+implementation M;
+procedure R implements M.R;
+begin
+	writeln("B.N.R");
+end R;
+end M;
+
+type O = object implements N, M
+
+begin
+
+end O;
+
+
+
+var o:O;
+var d: Random;
+
+begin
+ d := new Random;
+ o.P;
+ o.R; 
+ halt(1)
+end Main.
+

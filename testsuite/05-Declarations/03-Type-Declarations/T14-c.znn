@@ -1,0 +1,35 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Positive test: correct type names are imported from module B.
+ * The module B is declared before it is used.
+ *)
+
+module B;
+	type { public }
+		C = (one, two);
+
+	type { public } D = object
+    end D;
+
+	definition { public } E;
+    end E;
+end B.
+
+module A;
+	import B;
+
+	type T1 = B.C;
+	type T2 = B.D;
+	type T3 = object { B.E };
+	type T4 = array 1 of B.C;
+	type T5 = procedure(B.C); 
+end A.
+
+module Main;
+begin
+	halt(1);
+end Main.
+
+

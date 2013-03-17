@@ -1,0 +1,17 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.3. Arithmetic Operators
+ *
+ * Positive test: 5 mod 2 with variables
+ *)
+module Main;
+	var a, b : integer;
+begin
+	a := 5;
+	b := 3;
+
+	if a mod b = 2 
+	then halt(1) else halt(0) end;
+end Main.
+

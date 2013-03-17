@@ -1,0 +1,59 @@
+(* ********* Zonnon online collection ***********
+ * The Readers - Writers paradigma in Zonnon is a basic feature
+ *
+ * This example is a part of Concurrency examples
+ * www.zonnon.ethz.ch/usergroup
+ * (c) ETH Zurich 
+ *)
+
+(*
+
+Description:
+
+The Readers - Writers paradigma regulates the data access in a critical section.
+Either one Writer (activity changing the state of the object) or many Readers 
+(activities that don't change the state of the object) are allowed to be in the 
+critical section at a given time. 
+
+The problem consists of readers and writers that share a data resource. 
+The readers only want to read from the resource, the writers want to write 
+to it. Obviously, there is no problem if two or more readers access the 
+resource simultaneously. However, if a writer and a reader or two writers 
+access the resource simultaneously, the result becomes indeterminable. 
+Therefore the writers must have exclusive access to the resource. 
+*)
+
+module Main;
+import System;
+
+type {public, protected} Obj = object
+	var value:integer;
+	
+	procedure {public} setValue(newvalue:integer);
+	(*
+	 * Since object is 'protected' and this procedure is not marked 
+	 * as 'shared' it is interpreted as "writer" by Zonnon compiler.
+	 **)
+	var t:integer;
+	begin
+		value := newvalue;
+	end Exchange;
+
+	procedure {public, shared} getValue: integer;
+	(*
+	 * Since object is 'protected' and this procedure is marked 
+	 * as 'shared' it is interpreted as "reader" by Zonnon compiler.
+	 **)
+        begin
+                return value;
+        end getValue;
+end Obj;
+
+
+var o:Obj;
+
+begin
+    o := new Obj;    
+    o.setValue(10);
+    writeln('Value is ', o.getValue());
+end Main.

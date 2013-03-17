@@ -1,0 +1,15 @@
+(** 
+ * 17. Math extensions.
+ * 17.3. Indexing
+ * 
+ * Negative test: ranges never change array dimension
+ *)
+
+module Main;
+
+var
+	a : array {math} 5 of integer;
+begin	
+	a[1..1] := a[0];
+	halt(0);
+end Main.

@@ -1,0 +1,39 @@
+(** 
+ * 7. Statement 
+ * 7.2. Procedure call.
+ *
+ * Positive test: the procedure call.
+ * The procedure is located in default implementation of definition B.
+ *)
+module Main;
+	import A;
+
+	procedure p2(i : integer) : integer;
+	begin
+		return a.p1(i);
+	end p2;
+
+	var 
+		k : integer;
+		a : A;
+begin
+	k := 1;
+	k := p2(1);
+
+	if k = 2 
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public} A implements B;
+end A.
+
+definition {public} B;
+	procedure p1(j : integer) : integer;
+end B.
+
+implementation B;
+	procedure {public} p1(j : integer) : integer;
+	begin  
+		return j + 1
+	end p1;
+end B.

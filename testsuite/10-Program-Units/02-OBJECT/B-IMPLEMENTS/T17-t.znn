@@ -1,0 +1,34 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * IMPLEMENTS clause
+ *
+ * Positive test: the DEFINITION C is used as parameter type.
+ * The DEFINITION B is used before it was declared.
+ *)
+
+(*
+
+Important problem with interfaces and value types
+
+*)
+module Main;
+	import B;
+
+	var b : B;
+begin
+	if b.x = 1 
+	then halt(1) else halt(0) end;
+end Main.
+
+object {public} B implements A;
+	procedure P;
+	begin x := 1 end P; 
+begin
+	x := 2;
+	P;
+end B.
+
+definition {public} A;
+	var x : integer;
+end A.

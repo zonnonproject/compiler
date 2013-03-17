@@ -1,0 +1,15 @@
+(**
+ * 09.Predefined procedures.
+ * The succ(x) procedure.
+ *
+ * Positive test: succ procedure for enumeration type value.
+ *)
+module Main;
+	var ch1, ch2 : char;
+begin
+	ch1 := 'a';
+	ch2 := succ(ch1);
+	
+	if ch2 = 'b' 
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,13 @@
+(*
+	4. Language symbols and identifiers.
+	4.8 Comments
+*)
+module Main;
+begin
+(*
+	s := \\\\"(* *)\\\\";
+*)	
+  halt(1)
+end Main.
+
+

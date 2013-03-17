@@ -1,0 +1,15 @@
+(** 
+ * 6. Expression.
+ * 6.2. Predefined Operators.
+ * 6.2.5. Relation Operators.
+ * IS operator.
+ *
+ * Positive test: is operator is used to check integer variable.
+ * The result is true.
+ *)
+module Main;
+	var i : integer;
+begin
+	if i is integer
+	then halt(1) else halt(0) end;
+end Main.

@@ -1,0 +1,13 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ *
+ * Negative test: incorrect type declaration.
+ *)
+module Main;
+	const N = 100;
+
+	type b = N / 3; 
+begin
+	halt(0);
+end Main.

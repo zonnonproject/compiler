@@ -1,0 +1,21 @@
+(** 
+ * 7. Statement 
+ * 7.4. CASE statement.
+ *
+ * Negative test: the types of case expression and label expression are not compatible.
+ *)
+module Main;
+	type E = ( one, two );
+
+	var e : E;
+		j : integer;
+begin
+	j := 2;
+
+	case j of
+		  E.one : j := 3;
+		| E.two : j := 4;
+	end;
+
+	halt(0);
+end Main.

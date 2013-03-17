@@ -1,0 +1,76 @@
+(*************************************************************************
+Search of the value of the game and it's saddle points.
+
+Search of the value of a zero-sum game and it's saddle points,
+where M is the kernel of the game.
+(In pure strategies)
+
+Method description: http://planning.cs.uiuc.edu/node455.html
+
+Author: Nina Gonova                     
+Last change: 13.04.2008
+**************************************************************************)
+
+module Main;
+
+type TypeOfArray = integer;
+type Matrix = array {math} *,* of TypeOfArray;
+type Vector = array {math} * of TypeOfArray;
+
+const n = 2; 
+const m = 3;
+
+var 
+	M: Matrix; 
+	NRow, NCol: integer; (*NRow = number of rows of M, NCol = number of columns of M*)
+	i, j: integer;
+	MaxMin, MinMax: TypeOfArray;
+	V, N: Vector;
+
+begin
+	writeln("Input NRow");
+	readln(NRow);
+	writeln("Input NCol");
+	readln(NCol);
+	M := new Matrix(NRow, NCol);
+	
+	writeln("Input M[i, j]");
+	for i := 0 to NRow - 1 do
+		for j := 0 to NCol - 1 do
+			readln (M[i, j]);
+		end;
+	end;
+	
+	(*MaxMin*)
+	V := new Vector(NRow);
+	for i := 0 to NRow - 1 do
+		V[i] := min(M[i, ..]);
+	end;
+	MaxMin := max(V);
+	
+	(*MinMax*)
+	V := new Vector(NCol);
+	for j := 0 to NCol - 1 do
+		V[j] := max(M[.., j]);
+	end;
+	MinMax := min(V);
+	
+	if MaxMin = MinMax then
+		writeln ("Saddle point exists, value of the game = ");
+		writeln (MaxMin);
+		writeln ("Positions:");
+		for i := 0 to NRow - 1 do
+			for j := 0 to NCol - 1 do
+				if (M[i, j] = MaxMin) & (max(M[.., j]) = M[i, j]) & (min(M[i, ..]) = M[i, j])
+				then
+					write (i);
+					writeln (j);
+				end;
+			end;
+		end;
+	else
+		writeln ("No saddle point");
+	end;
+	
+	readln;
+end Main.

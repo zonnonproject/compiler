@@ -1,0 +1,19 @@
+(** 
+ * 5. Declarations.
+ * 5.3. Type declaration.
+ * 5.3.1. Basic types.
+ * cardinal type
+ *
+ * Negative test: cardinal value is less then cardinal minimum.
+ *)
+module Main;
+	var imin : cardinal;
+begin
+	do
+		imin := min(cardinal);
+		imin := imin - 1;
+		halt(0);
+	on Overflow do
+		halt(1);
+	end
+end Main.

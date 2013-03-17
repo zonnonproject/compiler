@@ -1,0 +1,30 @@
+(** 
+ * 11. Program Units.
+ * 11.2. object
+ * IMPLEMENTS clause
+ *
+ * Negative test: the DEFINITION C is used as parameter type.
+ *)
+object {public} A implements B;
+	import B, C;
+
+	procedure { public } P(c : C) : integer;
+	begin end P;
+begin 
+end A.
+
+module Main;
+	var k : integer;
+begin
+	if k = 1
+	then halt(1) else halt(0) end;
+end Main.
+
+definition {public} B;
+	import C;
+
+	procedure P(c : C) : integer;
+end B.
+
+definition {public} C;
+end C.

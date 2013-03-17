@@ -1,0 +1,23 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.1. Assignment
+ * 
+ * Negative test: base elements types are not assignment compatible
+ * math dynamic := dynamic
+ *)
+
+module Main;
+
+type v = array {math} *, *, * of integer;
+type v1 = array *, *, * of real;
+
+var
+	a : v;
+	b : v1;
+	
+begin	
+	b := new v1(4, 2, 6);
+	a := b;
+	halt(0);
+end Main.

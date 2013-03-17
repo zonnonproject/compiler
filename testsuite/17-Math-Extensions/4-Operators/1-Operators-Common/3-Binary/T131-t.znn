@@ -1,0 +1,55 @@
+(** 
+ * 17. Math extensions.
+ * 17.4. Operators
+ * 17.4.2. Binary
+ * 
+ * Negative test: Binary generalized comparison + indexing : nil reference
+ * array + array
+ *)
+
+module Main;
+
+type mi = array {math} *,* of integer;
+type mr = array {math} *,* of real;
+type mc = array {math} *,* of cardinal;
+
+type iind = array {math} * of integer;
+type bind = array {math} * of boolean;
+
+var
+	ai1 : array {math} 2, 3 of integer;
+	ai2, ai3, ai3_prove : mi;
+	ar1 : array {math} 2, 3 of real;
+	ar2, ar3, ar4, ar3_prove : mr;
+	ac1 : array {math} 2, 3 of cardinal;
+	ac2, ac3, ac3_prove : mc;
+	
+	bi1, bi2 : iind;
+	bb1, bb2 : bind;
+	r1, r2 : range;
+	
+	i, j : integer;
+	resb1, resb1_prove, resb2, resb2_prove : boolean;	
+	
+begin	
+	
+	ar1 := [[1.3, -2.1, 3.4], [-4.1, 5.2, -6.7]];
+	
+	bi1 := [1, 0, 1, 2];
+	bi2 := [1, 0, 0];
+	bb1 := [false, true, true];
+	bb2 := [true, true, false];
+	r1 := 1..2;
+	r2 := 0..2 by 2;
+	
+	do
+		resb1 := ai2[1..2, r2] >= ar1[0..2 by 2, bb2];
+	on NilReference
+	do
+		halt(1);
+	end;
+	
+	halt(0);
+	
+end Main.
+	
