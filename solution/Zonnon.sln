@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETH.Zonnon", "Compiler\ETH.Zonnon.csproj", "{BF9B97DC-5D86-4043-977A-CB5B8E3BCE3C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C9B31FDE-EE7E-4B46-8BE3-63F384B5F760} = {C9B31FDE-EE7E-4B46-8BE3-63F384B5F760}
