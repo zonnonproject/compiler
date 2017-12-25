@@ -27,36 +27,7 @@ namespace ETH.Zonnon
         public ZonnonCompilerParameters ( ) 
         { 
         }
-#if !ROTOR
-        internal ZonnonCompilerParameters( ZonnonProjectManager.ZonnonProjectOptions options ) 
-          : base(new ETH.Zonnon.Integration.CompilerOptions(options))
-        {
-            this.Success = options.Success;
-            if ( options.MainClass == "" ) this.MainModule = null;
-            else                           this.MainModule = options.MainClass;
-            this.MainClass = null;
-            // this.EmbeddedDialogue = options.EmbeddedDialogue; // Obsolete
-            this.GenerateXML = options.GenerateXML;
-            this.Output = options.Output;
-            this.Quiet = options.Quiet;
-            this.SafeMode = options.SafeMode;
-            this.Debug = options.Debug;
-            this.DebugT = options.DebugT;
-            this.Messages = options.Messages;
-            this.SourceFiles = options.SourceFiles;
-            this.UseComputeMath = options.UseComputeMath;
-            this.TargetInformation.Version = options.Version;
-            this.TargetInformation.ProductVersion = options.Version;               
 
-            string mscorlibLocation = typeof(System.Console).Assembly.Location;
-            string systemLocation   = typeof(System.CodeDom.Compiler.CodeCompiler).Assembly.Location;
-            string rtlLocation      = typeof(RTL.CommonException).Assembly.Location;
-            this.ReferencedAssemblies.Add(mscorlibLocation);
-            this.ReferencedAssemblies.Add(systemLocation);
-            this.ReferencedAssemblies.Add(rtlLocation); // "Zonnon.RTL.dll");
-        }
-
-#endif
         public bool   Success          = true;
         public string MainModule       = null;
         public bool   EmbeddedDialogue = false;
@@ -70,7 +41,7 @@ namespace ETH.Zonnon
 		public bool   DisplayHelp	   = false;
         public bool   MathOpt          = false;
 		public string ExportReport	   = null;
-        public bool UseComputeMath = false;
+        public bool   UseComputeMath   = false;
 
         public StringCollection Messages    = new StringCollection();
         public StringCollection SourceFiles = new StringCollection();
