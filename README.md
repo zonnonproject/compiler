@@ -8,7 +8,7 @@ types and operations as first-class language citizens.
 
 # Command Line Compiler for .NET platform / Mono
 
-This project is a fork of ETH Zonnon compiler, but excludes Visual Studio integration. It was originally hosted on [CodePlex](https://zonnon.codeplex.com/).
+This project is a fork of ETH Zonnon compiler, but excludes Visual Studio integration.
 
 Zonnon compiler targets .NET framework, but also works on Mono. For computations with mathematical 
 data types it can also use OpenCL. To run on Mono the compiler needs to be specially compiled with 
