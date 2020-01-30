@@ -22,6 +22,5 @@ code for these CCI libraries you can fined a very similar code in [Spec# project
 Please note that Spec# extends these libraries directly so in the code there you will get also many things 
 not directly relevant for Zonnon.
 
-Zonnon command line compiler does not compile with latest public version of [CCI](http://cciast.codeplex.com/) 
-so please either use the libraries checked in with the source code or use the source code from [Spec#
-repository](http://specsharp.codeplex.com/).
+Zonnon command line compiler does not compile with latest public version of [CCI](https://github.com/microsoft/cci) 
+so please either use the libraries checked in with the source code or use the source code from Spec#.
